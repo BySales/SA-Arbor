@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbor - Nova Solicitação</title>
+</head>
+<body>
+
+    <h1>Criar Nova Solicitação</h1>
+
+    <hr>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Enviar Solicitação</button>
+    </form>
+
+</body>
+</html>

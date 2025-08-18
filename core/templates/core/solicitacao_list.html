@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbor - Solicitações</title>
+</head>
+<body>
+
+    <h1>Lista de Solicitações</h1>
+    <a href="{% url 'solicitacao_create' %}">Criar Nova Solicitação</a>
+    <hr>
+
+    {% for solicitacao in solicitacoes %}
+        <div>
+            <h2>{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h2>
+            <p><strong>Status:</strong> {{ solicitacao.status }}</p>
+            <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
+            <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+        </div>
+        <hr>
+    {% empty %}
+        <p>Nenhuma solicitação encontrada.</p>
+    {% endfor %}
+
+</body>
+</html>
