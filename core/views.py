@@ -1,18 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Solicitacao
-from .forms import SolicitacaoForm
+from .forms import SolicitacaoForm 
 
-# Create your views here.
 
 def solicitacao_list(request):
     solicitacoes = Solicitacao.objects.all()
     return render(request, 'core/solicitacao_list.html', {'solicitacoes': solicitacoes})
 
-from django.shortcuts import render, redirect # 1. Adiciona o 'redirect'
-from .models import Solicitacao
-from .forms import SolicitacaoForm # 2. Importa nossa "comanda inteligente"
 
-# ... a função solicitacao_list continua aqui em cima ...
+
 def solicitacao_list(request):
     solicitacoes = Solicitacao.objects.all()
     return render(request, 'core/solicitacao_list.html', {'solicitacoes': solicitacoes})
@@ -30,3 +26,13 @@ def solicitacao_create(request):
     else:
         form = SolicitacaoForm()
     return render(request, 'core/solicitacao_form.html', {'form': form})
+
+def solicitacao_update(request, pk):
+    solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('solicitacao_list')
+    else:
+        form = SolicitacaoForm(instance=solicitacao)
+        return render(request, 'core/solicitacao_form.html', {'form': form})
