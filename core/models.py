@@ -13,6 +13,8 @@ class Arvore(models.Model):
     nome_popular = models.CharField(max_length=150)
     nome_cientifico = models.CharField(max_length=150, blank=True, null=True)
     descricao = models.TextField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.nome_popular

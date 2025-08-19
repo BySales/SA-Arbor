@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    <h2>Criar/Editar Solicitação</h2>
+    <h2>Cadastrar/Editar Árvore</h2>
     <form method="POST">
         {% csrf_token %}
 
@@ -9,6 +9,7 @@
             {{ form.as_p }}
         </div>
 
-        <button type="submit" class="btn btn-success">Salvar</button>
+        <button type="submit" class="btn btn-success">Salvar Árvore</button>
+        <a href="{% url 'arvore_list' %}" class="btn btn-light">Cancelar</a>
     </form>
 {% endblock %}

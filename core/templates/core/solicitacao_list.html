@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Arbor - Solicitações</title>
-</head>
-<body>
+{% extends 'core/base.html' %}
 
-    <h1>Lista de Solicitações</h1>
-    <a href="{% url 'solicitacao_create' %}">Criar Nova Solicitação</a>
-    <hr>
+{% block content %}
+    <h2>Lista de Solicitações</h2>
+    <a href="{% url 'solicitacao_create' %}" class="btn btn-primary mb-3">Criar Nova Solicitação</a>
 
     {% for solicitacao in solicitacoes %}
-        <div>
-            <h2>{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h2>
-            <p><strong>Status:</strong> {{ solicitacao.status }}</p>
-            <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
-            <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
-            <a href="#">Editar</a>
+        <div class="card mb-3">
+            <div class="card-header">
+                {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}
+            </div>
+            <div class="card-body">
+                <p><strong>Status:</strong> {{ solicitacao.status }}</p>
+                <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
+                <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+            </div>
         </div>
-        <hr>
     {% empty %}
-        <p>Nenhuma solicitação encontrada.</p>
+        <div class="alert alert-warning">
+            Nenhuma solicitação encontrada.
+        </div>
     {% endfor %}
-
-</body>
-</html>
+{% endblock %}
