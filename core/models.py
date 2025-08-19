@@ -25,12 +25,12 @@ class Solicitacao(models.Model):
         ('DENUNCIA', 'Denúncia'),
     )
     STATUS_CHOICES = (
-        ('ABERTO', 'Em Aberto'),
+        ('EM_ABERTO', 'Em Aberto'),
         ('EM_ANDAMENTO', 'Em Andamento'),
         ('FINALIZADO', 'Finalizado'),
     )
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ABERTO')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='EM_ABERTO')
     descricao = models.TextField()
     data_criacao = models.DateTimeField(auto_now_add=True)
     cidadao = models.ForeignKey(User, on_delete=models.CASCADE)

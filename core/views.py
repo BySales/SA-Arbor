@@ -30,13 +30,15 @@ def solicitacao_create(request):
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
+        form = SolicitacaoForm(request.POST, instance=solicitacao)
+        
         if form.is_valid():
             form.save()
             return redirect('solicitacao_list')
     else:
         form = SolicitacaoForm(instance=solicitacao)
-        return render(request, 'core/solicitacao_form.html', {'form': form})
-    
+
+    return render(request, 'core/solicitacao_form.html', {'form': form})
 def arvore_list(request):
     arvores = Arvore.objects.all()
     return render(request, 'core/arvore_list.html', {'arvores': arvores})
