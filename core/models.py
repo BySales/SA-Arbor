@@ -35,6 +35,8 @@ class Solicitacao(models.Model):
     data_criacao = models.DateTimeField(auto_now_add=True)
     cidadao = models.ForeignKey(User, on_delete=models.CASCADE)
     equipe_delegada = models.ForeignKey(Equipe, on_delete=models.SET_NULL, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.get_tipo_display()} #{self.id} - {self.status}'
@@ -56,7 +58,7 @@ class Projeto(models.Model):
     visualizadores = models.ManyToManyField(User, related_name='projetos_visualizados', blank=True)
 
     def __str__(self):
-        return self.none
+        return self.nome
     
 class Area(models.Model):
     TIPO_AREA_CHOICES = (
@@ -90,6 +92,7 @@ class Area(models.Model):
     tipo_vegetacao = models.CharField(max_length=50, choices=TIPO_VEGETACAO_CHOICES)
     especies = models.ManyToManyField(Arvore, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
+    geom = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.nome} ({self.projeto.nome})'

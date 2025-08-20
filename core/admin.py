@@ -3,7 +3,7 @@ from .models import Equipe, Arvore, Solicitacao, Projeto, Area
 # Register your models here.
 
 class SolicitacaoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_tipo_display','status','cidadao','data_criacao')
+    list_display = ('id', 'get_tipo_display','status','cidadao','data_criacao', 'latitude', 'longitude')
     list_filter = ('status','tipo')
     search_fields = ('descricao','cidadao__username')
 

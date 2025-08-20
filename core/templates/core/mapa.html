@@ -1,19 +1,105 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
 
-<h2>Mapa de Gestão</h2>
+    <h2>Mapa de Gestão</h2>
+    <div id="map" style="height: 600px;" class="mb-3"></div>
 
-<div id="map" style="height: 600px;" class="mb-3"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    {{ arvores_data|json_script:"arvores-data-json" }}
+    {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
+    {{ areas_data|json_script:"areas-data-json" }}
 
-<script>
-    var map = L.map('map').setView([-24.0965, -46.6212], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
-</script>
+    <script>
+        var map = L.map('map').setView([-24.0965, -46.6212], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+
+        // --- PREPARANDO AS CAMADAS ---
+        var camadaArvores = L.layerGroup().addTo(map);
+        var camadaSolicitacoes = L.layerGroup().addTo(map);
+        var camadaAreasSalvas = L.layerGroup().addTo(map); // A camada para os desenhos do banco
+
+        // --- PROCESSANDO DADOS DAS ÁRVORES ---
+        const arvoresDataElement = document.getElementById('arvores-data-json');
+        const arvoresData = JSON.parse(arvoresDataElement.textContent);
+        arvoresData.forEach(function(arvore) {
+            if (arvore.lat && arvore.lon) {
+                var marker = L.marker([arvore.lat, arvore.lon]).bindPopup("<b>" + arvore.nome + "</b>");
+                camadaArvores.addLayer(marker);
+            }
+        });
+        
+        // --- PROCESSANDO DADOS DAS SOLICITAÇÕES ---
+        const solicitacoesDataElement = document.getElementById('solicitacoes-data-json');
+        const solicitacoesData = JSON.parse(solicitacoesDataElement.textContent);
+        solicitacoesData.forEach(function(solicitacao) {
+            if (solicitacao.lat && solicitacao.lon) {
+                var marker = L.marker([solicitacao.lat, solicitacao.lon]).bindPopup("<b>" + solicitacao.tipo + "</b>");
+                camadaSolicitacoes.addLayer(marker);
+            }
+        });
+
+        // --- DESENHANDO AS ÁREAS SALVAS ---
+        const areasDataElement = document.getElementById('areas-data-json');
+        const areasData = JSON.parse(areasDataElement.textContent);
+        areasData.forEach(function(area) {
+            if (area.geom) {
+                var areaLayer = L.geoJSON(area.geom).bindPopup("<b>" + area.nome + "</b>");
+                camadaAreasSalvas.addLayer(areaLayer);
+            }
+        });
+
+        // --- ATUALIZANDO O CONTROLE DE CAMADAS ---
+        var overlayMaps = {
+            "Árvores": camadaArvores,
+            "Solicitações Abertas": camadaSolicitacoes,
+            "Áreas Planejadas": camadaAreasSalvas // Adiciona a nova camada no menu
+        };
+        L.control.layers(null, overlayMaps).addTo(map);
+
+        // --- CONFIGURANDO AS FERRAMENTAS DE DESENHO ---
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        var drawControl = new L.Control.Draw({
+            edit: { featureGroup: drawnItems },
+            draw: {
+                polygon: true,
+                polyline: false,
+                rectangle: true,
+                circle: false,
+                marker: true
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+            var geojson = layer.toGeoJSON();
+            drawnItems.addLayer(layer);
+
+            fetch("{% url 'salvar_area' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(geojson)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                if (data.status === 'ok') {
+                    alert('Área salva com sucesso! Atualize a página para ver o desenho salvo.');
+                } else {
+                    alert('Ocorreu um erro ao salvar a área: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Erro na requisição:', error);
+                alert('Erro de comunicação com o servidor.');
+            });
+        });
+    </script>
 {% endblock %}

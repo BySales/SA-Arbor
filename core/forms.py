@@ -4,7 +4,7 @@ from .models import Solicitacao, Arvore
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
         model = Solicitacao
-        fields = ['tipo', 'descricao']
+        fields = ['tipo', 'descricao', 'latitude', 'longitude']
 
 class ArvoreForm(forms.ModelForm):
     class Meta:

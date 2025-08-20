@@ -10,23 +10,37 @@
     <div class="container">
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light my-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'home' %}">Arbor</a>
-                <div class="collapse navbar-collapse">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'solicitacao_list' %}">Solicitações</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'arvore_list' %}">Inventário de Árvores</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'mapa' %}">Mapa de Gestão</a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">Arbor</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'solicitacao_list' %}">Solicitações</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'arvore_list' %}">Inventário de Árvores</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'mapa' %}">Mapa de Gestão</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text me-3">
+                        Olá, {{ user.username }}
+                    </span>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Sair</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Entrar</a>
+                    <a href="{% url 'cadastro' %}" class="btn btn-success">Cadastrar</a>
+                {% endif %}
             </div>
-        </nav>
+        </div>
+    </div>
+</nav>
 
         {% block content %}
         {% endblock %}
