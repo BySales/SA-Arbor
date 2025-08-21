@@ -1,16 +1,65 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    <h2>Lista de Solicitações</h2>
-    <a href="{% url 'solicitacao_create' %}" class="btn btn-primary mb-3">Criar Nova Solicitação</a>
+    
+    {# CONDIÇÃO PARA MOSTRAR O DASHBOARD SÓ PARA GESTORES #}
+    {% if user.is_staff or user.is_superuser %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-header">Em Aberto</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ abertas_count }}</h5>
+                        <p class="card-text">Solicitações aguardando atendimento.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-header">Em Andamento</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ andamento_count }}</h5>
+                        <p class="card-text">Solicitações sendo executadas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Finalizadas</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ finalizadas_count }}</h5>
+                        <p class="card-text">Solicitações já concluídas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="card mb-4">
+            <div class="card-header">
+                Gráfico de Solicitações por Status
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        {# O título muda dependendo de quem está logado #}
+        {% if user.is_staff or user.is_superuser %}
+            <h2>Lista de Todas as Solicitações</h2>
+        {% else %}
+            <h2>Minhas Solicitações</h2>
+        {% endif %}
+        <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
+    </div>
+    
     {% for solicitacao in solicitacoes %}
         <div class="card mb-3">
             <div class="card-header">
-                {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}
+                {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.status }}</strong>
             </div>
             <div class="card-body">
-                <p><strong>Status:</strong> {{ solicitacao.status }}</p>
                 <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
                 <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
                 <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
@@ -18,7 +67,45 @@
         </div>
     {% empty %}
         <div class="alert alert-warning">
-            Nenhuma solicitação encontrada.
+            {% if user.is_staff or user.is_superuser %}
+                Nenhuma solicitação encontrada no sistema.
+            {% else %}
+                Você ainda não criou nenhuma solicitação.
+            {% endif %}
         </div>
     {% endfor %}
+
+
+    {# O SCRIPT DO GRÁFICO SÓ RODA SE O USUÁRIO FOR GESTOR #}
+    {% if user.is_staff or user.is_superuser %}
+        <script>
+            const ctx = document.getElementById('statusChart');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Em Aberto', 'Em Andamento', 'Finalizadas'],
+                    datasets: [{
+                        label: '# de Solicitações',
+                        data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}],
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(25, 135, 84, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(220, 53, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(25, 135, 84, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    // A CORREÇÃO PARA O TAMANHO DO GRÁFICO
+                    maintainAspectRatio: false 
+                }
+            });
+        </script>
+    {% endif %}
 {% endblock %}

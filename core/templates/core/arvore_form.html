@@ -9,7 +9,13 @@
             {{ form.as_p }}
         </div>
 
-        <button type="submit" class="btn btn-success">Salvar Árvore</button>
-        <a href="{% url 'arvore_list' %}" class="btn btn-light">Cancelar</a>
+<button type="submit" class="btn btn-success">Salvar Árvore</button>
+
+{# SÓ MOSTRA O BOTÃO DE DELETAR SE O OBJETO JÁ EXISTIR (TIVER UM PK) #}
+{% if form.instance.pk %}
+    <a href="{% url 'arvore_delete' pk=form.instance.pk %}" class="btn btn-danger">Deletar</a>
+{% endif %}
+
+<a href="{% url 'arvore_list' %}" class="btn btn-light">Cancelar</a>
     </form>
 {% endblock %}

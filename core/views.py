@@ -2,16 +2,39 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from .models import Solicitacao, Arvore, Projeto, Area
-from .forms import SolicitacaoForm, ArvoreForm
 from django.contrib.auth.forms import UserCreationForm
+from .forms import SolicitacaoForm, ArvoreForm
+
 
 # --- VIEWS DE SOLICITAÇÃO ---
 
-def solicitacao_list(request):
-    solicitacoes = Solicitacao.objects.all()
-    return render(request, 'core/solicitacao_list.html', {'solicitacoes': solicitacoes})
 
+@login_required # Vamos garantir que só usuários logados vejam a home
+def solicitacao_list(request):
+    # --- LÓGICA DE FILTRO POR USUÁRIO ---
+    if request.user.is_superuser or request.user.is_staff:
+        # Se for admin ou um "gestor", mostra tudo
+        solicitacoes = Solicitacao.objects.all()
+    else:
+        # Se for usuário comum, mostra apenas as solicitações criadas por ele
+        solicitacoes = Solicitacao.objects.filter(cidadao=request.user)
+
+    # --- A lógica do Dashboard continua a mesma, mas usando a lista já filtrada ---
+    abertas_count = solicitacoes.filter(status='EM_ABERTO').count()
+    andamento_count = solicitacoes.filter(status='EM_ANDAMENTO').count()
+    finalizadas_count = solicitacoes.filter(status='FINALIZADO').count()
+
+    context = {
+        'solicitacoes': solicitacoes,
+        'abertas_count': abertas_count,
+        'andamento_count': andamento_count,
+        'finalizadas_count': finalizadas_count,
+    }
+    return render(request, 'core/solicitacao_list.html', context)
+
+@login_required
 def solicitacao_create(request):
     if request.method == 'POST':
         form = SolicitacaoForm(request.POST)
@@ -24,6 +47,7 @@ def solicitacao_create(request):
         form = SolicitacaoForm()
     return render(request, 'core/solicitacao_form.html', {'form': form})
 
+@login_required
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
@@ -35,12 +59,21 @@ def solicitacao_update(request, pk):
         form = SolicitacaoForm(instance=solicitacao)
     return render(request, 'core/solicitacao_form.html', {'form': form})
 
+@login_required
+def solicitacao_delete(request, pk):
+    solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    if request.method == 'POST': 
+        solicitacao.delete()
+        return redirect('solicitacao_list')
+    return render(request, 'core/solicitacao_confirm_delete.html', {'object': solicitacao})
+
 # --- VIEWS DE ÁRVORE ---
 
 def arvore_list(request):
     arvores = Arvore.objects.all()
     return render(request, 'core/arvore_list.html', {'arvores': arvores})
 
+@login_required
 def arvore_create(request):
     if request.method == 'POST':
         form = ArvoreForm(request.POST)
@@ -51,6 +84,7 @@ def arvore_create(request):
         form = ArvoreForm()
     return render(request, 'core/arvore_form.html', {'form': form})
 
+@login_required
 def arvore_update(request, pk):
     arvore = get_object_or_404(Arvore, pk=pk)
     if request.method == 'POST':
@@ -62,7 +96,19 @@ def arvore_update(request, pk):
         form = ArvoreForm(instance=arvore)
     return render(request, 'core/arvore_form.html', {'form': form})
 
+# Arquivo: core/views.py
+
+@login_required
+def arvore_delete(request, pk):
+    arvore = get_object_or_404(Arvore, pk=pk)
+    if request.method == 'POST':
+        arvore.delete()
+        return redirect('arvore_list')
+    return render(request, 'core/arvore_confirm_delete.html', {'object': arvore})
+
 # --- VIEW DO MAPA ---
+
+# Arquivo: core/views.py
 
 def mapa_view(request):
     arvores_com_coords = Arvore.objects.filter(latitude__isnull=False, longitude__isnull=False)
@@ -71,9 +117,15 @@ def mapa_view(request):
         for arvore in arvores_com_coords
     ]
 
-    solicitacoes_com_coords = Solicitacao.objects.filter(status='ABERTO', latitude__isnull=False, longitude__isnull=False)
+    solicitacoes_com_coords = Solicitacao.objects.filter(status='EM_ABERTO', latitude__isnull=False, longitude__isnull=False)
     solicitacoes_data = [
-        {"tipo": solicitacao.get_tipo_display(), "lat": solicitacao.latitude, "lon": solicitacao.longitude}
+        {
+            # A MUDANÇA ESTÁ AQUI: Mandamos o nome bonito E o código interno
+            "tipo_display": solicitacao.get_tipo_display(),
+            "tipo_codigo": solicitacao.tipo, # Ex: 'SUGESTAO' ou 'DENUNCIA'
+            "lat": solicitacao.latitude,
+            "lon": solicitacao.longitude
+        }
         for solicitacao in solicitacoes_com_coords
     ]
 
@@ -93,6 +145,7 @@ def mapa_view(request):
 # --- API PARA SALVAR ÁREA ---
 
 @csrf_exempt
+@login_required
 def salvar_area(request):
     if request.method == 'POST':
         data = json.loads(request.body)

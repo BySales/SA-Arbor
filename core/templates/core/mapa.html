@@ -18,27 +18,50 @@
         var map = L.map('map').setView([-24.0965, -46.6212], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
 
+        // --- DEFININDO NOSSOS TRÊS ÍCONES ---
+        var treeIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+        var alertIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+        var suggestionIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
         // --- PREPARANDO AS CAMADAS ---
         var camadaArvores = L.layerGroup().addTo(map);
         var camadaSolicitacoes = L.layerGroup().addTo(map);
-        var camadaAreasSalvas = L.layerGroup().addTo(map); // A camada para os desenhos do banco
+        var camadaAreasSalvas = L.layerGroup().addTo(map);
 
         // --- PROCESSANDO DADOS DAS ÁRVORES ---
         const arvoresDataElement = document.getElementById('arvores-data-json');
         const arvoresData = JSON.parse(arvoresDataElement.textContent);
         arvoresData.forEach(function(arvore) {
             if (arvore.lat && arvore.lon) {
-                var marker = L.marker([arvore.lat, arvore.lon]).bindPopup("<b>" + arvore.nome + "</b>");
+                var marker = L.marker([arvore.lat, arvore.lon], {icon: treeIcon}).bindPopup("<b>" + arvore.nome + "</b>");
                 camadaArvores.addLayer(marker);
             }
         });
         
-        // --- PROCESSANDO DADOS DAS SOLICITAÇÕES ---
+        // --- PROCESSANDO DADOS DAS SOLICITAÇÕES (COM LÓGICA DE COR) ---
         const solicitacoesDataElement = document.getElementById('solicitacoes-data-json');
         const solicitacoesData = JSON.parse(solicitacoesDataElement.textContent);
         solicitacoesData.forEach(function(solicitacao) {
             if (solicitacao.lat && solicitacao.lon) {
-                var marker = L.marker([solicitacao.lat, solicitacao.lon]).bindPopup("<b>" + solicitacao.tipo + "</b>");
+                var iconeEscolhido;
+                if (solicitacao.tipo_codigo === 'DENUNCIA') {
+                    iconeEscolhido = alertIcon; // Vermelho para denúncias
+                } else {
+                    iconeEscolhido = suggestionIcon; // Amarelo para sugestões
+                }
+                var marker = L.marker([solicitacao.lat, solicitacao.lon], {icon: iconeEscolhido}).bindPopup("<b>" + solicitacao.tipo_display + "</b>");
                 camadaSolicitacoes.addLayer(marker);
             }
         });
@@ -57,44 +80,25 @@
         var overlayMaps = {
             "Árvores": camadaArvores,
             "Solicitações Abertas": camadaSolicitacoes,
-            "Áreas Planejadas": camadaAreasSalvas // Adiciona a nova camada no menu
+            "Áreas Planejadas": camadaAreasSalvas
         };
         L.control.layers(null, overlayMaps).addTo(map);
 
         // --- CONFIGURANDO AS FERRAMENTAS DE DESENHO ---
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
-
-        var drawControl = new L.Control.Draw({
-            edit: { featureGroup: drawnItems },
-            draw: {
-                polygon: true,
-                polyline: false,
-                rectangle: true,
-                circle: false,
-                marker: true
-            }
-        });
+        var drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: true } });
         map.addControl(drawControl);
-
         map.on(L.Draw.Event.CREATED, function (event) {
             var layer = event.layer;
             var geojson = layer.toGeoJSON();
             drawnItems.addLayer(layer);
-
-            fetch("{% url 'salvar_area' %}", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(geojson)
-            })
+            fetch("{% url 'salvar_area' %}", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(geojson) })
             .then(response => response.json())
             .then(data => {
                 console.log('Resposta do servidor:', data);
-                if (data.status === 'ok') {
-                    alert('Área salva com sucesso! Atualize a página para ver o desenho salvo.');
-                } else {
-                    alert('Ocorreu um erro ao salvar a área: ' + data.message);
-                }
+                if (data.status === 'ok') { alert('Área salva com sucesso! Atualize a página para ver o desenho salvo.'); } 
+                else { alert('Ocorreu um erro ao salvar a área: ' + data.message); }
             })
             .catch((error) => {
                 console.error('Erro na requisição:', error);
