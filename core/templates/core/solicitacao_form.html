@@ -2,16 +2,26 @@
 
 {% block content %}
     <h2>Criar/Editar Solicitação</h2>
-<form method="POST">
-    {% csrf_token %}
-    <div class="mb-3">
-        {{ form.as_p }}
-    </div>
-<button type="submit" class="btn btn-success">Salvar</button>
 
-{# A MESMA LÓGICA DE SEGURANÇA AQUI #}
-{% if form.instance.pk %}
-    <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger">Deletar</a>
-{% endif %}
-</form>
+    {# (NOVO) MOSTRA A IMAGEM ATUAL, SE ELA EXISTIR #}
+    {% if form.instance.imagem %}
+        <div class="mb-3">
+            <p><strong>Imagem atual:</strong></p>
+            <img src="{{ form.instance.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 300px;">
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+
+        {% if form.instance.pk %}
+            <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger">Deletar</a>
+        {% endif %}
+    </form>
 {% endblock %}

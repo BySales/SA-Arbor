@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Solicitacao, Arvore, Projeto, Area
 from django.contrib.auth.forms import UserCreationForm
 from .forms import SolicitacaoForm, ArvoreForm
+from datetime import date, timedelta
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -13,15 +14,31 @@ from .forms import SolicitacaoForm, ArvoreForm
 
 @login_required # Vamos garantir que só usuários logados vejam a home
 def solicitacao_list(request):
+    # 1. Pega o filtro de período da URL (ex: ?periodo=semana). O padrão é 'total'.
+    periodo = request.GET.get('periodo', 'total')
+
+    # 2. Começa com todas as solicitações
+    solicitacoes_base = Solicitacao.objects.all()
+
+    # 3. Aplica o filtro de data, se necessário
+    if periodo == 'hoje':
+        solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date=date.today())
+    elif periodo == 'semana':
+        uma_semana_atras = date.today() - timedelta(days=7)
+        solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=uma_semana_atras)
+    elif periodo == 'mes':
+        um_mes_atras = date.today() - timedelta(days=30)
+        solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
+    else: # 'total'
+        solicitacoes_filtradas = solicitacoes_base
+
     # --- LÓGICA DE FILTRO POR USUÁRIO ---
     if request.user.is_superuser or request.user.is_staff:
-        # Se for admin ou um "gestor", mostra tudo
-        solicitacoes = Solicitacao.objects.all()
+        solicitacoes = solicitacoes_filtradas
     else:
-        # Se for usuário comum, mostra apenas as solicitações criadas por ele
-        solicitacoes = Solicitacao.objects.filter(cidadao=request.user)
+        solicitacoes = solicitacoes_filtradas.filter(cidadao=request.user)
 
-    # --- A lógica do Dashboard continua a mesma, mas usando a lista já filtrada ---
+    # --- A lógica do Dashboard agora usa a lista já filtrada por data e usuário ---
     abertas_count = solicitacoes.filter(status='EM_ABERTO').count()
     andamento_count = solicitacoes.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = solicitacoes.filter(status='FINALIZADO').count()
@@ -31,13 +48,14 @@ def solicitacao_list(request):
         'abertas_count': abertas_count,
         'andamento_count': andamento_count,
         'finalizadas_count': finalizadas_count,
+        'periodo_selecionado': periodo, # Manda o período pro template saber qual botão destacar
     }
     return render(request, 'core/solicitacao_list.html', context)
 
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST)
+        form = SolicitacaoForm(request.POST, request.FILES)
         if form.is_valid():
             solicitacao = form.save(commit=False)
             solicitacao.cidadao = request.user
@@ -51,7 +69,7 @@ def solicitacao_create(request):
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST, instance=solicitacao)
+        form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao)
         if form.is_valid():
             form.save()
             return redirect('solicitacao_list')

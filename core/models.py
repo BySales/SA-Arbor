@@ -37,6 +37,7 @@ class Solicitacao(models.Model):
     equipe_delegada = models.ForeignKey(Equipe, on_delete=models.SET_NULL, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    imagem = models.ImageField(upload_to='solicitacoes/', null=True, blank=True)
 
     def __str__(self):
         return f'{self.get_tipo_display()} #{self.id} - {self.status}'

@@ -2,8 +2,18 @@
 
 {% block content %}
     
-    {# CONDIÇÃO PARA MOSTRAR O DASHBOARD SÓ PARA GESTORES #}
     {% if user.is_staff or user.is_superuser %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2>Dashboard do Gestor</h2>
+            <div class="btn-group" role="group">
+                <a href="?periodo=hoje" class="btn btn-sm {% if periodo_selecionado == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">Hoje</a>
+                <a href="?periodo=semana" class="btn btn-sm {% if periodo_selecionado == 'semana' %}btn-primary{% else %}btn-outline-primary{% endif %}">Últimos 7 Dias</a>
+                <a href="?periodo=mes" class="btn btn-sm {% if periodo_selecionado == 'mes' %}btn-primary{% else %}btn-outline-primary{% endif %}">Últimos 30 Dias</a>
+                <a href="{% url 'home' %}" class="btn btn-sm {% if periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Ver Total</a>
+            </div>
+        </div>
+        <hr class="mt-0">
+        
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="card text-white bg-danger mb-3">
@@ -45,7 +55,6 @@
     {% endif %}
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        {# O título muda dependendo de quem está logado #}
         {% if user.is_staff or user.is_superuser %}
             <h2>Lista de Todas as Solicitações</h2>
         {% else %}
@@ -62,21 +71,23 @@
             <div class="card-body">
                 <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
                 <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
-                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                {% if solicitacao.imagem %}
+                    <p><strong>Imagem:</strong></p>
+                    <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
+                {% endif %}
+                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
             </div>
         </div>
     {% empty %}
         <div class="alert alert-warning">
             {% if user.is_staff or user.is_superuser %}
-                Nenhuma solicitação encontrada no sistema.
+                Nenhuma solicitação encontrada para o período selecionado.
             {% else %}
                 Você ainda não criou nenhuma solicitação.
             {% endif %}
         </div>
     {% endfor %}
 
-
-    {# O SCRIPT DO GRÁFICO SÓ RODA SE O USUÁRIO FOR GESTOR #}
     {% if user.is_staff or user.is_superuser %}
         <script>
             const ctx = document.getElementById('statusChart');
@@ -102,7 +113,6 @@
                 },
                 options: {
                     responsive: true,
-                    // A CORREÇÃO PARA O TAMANHO DO GRÁFICO
                     maintainAspectRatio: false 
                 }
             });
