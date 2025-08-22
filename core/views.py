@@ -1,26 +1,19 @@
 import json
+from datetime import date, timedelta
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from .models import Solicitacao, Arvore, Projeto, Area
 from django.contrib.auth.forms import UserCreationForm
-from .forms import SolicitacaoForm, ArvoreForm
-from datetime import date, timedelta
-
+from .models import Solicitacao, Arvore, Projeto, Area, User
+from .forms import SolicitacaoForm, ArvoreForm, AreaForm
 
 # --- VIEWS DE SOLICITAÇÃO ---
 
-
-@login_required # Vamos garantir que só usuários logados vejam a home
+@login_required
 def solicitacao_list(request):
-    # 1. Pega o filtro de período da URL (ex: ?periodo=semana). O padrão é 'total'.
     periodo = request.GET.get('periodo', 'total')
-
-    # 2. Começa com todas as solicitações
     solicitacoes_base = Solicitacao.objects.all()
-
-    # 3. Aplica o filtro de data, se necessário
     if periodo == 'hoje':
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date=date.today())
     elif periodo == 'semana':
@@ -29,26 +22,21 @@ def solicitacao_list(request):
     elif periodo == 'mes':
         um_mes_atras = date.today() - timedelta(days=30)
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
-    else: # 'total'
+    else:
         solicitacoes_filtradas = solicitacoes_base
-
-    # --- LÓGICA DE FILTRO POR USUÁRIO ---
     if request.user.is_superuser or request.user.is_staff:
         solicitacoes = solicitacoes_filtradas
     else:
         solicitacoes = solicitacoes_filtradas.filter(cidadao=request.user)
-
-    # --- A lógica do Dashboard agora usa a lista já filtrada por data e usuário ---
     abertas_count = solicitacoes.filter(status='EM_ABERTO').count()
     andamento_count = solicitacoes.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = solicitacoes.filter(status='FINALIZADO').count()
-
     context = {
         'solicitacoes': solicitacoes,
         'abertas_count': abertas_count,
         'andamento_count': andamento_count,
         'finalizadas_count': finalizadas_count,
-        'periodo_selecionado': periodo, # Manda o período pro template saber qual botão destacar
+        'periodo_selecionado': periodo,
     }
     return render(request, 'core/solicitacao_list.html', context)
 
@@ -80,7 +68,7 @@ def solicitacao_update(request, pk):
 @login_required
 def solicitacao_delete(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
-    if request.method == 'POST': 
+    if request.method == 'POST':
         solicitacao.delete()
         return redirect('solicitacao_list')
     return render(request, 'core/solicitacao_confirm_delete.html', {'object': solicitacao})
@@ -114,8 +102,6 @@ def arvore_update(request, pk):
         form = ArvoreForm(instance=arvore)
     return render(request, 'core/arvore_form.html', {'form': form})
 
-# Arquivo: core/views.py
-
 @login_required
 def arvore_delete(request, pk):
     arvore = get_object_or_404(Arvore, pk=pk)
@@ -126,64 +112,32 @@ def arvore_delete(request, pk):
 
 # --- VIEW DO MAPA ---
 
-# Arquivo: core/views.py
-
 def mapa_view(request):
     arvores_com_coords = Arvore.objects.filter(latitude__isnull=False, longitude__isnull=False)
     arvores_data = [
-        {"nome": arvore.nome_popular, "lat": arvore.latitude, "lon": arvore.longitude} 
+        {"id": arvore.id, "nome": arvore.nome_popular, "nome_cientifico": arvore.nome_cientifico, "descricao": arvore.descricao, "lat": arvore.latitude, "lon": arvore.longitude} 
         for arvore in arvores_com_coords
     ]
-
     solicitacoes_com_coords = Solicitacao.objects.filter(status='EM_ABERTO', latitude__isnull=False, longitude__isnull=False)
     solicitacoes_data = [
-        {
-            # A MUDANÇA ESTÁ AQUI: Mandamos o nome bonito E o código interno
-            "tipo_display": solicitacao.get_tipo_display(),
-            "tipo_codigo": solicitacao.tipo, # Ex: 'SUGESTAO' ou 'DENUNCIA'
-            "lat": solicitacao.latitude,
-            "lon": solicitacao.longitude
-        }
+        {"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.status, "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude}
         for solicitacao in solicitacoes_com_coords
     ]
-
     areas_salvas = Area.objects.filter(geom__isnull=False)
     areas_data = [
-        {"nome": area.nome, "geom": area.geom}
+        {"id": area.id, "nome": area.nome, "geom": area.geom, "tipo": area.get_tipo_display(), "status": area.get_status_display()}
         for area in areas_salvas
     ]
-
+    form_area = AreaForm()
     context = {
         'arvores_data': arvores_data,
         'solicitacoes_data': solicitacoes_data,
         'areas_data': areas_data,
+        'form_area': form_area,
     }
     return render(request, 'core/mapa.html', context)
 
-# --- API PARA SALVAR ÁREA ---
-
-@csrf_exempt
-@login_required
-def salvar_area(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        
-        primeiro_projeto = Projeto.objects.first()
-        if not primeiro_projeto:
-            return JsonResponse({'status': 'erro', 'message': 'Nenhum projeto encontrado para associar a área.'}, status=400)
-
-        nova_area = Area.objects.create(
-            geom=data.get('geometry'),
-            nome="Área Desenhada via Mapa",
-            projeto=primeiro_projeto,
-            status='PLANEJANDO',
-            tipo='PUBLICA',
-            tipo_vegetacao='NENHUMA'
-        )
-        
-        return JsonResponse({'status': 'ok', 'message': 'Área salva com sucesso!', 'id': nova_area.id})
-    
-    return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
+# --- VIEWS DE AUTENTICAÇÃO E API ---
 
 def cadastro_view(request):
     if request.method == 'POST':
@@ -193,5 +147,60 @@ def cadastro_view(request):
             return redirect('login')
     else:
         form = UserCreationForm()
-
     return render(request, 'core/cadastro.html', {'form': form})
+
+@csrf_exempt
+@login_required
+def salvar_area(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form_data = data.get('form_data')
+        geometry_data = data.get('geometry')
+        if not form_data or not geometry_data:
+            return JsonResponse({'status': 'erro', 'message': 'Dados incompletos.'}, status=400)
+        form = AreaForm(form_data)
+        if form.is_valid():
+            area = form.save(commit=False)
+            area.geom = geometry_data
+            area.projeto = Projeto.objects.first()
+            area.save()
+            form.save_m2m()
+            return JsonResponse({'status': 'ok', 'message': 'Área salva com sucesso!', 'id': area.id})
+        else:
+            return JsonResponse({'status': 'erro', 'message': 'Dados do formulário inválidos.', 'errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
+
+# --- (NOVA) API PARA GERENCIAR UMA ÁREA ESPECÍFICA ---
+@csrf_exempt
+@login_required
+def area_manage_api(request, pk):
+    area = get_object_or_404(Area, pk=pk)
+
+    # SE A REQUISIÇÃO FOR PARA ATUALIZAR (PUT)
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        form_data = data.get('form_data')
+        form = AreaForm(form_data, instance=area)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'status': 'ok', 'message': 'Área atualizada com sucesso!'})
+        else:
+            return JsonResponse({'status': 'erro', 'errors': form.errors.as_json()}, status=400)
+
+    # SE A REQUISIÇÃO FOR PARA DELETAR (DELETE)
+    elif request.method == 'DELETE':
+        area.delete()
+        return JsonResponse({'status': 'ok', 'message': 'Área deletada com sucesso!'})
+    
+    # SE A REQUISIÇÃO FOR PARA PEGAR OS DETALHES (GET)
+    else: # GET
+        data = {
+            'id': area.id,
+            'nome': area.nome,
+            'tipo': area.tipo,
+            'status': area.status,
+            'responsavel': area.responsavel.id if area.responsavel else '',
+            'tipo_vegetacao': area.tipo_vegetacao,
+            'especies': list(area.especies.all().values_list('id', flat=True))
+        }
+        return JsonResponse(data)

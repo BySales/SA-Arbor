@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3>Tem certeza?</h3>
+        </div>
+        <div class="card-body">
+            <p>Você está prestes a deletar permanentemente a área: <strong>"{{ object.nome }}"</strong>.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Sim, quero deletar</button>
+                <a href="{% url 'mapa' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block content %}
+    <h2>Editando Área: {{ area.nome }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Salvar Alterações</button>
+        <a href="{% url 'mapa' %}" class="btn btn-secondary">Voltar para o Mapa</a>
+    </form>
+{% endblock %}
