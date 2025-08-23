@@ -7,13 +7,37 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from .models import Solicitacao, Arvore, Projeto, Area, User
 from .forms import SolicitacaoForm, ArvoreForm, AreaForm
+from django.contrib import messages
+
 
 # --- VIEWS DE SOLICITAÇÃO ---
 
 @login_required
 def solicitacao_list(request):
     periodo = request.GET.get('periodo', 'total')
+    status = request.GET.get('status')
+    ordenar = request.GET.get('ordenar')
+
+    # Queryset base, começando com tudo
     solicitacoes_base = Solicitacao.objects.all()
+
+    # 1. Filtra por status, se ele for passado na URL
+    if status:
+        solicitacoes_base = solicitacoes_base.filter(status=status)
+
+    # Base para os cards do dashboard (só com filtro de período)
+    dashboard_qs = Solicitacao.objects.all()
+    if periodo == 'hoje':
+        dashboard_qs = dashboard_qs.filter(data_criacao__date=date.today())
+    elif periodo == 'semana':
+        uma_semana_atras = date.today() - timedelta(days=7)
+        dashboard_qs = dashboard_qs.filter(data_criacao__date__gte=uma_semana_atras)
+    elif periodo == 'mes':
+        um_mes_atras = date.today() - timedelta(days=30)
+        dashboard_qs = dashboard_qs.filter(data_criacao__date__gte=um_mes_atras)
+
+    # 2. Filtra a lista principal por período
+    solicitacoes_filtradas = solicitacoes_base
     if periodo == 'hoje':
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date=date.today())
     elif periodo == 'semana':
@@ -22,24 +46,38 @@ def solicitacao_list(request):
     elif periodo == 'mes':
         um_mes_atras = date.today() - timedelta(days=30)
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
-    else:
-        solicitacoes_filtradas = solicitacoes_base
+
+    # 3. Filtra por usuário (cidadão comum só vê o dele)
     if request.user.is_superuser or request.user.is_staff:
         solicitacoes = solicitacoes_filtradas
     else:
         solicitacoes = solicitacoes_filtradas.filter(cidadao=request.user)
-    abertas_count = solicitacoes.filter(status='EM_ABERTO').count()
-    andamento_count = solicitacoes.filter(status='EM_ANDAMENTO').count()
-    finalizadas_count = solicitacoes.filter(status='FINALIZADO').count()
+
+    # 4. Ordena o resultado final
+    if ordenar == 'data_asc':
+        solicitacoes = solicitacoes.order_by('data_criacao')
+    elif ordenar == 'tipo':
+        solicitacoes = solicitacoes.order_by('tipo')
+    else: # A ordem padrão é por mais recente
+        solicitacoes = solicitacoes.order_by('-data_criacao')
+
+    # A contagem dos cards do topo usa o filtro de período, mas ignora o de status
+    abertas_count = dashboard_qs.filter(status='EM_ABERTO').count()
+    andamento_count = dashboard_qs.filter(status='EM_ANDAMENTO').count()
+    finalizadas_count = dashboard_qs.filter(status='FINALIZADO').count()
+
     context = {
         'solicitacoes': solicitacoes,
         'abertas_count': abertas_count,
         'andamento_count': andamento_count,
         'finalizadas_count': finalizadas_count,
         'periodo_selecionado': periodo,
+        'status_selecionado': status, # Manda o status pra saber qual tá ativo
+        'ordenar_selecionado': ordenar, # Manda a ordenação pra saber qual tá ativa
     }
     return render(request, 'core/solicitacao_list.html', context)
 
+# O resto do arquivo continua igual...
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
@@ -48,6 +86,7 @@ def solicitacao_create(request):
             solicitacao = form.save(commit=False)
             solicitacao.cidadao = request.user
             solicitacao.save()
+            messages.success(request, 'Solicitação criada com sucesso!')
             return redirect('solicitacao_list')
     else:
         form = SolicitacaoForm()
@@ -60,6 +99,7 @@ def solicitacao_update(request, pk):
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao)
         if form.is_valid():
             form.save()
+            messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
             return redirect('solicitacao_list')
     else:
         form = SolicitacaoForm(instance=solicitacao)
@@ -69,7 +109,9 @@ def solicitacao_update(request, pk):
 def solicitacao_delete(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
+        id_solicitacao = solicitacao.id
         solicitacao.delete()
+        messages.success(request, f'Solicitação #{id_solicitacao} foi deletada com sucesso!')
         return redirect('solicitacao_list')
     return render(request, 'core/solicitacao_confirm_delete.html', {'object': solicitacao})
 

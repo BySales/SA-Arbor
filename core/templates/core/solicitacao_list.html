@@ -3,90 +3,133 @@
 {% block content %}
     
     {% if user.is_staff or user.is_superuser %}
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h2>Dashboard do Gestor</h2>
-            <div class="btn-group" role="group">
-                <a href="?periodo=hoje" class="btn btn-sm {% if periodo_selecionado == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">Hoje</a>
-                <a href="?periodo=semana" class="btn btn-sm {% if periodo_selecionado == 'semana' %}btn-primary{% else %}btn-outline-primary{% endif %}">Últimos 7 Dias</a>
-                <a href="?periodo=mes" class="btn btn-sm {% if periodo_selecionado == 'mes' %}btn-primary{% else %}btn-outline-primary{% endif %}">Últimos 30 Dias</a>
-                <a href="{% url 'home' %}" class="btn btn-sm {% if periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Ver Total</a>
-            </div>
-        </div>
-        <hr class="mt-0">
-        
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-danger mb-3">
-                    <div class="card-header">Em Aberto</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ abertas_count }}</h5>
-                        <p class="card-text">Solicitações aguardando atendimento.</p>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="mb-0">
+                            {% if status_selecionado %}
+                                Solicitações: {{ status_selecionado|cut:"EM_"|cut:"_"|title }}
+                            {% else %}
+                                Todas as Solicitações
+                            {% endif %}
+                        </h2>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'solicitacao_create' %}" class="btn btn-primary me-3">Criar Nova Solicitação</a>
+                        <form method="GET" class="d-flex">
+                            <input type="hidden" name="periodo" value="{{ periodo_selecionado }}">
+                            {% if status_selecionado %}
+                                <input type="hidden" name="status" value="{{ status_selecionado }}">
+                            {% endif %}
+                            
+                            <select name="ordenar" class="form-select" onchange="this.form.submit()">
+                                <option value="">Ordenar por...</option>
+                                <option value="data_desc" {% if not ordenar_selecionado or ordenar_selecionado == 'data_desc' %}selected{% endif %}>Mais Recentes</option>
+                                <option value="data_asc" {% if ordenar_selecionado == 'data_asc' %}selected{% endif %}>Mais Antigos</option>
+                                <option value="tipo" {% if ordenar_selecionado == 'tipo' %}selected{% endif %}>Tipo (A-Z)</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-warning mb-3">
-                    <div class="card-header">Em Andamento</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ andamento_count }}</h5>
-                        <p class="card-text">Solicitações sendo executadas.</p>
+                
+                {% for solicitacao in solicitacoes %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
+                            <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+                            {% if solicitacao.imagem %}
+                                <p><strong>Imagem:</strong></p>
+                                <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
+                            {% endif %}
+                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-header">Finalizadas</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ finalizadas_count }}</h5>
-                        <p class="card-text">Solicitações já concluídas.</p>
+                {% empty %}
+                    <div class="alert alert-warning">
+                        Nenhuma solicitação encontrada para o período e status selecionados.
                     </div>
-                </div>
+                {% endfor %}
             </div>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                Gráfico de Solicitações por Status
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart"></canvas>
+            <div class="col-lg-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5>Dashboard</h5>
+                    <div class="btn-group" role="group">
+                        <a href="?periodo=hoje" class="btn btn-sm {% if periodo_selecionado == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">Hoje</a>
+                        <a href="?periodo=semana" class="btn btn-sm {% if periodo_selecionado == 'semana' %}btn-primary{% else %}btn-outline-primary{% endif %}">7d</a>
+                        <a href="?periodo=mes" class="btn btn-sm {% if periodo_selecionado == 'mes' %}btn-primary{% else %}btn-outline-primary{% endif %}">30d</a>
+                        <a href="{% url 'home' %}" class="btn btn-sm {% if periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Total</a>
+                    </div>
+                </div>
+                <hr class="mt-0">
+                
+                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Em Aberto</span>
+                            <span class="badge bg-light text-danger">{{ abertas_count }}</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none">
+                    <div class="card text-white bg-warning mb-3">
+                        <div class="card-header d-flex justify-content-between">
+                           <span>Em Andamento</span>
+                           <span class="badge bg-light text-warning">{{ andamento_count }}</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Finalizadas</span>
+                            <span class="badge bg-light text-success">{{ finalizadas_count }}</span>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="card">
+                    <div class="card-header">
+                        Gráfico de Solicitações
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
-    {% endif %}
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        {% if user.is_staff or user.is_superuser %}
-            <h2>Lista de Todas as Solicitações</h2>
-        {% else %}
+    {% else %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Minhas Solicitações</h2>
-        {% endif %}
-        <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
-    </div>
-    
-    {% for solicitacao in solicitacoes %}
-        <div class="card mb-3">
-            <div class="card-header">
-                {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.status }}</strong>
-            </div>
-            <div class="card-body">
-                <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
-                <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
-                {% if solicitacao.imagem %}
-                    <p><strong>Imagem:</strong></p>
-                    <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
-                {% endif %}
-                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
-            </div>
+            <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
         </div>
-    {% empty %}
-        <div class="alert alert-warning">
-            {% if user.is_staff or user.is_superuser %}
-                Nenhuma solicitação encontrada para o período selecionado.
-            {% else %}
+        
+        {% for solicitacao in solicitacoes %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.status }}</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+                    {% if solicitacao.imagem %}
+                        <p><strong>Imagem:</strong></p>
+                        <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
+                    {% endif %}
+                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-warning">
                 Você ainda não criou nenhuma solicitação.
-            {% endif %}
-        </div>
-    {% endfor %}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     {% if user.is_staff or user.is_superuser %}
         <script>
@@ -113,7 +156,12 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false 
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    }
                 }
             });
         </script>
