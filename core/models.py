@@ -97,3 +97,10 @@ class Area(models.Model):
 
     def __str__(self):
         return f'{self.nome} ({self.projeto.nome})'
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    imagem = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
+
+    def __str__(self):
+        return f'Perfil de {self.user.username}'

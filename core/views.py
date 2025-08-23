@@ -4,10 +4,11 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from .models import Solicitacao, Arvore, Projeto, Area, User
-from .forms import SolicitacaoForm, ArvoreForm, AreaForm
+from .forms import SolicitacaoForm, ArvoreForm, AreaForm, UserUpdateForm, ProfileUpdateForm
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -178,6 +179,43 @@ def mapa_view(request):
         'form_area': form_area,
     }
     return render(request, 'core/mapa.html', context)
+
+@login_required
+def configuracoes_view(request):
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            user_form = UserUpdateForm(request.POST, instance=request.user)
+            profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+            
+            if user_form.is_valid() and profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                messages.success(request, 'Seu perfil foi atualizado com sucesso!')
+                return redirect('configuracoes')
+            else:
+                password_form = PasswordChangeForm(request.user)
+
+        elif 'change_password' in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            user_form = UserUpdateForm(instance=request.user)
+            profile_form = ProfileUpdateForm(instance=request.user.profile)
+
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Sua senha foi alterada com sucesso!')
+                return redirect('configuracoes')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'password_form': password_form
+    }
+    return render(request, 'core/configuracoes.html', context)
 
 # --- VIEWS DE AUTENTICAÇÃO E API ---
 

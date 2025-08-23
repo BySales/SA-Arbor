@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <h2>Configurações da Conta</h2>
+    <p class="text-muted">Gerencie suas informações de perfil e segurança.</p>
+    <hr>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Meu Perfil</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="{{ user.profile.imagem.url }}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                        <div class="ms-4">
+                            <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                            <p class="text-muted mb-0">@{{ user.username }}</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ profile_form.as_p }}
+                        {{ user_form.as_p }}
+                        <button type="submit" name="update_profile" class="btn btn-primary mt-3">Salvar Perfil</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                 </div>
+        </div>
+
+        <div class="col-lg-4">
+             </div>
+    </div>
+{% endblock %}
