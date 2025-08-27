@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import Solicitacao, Arvore, Area, Profile # Adicionamos o Profile aqui
+from .models import Solicitacao, Arvore, Area, Profile, Equipe# Adicionamos o Profile aqui
 
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
@@ -39,4 +39,12 @@ class ProfileUpdateForm(forms.ModelForm):
         }
         labels = {
             'imagem': 'Alterar foto de perfil'
+        }
+
+class EquipeForm(forms.ModelForm):
+    class Meta:
+        model = Equipe
+        fields = ['nome', 'membros']
+        widgets = {
+            'membros':forms.CheckboxSelectMultiple,
         }

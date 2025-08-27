@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class Equipe(models.Model):
     nome = models.CharField(max_length=100)
     data_criação = models.DateTimeField(auto_now_add=True)
+    membros = models.ManyToManyField(User, related_name='equipes', blank=True)
 
     def __str__(self):
         return self.nome
@@ -104,3 +105,4 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
+    

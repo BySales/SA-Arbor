@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestão de Equipes</h2>
+        <a href="{% url 'equipe_create' %}" class="btn btn-primary">Cadastrar Nova Equipe</a>
+    </div>
+
+    {% for equipe in equipes %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>{{ equipe.nome }}</strong>
+                <div>
+                    <a href="{% url 'equipe_update' pk=equipe.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                    <a href="{% url 'equipe_delete' pk=equipe.pk %}" class="btn btn-danger btn-sm">Deletar</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Membros da Equipe:</h6>
+                {% if equipe.membros.all %}
+                    <ul>
+                        {% for membro in equipe.membros.all %}
+                            <li>{{ membro.username }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Nenhum membro cadastrado nesta equipe.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-warning">
+            Nenhuma equipe encontrada.
+        </div>
+    {% endfor %}
+{% endblock %}

@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 from .views import (
     solicitacao_list, solicitacao_create, solicitacao_update, solicitacao_delete,
     arvore_list, arvore_create, arvore_update, arvore_delete, mapa_view, cadastro_view, salvar_area, area_manage_api, 
-    configuracoes_view 
+    configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -37,6 +37,11 @@ urlpatterns = [
     path('api/salvar_area/', salvar_area, name='salvar_area'),
     # A NOVA ROTA QUE FAZ TUDO (GET, PUT, DELETE) PARA UMA ÁREA ESPECÍFICA
     path('api/areas/<int:pk>/', area_manage_api, name='area_manage_api'),
+
+    path('equipes/', equipe_list, name='equipe_list'),
+    path('equipes/nova/', equipe_create, name='equipe_create'),
+    path('equipes/<int:pk>/editar/', equipe_update, name='equipe_update'),
+    path('equipes/<int:pk>/deletar/', equipe_delete, name='equipe_delete'),
 ]
 
 if settings.DEBUG:

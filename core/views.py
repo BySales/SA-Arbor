@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import Solicitacao, Arvore, Projeto, Area, User
-from .forms import SolicitacaoForm, ArvoreForm, AreaForm, UserUpdateForm, ProfileUpdateForm
+from .models import Solicitacao, Arvore, Projeto, Area, User, Equipe
+from .forms import SolicitacaoForm, ArvoreForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 
@@ -284,3 +284,45 @@ def area_manage_api(request, pk):
             'especies': list(area.especies.all().values_list('id', flat=True))
         }
         return JsonResponse(data)
+    
+@login_required
+def equipe_list(request):
+    equipes = Equipe.objects.all()
+    return render(request, 'core/equipe_list.html', {'equipes': equipes})
+
+@login_required
+def equipe_create(request):
+    if request.method == 'POST':
+        form = EquipeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Equipe criada com sucesso!')
+            return redirect('equipe_list')
+    else:
+        form = EquipeForm()
+    return render(request, 'core/equipe_form.html', {'form': form, 'titulo': 'Cadastrar Nova Equipe'})
+
+@login_required
+def equipe_update(request, pk):
+    equipe = get_object_or_404(Equipe, pk=pk)
+    if request.method == 'POST':
+        form = EquipeForm(request.POST, instance=equipe)
+        if form.is_valid():
+            form.save()
+        messages.success(request, f'Equipe "{equipe.nome}" foi atualizada com sucesso!')
+        return redirect('equipe_list')
+    else:
+        form = EquipeForm(instance=equipe)
+    return render(request, 'core/equipe_form.html', {'form': form, 'titulo': f'Editar Equipe: {equipe.nome}'})
+
+@login_required
+def equipe_delete(request, pk):
+    equipe = get_object_or_404(Equipe, pk=pk)
+    if request.method == 'POST':
+        nome_equipe = equipe.nome
+        equipe.delete()
+        messages.success(request, f'Equipe "{nome_equipe}" foi deletada com sucesso!')
+        return redirect('equipe_list')
+    return render(request, 'core/equipe_confirm_delete.html', {'object': equipe})
+
+
