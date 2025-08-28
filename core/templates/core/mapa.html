@@ -60,17 +60,56 @@
         </div>
     </div>
 
+    <div class="modal fade" id="instanciaFormModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Nova Árvore ao Mapa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="instancia-arvore-form" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="especie-select" class="form-label">Espécie</label>
+                            <select id="especie-select" class="form-select" required>
+                                <option value="" disabled selected>Selecione a espécie...</option>
+                                {% for especie in todas_especies %}
+                                    <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="saude-select" class="form-label">Estado de Saúde</label>
+                            <select id="saude-select" class="form-select">
+                                {% for value, label in opcoes_saude %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="plantio-date" class="form-label">Data de Plantio</label>
+                            <input type="date" id="plantio-date" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="saveInstanciaButton" class="btn btn-primary">Salvar Árvore</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        // --- FUNÇÃO TOAST ---
         function showToast(title, message, isError=false) {
             const toastEl = document.getElementById('liveToast');
             const toastTitle = document.getElementById('toast-title');
             const toastBody = document.getElementById('toast-body');
 
             if (!toastEl || !toastTitle || !toastBody) {
-                console.error('Elementos do toast não encontrados!');
+                console.error('Toast elements not found!');
                 return;
             }
 
@@ -86,7 +125,6 @@
             bsToast.show();
         }
 
-        // --- MAPA ---
         var map = L.map('map').setView([-24.0965, -46.6212], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
 
@@ -103,13 +141,18 @@
         const closeDetailsBtn = document.getElementById('close-details-btn');
         closeDetailsBtn.addEventListener('click', function() { detailsPanel.classList.add('d-none'); });
 
-        // --- DADOS ---
         const arvoresData = JSON.parse(document.getElementById('arvores-data-json').textContent);
         arvoresData.forEach(function(arvore) {
             if (arvore.lat && arvore.lon) {
                 var marker = L.marker([arvore.lat, arvore.lon], {icon: treeIcon});
                 marker.on('click', function() {
-                    const content = `<p><strong>Nome Científico:</strong> ${arvore.nome_cientifico || 'N/A'}</p><p><strong>Descrição:</strong> ${arvore.descricao || 'N/A'}</p>`;
+                    const content = `
+                        <p class="mb-1"><strong>Científico:</strong> ${arvore.nome_cientifico || 'N/A'}</p>
+                        <p class="mb-1"><strong>Saúde:</strong> ${arvore.saude || 'N/A'}</p>
+                        <p class="mb-1"><strong>Plantio:</strong> ${arvore.plantio || 'N/A'}</p>
+                        <hr class="my-1">
+                        <p class="mb-1">${arvore.descricao || 'Sem descrição.'}</p>
+                    `;
                     detailsTitle.innerHTML = `Árvore: ${arvore.nome}`;
                     detailsContent.innerHTML = content;
                     detailsPanel.classList.remove('d-none');
@@ -144,7 +187,6 @@
             }
         });
 
-        // --- CAMADAS ---
         const dataLayersContainer = document.getElementById('data-layers');
         const drawnLayersContainer = document.getElementById('drawn-layers');
 
@@ -164,11 +206,12 @@
             drawnLayersContainer.innerHTML = '';
             areasData.forEach(function(area) {
                 const layerId = `area-${area.id}`;
-                drawnLayersContainer.innerHTML += `<div class="form-check"><input class="form-check-input" type="checkbox" id="${layerId}"><label class="form-check-label" for="${layerId}">${area.nome}</label></div>`;
+                drawnLayersContainer.innerHTML += `<div class="form-check"><input class="form-check-input" type="checkbox" id="${layerId}" checked><label class="form-check-label" for="${layerId}">${area.nome}</label></div>`;
             });
             areasData.forEach(function(area) {
                 const layerId = `area-${area.id}`;
                 document.getElementById(layerId).addEventListener('change', function() { toggleLayer(this, areaLayers[area.id]); });
+                map.addLayer(areaLayers[area.id]);
             });
         } else {
             drawnLayersContainer.innerHTML = '<small>Nenhuma área salva.</small>';
@@ -181,13 +224,13 @@
             toggleButton.textContent = layerContent.classList.contains('d-none') ? '+' : '-';
         });
 
-        // --- DESENHO ---
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
         var drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: true } });
         map.addControl(drawControl);
 
         const areaModal = new bootstrap.Modal(document.getElementById('areaFormModal'));
+        const instanciaModal = new bootstrap.Modal(document.getElementById('instanciaFormModal'));
         const saveAreaButton = document.getElementById('saveAreaButton');
         const deleteAreaButton = document.getElementById('deleteAreaButton');
         const areaForm = document.getElementById('area-form');
@@ -196,18 +239,18 @@
         let editingAreaId = null;
 
         function getCookie(name) {
-            let c = null;
-            if (document.cookie) {
-                let C = document.cookie.split(';');
-                for (let i = 0; i < C.length; i++) {
-                    let c = C[i].trim();
-                    if (c.substring(0, name.length + 1) === (name + '=')) {
-                        c = decodeURIComponent(c.substring(name.length + 1));
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
                     }
                 }
             }
-            return c;
+            return cookieValue;
         }
         const csrftoken = getCookie('csrftoken');
 
@@ -228,18 +271,22 @@
 
         map.on(L.Draw.Event.CREATED, function (event) {
             temporaryLayer = event.layer;
-            editingAreaId = null;
-            areaForm.reset();
-            modalTitle.textContent = 'Detalhes da Nova Área';
-            deleteAreaButton.classList.add('d-none');
-            areaModal.show();
+            
+            if (event.layerType === 'marker') {
+                document.getElementById('instancia-arvore-form').reset();
+                instanciaModal.show();
+            } else {
+                editingAreaId = null;
+                areaForm.reset();
+                modalTitle.textContent = 'Detalhes da Nova Área';
+                deleteAreaButton.classList.add('d-none');
+                areaModal.show();
+            }
         });
 
         saveAreaButton.addEventListener('click', function() {
             const formData = new FormData(areaForm);
             const formObject = Object.fromEntries(formData.entries());
-            formObject.especies = formData.getAll('especies');
-
             let url, method, finalData;
 
             if (editingAreaId) {
@@ -263,7 +310,7 @@
                 if (data.status === 'ok') {
                     showToast('Sucesso!', data.message);
                     areaModal.hide();
-                    setTimeout(() => window.location.reload(), 2000);
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
                     showToast('Erro ao Salvar', (data.message || JSON.stringify(data.errors)), true);
                 }
@@ -281,13 +328,71 @@
                     if (data.status === 'ok') {
                         showToast('Sucesso!', data.message);
                         areaModal.hide();
-                        setTimeout(() => window.location.reload(), 2000);
+                        setTimeout(() => window.location.reload(), 1500);
                     } else {
                         showToast('Erro ao Deletar', data.message, true);
                     }
                 });
             }
         });
+
+        const saveInstanciaButton = document.getElementById('saveInstanciaButton');
+        saveInstanciaButton.addEventListener('click', function() {
+            const especieId = document.getElementById('especie-select').value;
+            const estadoSaude = document.getElementById('saude-select').value;
+            const dataPlantio = document.getElementById('plantio-date').value;
+            
+            if (!especieId) {
+                alert('Por favor, selecione uma espécie.');
+                return;
+            }
+
+            const latlng = temporaryLayer.getLatLng();
+
+            const dataToSend = {
+                especie_id: especieId,
+                lat: latlng.lat,
+                lon: latlng.lng,
+                estado_saude: estadoSaude,
+                data_plantio: dataPlantio,
+            };
+
+            fetch("{% url 'instancia_arvore_create_api' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    instanciaModal.hide();
+                    showToast('Sucesso!', data.message);
+                    
+                    const novaArvore = data.nova_arvore;
+                    var newMarker = L.marker([novaArvore.lat, novaArvore.lon], {icon: treeIcon}).addTo(camadaArvores);
+
+                    newMarker.on('click', function() {
+                        const content = `
+                            <p class="mb-1"><strong>Científico:</strong> ${novaArvore.nome_cientifico || 'N/A'}</p>
+                            <p class="mb-1"><strong>Saúde:</strong> ${novaArvore.saude || 'N/A'}</p>
+                            <p class="mb-1"><strong>Plantio:</strong> ${novaArvore.plantio || 'N/A'}</p>
+                            <hr class="my-1">
+                            <p class="mb-1">${novaArvore.descricao || 'Sem descrição.'}</p>
+                        `;
+                        detailsTitle.innerHTML = `Árvore: ${novaArvore.nome}`;
+                        detailsContent.innerHTML = content;
+                        detailsPanel.classList.remove('d-none');
+                    });
+
+                } else {
+                    showToast('Erro ao Salvar', data.message, true);
+                }
+            }).catch(error => {
+                console.error("Fetch Error:", error);
+                showToast('Erro de Rede', 'Não foi possível conectar ao servidor.', true);
+            });
+        });
+
 
         var coordsDisplay = document.getElementById('coords-display');
         map.on('mousemove', function(e) {

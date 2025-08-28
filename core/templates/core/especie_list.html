@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Catálogo de Espécies</h2>
+        <a href="{% url 'especie_create' %}" class="btn btn-primary">Adicionar Nova Espécie</a>
+    </div>
+
+    {% for especie in especies %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ especie.nome_popular }}</strong>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ especie.nome_cientifico|default:"Nome científico não informado" }}</h5>
+                <p class="card-text">{{ especie.descricao|default:"Sem descrição." }}</p>
+                <a href="{% url 'especie_update' pk=especie.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                <a href="{% url 'especie_delete' pk=especie.pk %}" class="btn btn-danger btn-sm">Deletar</a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-warning">
+            Nenhuma espécie encontrada no catálogo.
+        </div>
+    {% endfor %}
+{% endblock %}

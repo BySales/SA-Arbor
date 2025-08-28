@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 # Create your models here.
 class Equipe(models.Model):
@@ -9,16 +10,39 @@ class Equipe(models.Model):
 
     def __str__(self):
         return self.nome
-    
-class Arvore(models.Model):
-    nome_popular = models.CharField(max_length=150)
-    nome_cientifico = models.CharField(max_length=150, blank=True, null=True)
-    descricao = models.TextField()
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+
+class Especie(models.Model):
+    nome_popular = models.CharField(max_length=150, unique=True)
+    nome_cientifico =  models.CharField(max_length=150, blank=True, null=True)
+    descricao = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.nome_popular
+    
+
+class InstanciaArvore(models.Model):
+    ESTADO_SAUDE_CHOICES = (
+        ('BOA', 'Boa'),
+        ('REGULAR', 'Regular'),
+        ('RUIM', 'Ruim'),
+        ('MORTA', 'Morta'),  
+    )
+    especie = models.ForeignKey(Especie, on_delete=models.PROTECT, related_name='instancias')
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    estado_saude = models.CharField(
+        max_length=10,
+        choices=ESTADO_SAUDE_CHOICES,
+        default='BOA',
+        blank=True,
+        null=True
+    )
+    data_plantio = models.DateField(
+        blank=True, null=True, default=timezone.now
+    )
+
+    def __str__(self):
+        return f'{self.especies.nome_popular} #{self.id}'
     
 class Solicitacao(models.Model):
     TIPO_CHOICES = (
@@ -92,7 +116,7 @@ class Area(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_AREA_CHOICES)
     responsavel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='area_responsaveis')
     tipo_vegetacao = models.CharField(max_length=50, choices=TIPO_VEGETACAO_CHOICES)
-    especies = models.ManyToManyField(Arvore, blank=True)
+    especies = models.ManyToManyField(Especie, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     geom = models.JSONField(null=True, blank=True)
 

@@ -5,10 +5,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import Solicitacao, Arvore, Projeto, Area, User, Equipe
-from .forms import SolicitacaoForm, ArvoreForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm
+from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore 
+from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from datetime import datetime
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -118,67 +119,146 @@ def solicitacao_delete(request, pk):
 
 # --- VIEWS DE ÁRVORE ---
 
-def arvore_list(request):
-    arvores = Arvore.objects.all()
-    return render(request, 'core/arvore_list.html', {'arvores': arvores})
+@login_required
+def especie_list(request):
+    especies = Especie.objects.all()
+    # Trocamos 'arvore_list.html' por 'especie_list.html'
+    return render(request, 'core/especie_list.html', {'especies': especies})
 
 @login_required
-def arvore_create(request):
+def especie_create(request):
     if request.method == 'POST':
-        form = ArvoreForm(request.POST)
+        form = EspecieForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('arvore_list')
+            messages.success(request, 'Nova espécie cadastrada no catálogo!')
+            return redirect('especie_list')
     else:
-        form = ArvoreForm()
-    return render(request, 'core/arvore_form.html', {'form': form})
+        form = EspecieForm()
+    # Trocamos 'arvore_form.html' por 'especie_form.html'
+    return render(request, 'core/especie_form.html', {'form': form, 'titulo': 'Cadastrar Nova Espécie'})
 
 @login_required
-def arvore_update(request, pk):
-    arvore = get_object_or_404(Arvore, pk=pk)
+def especie_update(request, pk):
+    especie = get_object_or_404(Especie, pk=pk)
     if request.method == 'POST':
-        form = ArvoreForm(request.POST, instance=arvore)
+        form = EspecieForm(request.POST, instance=especie)
         if form.is_valid():
             form.save()
-            return redirect('arvore_list')
+            messages.success(request, f'Espécie "{especie.nome_popular}" foi atualizada.')
+            return redirect('especie_list')
     else:
-        form = ArvoreForm(instance=arvore)
-    return render(request, 'core/arvore_form.html', {'form': form})
+        form = EspecieForm(instance=especie)
+    return render(request, 'core/especie_form.html', {'form': form, 'titulo': f'Editar Espécie: {especie.nome_popular}'})
 
 @login_required
-def arvore_delete(request, pk):
-    arvore = get_object_or_404(Arvore, pk=pk)
+def especie_delete(request, pk):
+    especie = get_object_or_404(Especie, pk=pk)
     if request.method == 'POST':
-        arvore.delete()
-        return redirect('arvore_list')
-    return render(request, 'core/arvore_confirm_delete.html', {'object': arvore})
+        try:
+            nome_especie = especie.nome_popular
+            especie.delete()
+            messages.success(request, f'Espécie "{nome_especie}" foi deletada do catálogo.')
+        except Exception as e:
+            messages.error(request, f'Não foi possível deletar a espécie "{especie.nome_popular}", pois ela já está sendo utilizada em árvores no mapa.')
+        return redirect('especie_list')
+    return render(request, 'core/especie_confirm_delete.html', {'object': especie})
 
 # --- VIEW DO MAPA ---
 
 def mapa_view(request):
-    arvores_com_coords = Arvore.objects.filter(latitude__isnull=False, longitude__isnull=False)
+    instancias_de_arvores = InstanciaArvore.objects.select_related('especie').all()
     arvores_data = [
-        {"id": arvore.id, "nome": arvore.nome_popular, "nome_cientifico": arvore.nome_cientifico, "descricao": arvore.descricao, "lat": arvore.latitude, "lon": arvore.longitude} 
-        for arvore in arvores_com_coords
+        {
+            "id": instancia.id, 
+            "nome": instancia.especie.nome_popular, 
+            "nome_cientifico": instancia.especie.nome_cientifico,
+            "descricao": instancia.especie.descricao,
+            "lat": instancia.latitude, 
+            "lon": instancia.longitude,
+            "saude": instancia.get_estado_saude_display(),
+            "plantio": instancia.data_plantio.strftime('%d/%m/%Y') if instancia.data_plantio else 'N/A'
+        } 
+        for instancia in instancias_de_arvores
     ]
+
     solicitacoes_com_coords = Solicitacao.objects.filter(status='EM_ABERTO', latitude__isnull=False, longitude__isnull=False)
     solicitacoes_data = [
         {"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.status, "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude}
         for solicitacao in solicitacoes_com_coords
     ]
+
     areas_salvas = Area.objects.filter(geom__isnull=False)
     areas_data = [
         {"id": area.id, "nome": area.nome, "geom": area.geom, "tipo": area.get_tipo_display(), "status": area.get_status_display()}
         for area in areas_salvas
     ]
+
     form_area = AreaForm()
+
+    todas_especies = Especie.objects.all()
+    opcoes_saude = InstanciaArvore.ESTADO_SAUDE_CHOICES
+
     context = {
         'arvores_data': arvores_data,
         'solicitacoes_data': solicitacoes_data,
         'areas_data': areas_data,
         'form_area': form_area,
+        'todas_especies': todas_especies,
+        'opcoes_saude': opcoes_saude,
     }
     return render(request, 'core/mapa.html', context)
+
+@csrf_exempt
+@login_required
+def instancia_arvore_create_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            especie_id = data.get('especie_id')
+            lat = data.get('lat')
+            lon = data.get('lon')
+            estado_saude = data.get('estado_saude')
+            data_plantio_str = data.get('data_plantio') # Pegamos a data como texto
+
+            if not all([especie_id, lat, lon]):
+                return JsonResponse({'status': 'erro', 'message': 'Dados incompletos.'}, status=400)
+
+            # --- CORREÇÃO AQUI ---
+            # Convertemos o texto da data para um objeto de data do Python
+            # Se o texto estiver vazio, a data fica como None (nula)
+            data_plantio_obj = None
+            if data_plantio_str:
+                data_plantio_obj = datetime.strptime(data_plantio_str, '%Y-%m-%d').date()
+
+            especie = get_object_or_404(Especie, id=especie_id)
+            
+            nova_instancia = InstanciaArvore.objects.create(
+                especie=especie,
+                latitude=lat,
+                longitude=lon,
+                estado_saude=estado_saude,
+                data_plantio=data_plantio_obj # Usamos o objeto de data já convertido
+            )
+
+            nova_arvore_data = {
+                "id": nova_instancia.id,
+                "nome": nova_instancia.especie.nome_popular,
+                "nome_cientifico": nova_instancia.especie.nome_cientifico,
+                "descricao": nova_instancia.especie.descricao,
+                "lat": nova_instancia.latitude,
+                "lon": nova_instancia.longitude,
+                "saude": nova_instancia.get_estado_saude_display(),
+                "plantio": nova_instancia.data_plantio.strftime('%d/%m/%Y') if nova_instancia.data_plantio else 'N/A'
+            }
+
+            return JsonResponse({'status': 'ok', 'message': 'Árvore adicionada com sucesso!', 'nova_arvore': nova_arvore_data})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
+    
+    return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
 
 @login_required
 def configuracoes_view(request):
@@ -216,6 +296,8 @@ def configuracoes_view(request):
         'password_form': password_form
     }
     return render(request, 'core/configuracoes.html', context)
+
+
 
 # --- VIEWS DE AUTENTICAÇÃO E API ---
 

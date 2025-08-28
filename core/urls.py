@@ -2,8 +2,9 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import (
     solicitacao_list, solicitacao_create, solicitacao_update, solicitacao_delete,
-    arvore_list, arvore_create, arvore_update, arvore_delete, mapa_view, cadastro_view, salvar_area, area_manage_api, 
-    configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete
+    especie_list, especie_create, especie_update, especie_delete,
+    mapa_view, cadastro_view, salvar_area, area_manage_api, 
+    configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -18,11 +19,12 @@ urlpatterns = [
     path('solicitacoes/<int:pk>/editar/', solicitacao_update, name='solicitacao_update'),
     path('solicitacoes/<int:pk>/deletar/', solicitacao_delete, name='solicitacao_delete'),
 
-    # --- URLs de Árvore ---
-    path('arvores/', arvore_list, name='arvore_list'),
-    path('arvores/nova/', arvore_create, name='arvore_create'),
-    path('arvores/<int:pk>/editar/', arvore_update, name='arvore_update'),
-    path('arvores/<int:pk>/deletar/', arvore_delete, name='arvore_delete'),
+    # --- URLs de Espécie ---
+    path('especies/', especie_list, name='especie_list'),
+    path('especies/nova/', especie_create, name='especie_create'),
+    path('especies/<int:pk>/editar/', especie_update, name='especie_update'),
+    path('especies/<int:pk>/deletar/', especie_delete, name='especie_delete'),
+    path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
 
     # --- URLs do Mapa ---
     path('mapa/', mapa_view, name='mapa'),
