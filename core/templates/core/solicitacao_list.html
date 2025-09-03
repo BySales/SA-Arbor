@@ -94,6 +94,15 @@
                     </div>
                 </a>
 
+                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none">
+                    <div class="card text-white bg-dark mb-3">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Recusadas</span>
+                            <span class="badge bg-light text-dark">{{ recusadas_count }}</span>
+                        </div>
+                    </div>
+                </a>
+
                 <div class="card">
                     <div class="card-header">
                         Gráfico de Solicitações
@@ -113,7 +122,7 @@
         {% for solicitacao in solicitacoes %}
             <div class="card mb-3">
                 <div class="card-header">
-                    {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.status }}</strong>
+                    {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
                 </div>
                 <div class="card-body">
                     <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
@@ -137,19 +146,21 @@
             new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Em Aberto', 'Em Andamento', 'Finalizadas'],
+                    labels: ['Em Aberto', 'Em Andamento', 'Finalizadas', 'Recusadas'],
                     datasets: [{
                         label: '# de Solicitações',
-                        data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}],
+                        data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}, {{ recusadas_count }}],
                         backgroundColor: [
                             'rgba(220, 53, 69, 0.7)',
                             'rgba(255, 193, 7, 0.7)',
-                            'rgba(25, 135, 84, 0.7)'
+                            'rgba(25, 135, 84, 0.7)',
+                            'rgba(33, 37, 41, 0.7)'
                         ],
                         borderColor: [
                             'rgba(220, 53, 69, 1)',
                             'rgba(255, 193, 7, 1)',
-                            'rgba(25, 135, 84, 1)'
+                            'rgba(25, 135, 84, 1)',
+                            'rgba(33, 37, 41, 1)'
                         ],
                         borderWidth: 1
                     }]

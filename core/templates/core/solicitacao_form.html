@@ -1,9 +1,14 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    <h2>Criar/Editar Solicitação</h2>
+    <h2>
+        {% if form.instance.pk %}
+            Editar Solicitação #{{ form.instance.id }}
+        {% else %}
+            Criar Nova Solicitação
+        {% endif %}
+    </h2>
 
-    {# (NOVO) MOSTRA A IMAGEM ATUAL, SE ELA EXISTIR #}
     {% if form.instance.imagem %}
         <div class="mb-3">
             <p><strong>Imagem atual:</strong></p>
@@ -14,14 +19,76 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="mb-3">
-            {{ form.as_p }}
-        </div>
+        {# Campos visíveis para todos os usuários #}
+        {{ form.tipo.label_tag }}
+        {{ form.tipo }}
+        <br><br>
+        {{ form.descricao.label_tag }}
+        {{ form.descricao }}
+        <br><br>
+        {{ form.latitude.label_tag }}
+        {{ form.latitude }}
+        <br><br>
+        {{ form.longitude.label_tag }}
+        {{ form.longitude }}
+        <br><br>
+        {{ form.imagem.label_tag }}
+        {{ form.imagem }}
+        <br><br>
 
+        {# =============================================== #}
+        {#      ÁREA RESTRITA PARA ADMINS / STAFF          #}
+        {# =============================================== #}
+        {% if user.is_staff or user.is_superuser %}
+            <hr>
+            <h4>Gestão da Solicitação</h4>
+            
+            <div class="mb-3">
+                <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                {{ form.status }}
+            </div>
+
+            <div class="mb-3" id="equipe-wrapper" style="display: none;">
+                <label for="{{ form.equipe_delegada.id_for_label }}" class="form-label">{{ form.equipe_delegada.label }}</label>
+                {{ form.equipe_delegada }}
+            </div>
+        {% endif %}
+        
+        <hr>
         <button type="submit" class="btn btn-success">Salvar</button>
 
         {% if form.instance.pk %}
             <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger">Deletar</a>
         {% endif %}
     </form>
+
+
+    {# ======================================================== #}
+    {#      SCRIPT CORRIGIDO PARA MOSTRAR/ESCONDER O CAMPO      #}
+    {# ======================================================== #}
+    {% if user.is_staff or user.is_superuser %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // AQUI ESTÁ A CORREÇÃO: Usamos o ID gerado pelo Django para pegar o elemento
+            const statusSelect = document.getElementById('id_status');
+            const equipeWrapper = document.getElementById('equipe-wrapper');
+
+            function toggleEquipeField() {
+                // A condição continua a mesma
+                if (statusSelect.value === 'EM_ANDAMENTO') {
+                    equipeWrapper.style.display = 'block';
+                } else {
+                    equipeWrapper.style.display = 'none';
+                }
+            }
+
+            // Executa quando a página carrega
+            toggleEquipeField();
+
+            // Executa toda vez que o status mudar
+            statusSelect.addEventListener('change', toggleEquipeField);
+        });
+    </script>
+    {% endif %}
+
 {% endblock %}

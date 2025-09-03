@@ -67,12 +67,14 @@ def solicitacao_list(request):
     abertas_count = dashboard_qs.filter(status='EM_ABERTO').count()
     andamento_count = dashboard_qs.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = dashboard_qs.filter(status='FINALIZADO').count()
+    recusadas_count = dashboard_qs.filter(status='RECUSADO').count()
 
     context = {
         'solicitacoes': solicitacoes,
         'abertas_count': abertas_count,
         'andamento_count': andamento_count,
         'finalizadas_count': finalizadas_count,
+        'recusadas_count': recusadas_count,
         'periodo_selecionado': periodo,
         'status_selecionado': status, # Manda o status pra saber qual tá ativo
         'ordenar_selecionado': ordenar, # Manda a ordenação pra saber qual tá ativa

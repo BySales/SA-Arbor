@@ -6,11 +6,15 @@ from .models import Solicitacao, Area, Profile, Equipe, Especie# Adicionamos o P
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
         model = Solicitacao
-        fields = ['tipo', 'descricao', 'latitude', 'longitude', 'imagem']
+        fields = ['tipo', 'descricao', 'latitude', 'longitude', 'imagem', 'status', 'equipe_delegada']
         widgets = {
             'descricao': forms.Textarea(attrs={'autocomplete': 'off', 'rows': 4}),
             'latitude': forms.TextInput(attrs={'autocomplete': 'off'}),
             'longitude': forms.TextInput(attrs={'autocomplete': 'off'}),
+        }
+        labels = {
+            'status': 'Status da Solicitação',
+            'equipe_delegada': 'Delegar para a Equipe'
         }
 
 class EspecieForm(forms.ModelForm):

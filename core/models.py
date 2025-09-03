@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-# Create your models here.
 class Equipe(models.Model):
     nome = models.CharField(max_length=100)
     data_criação = models.DateTimeField(auto_now_add=True)
@@ -53,6 +52,7 @@ class Solicitacao(models.Model):
         ('EM_ABERTO', 'Em Aberto'),
         ('EM_ANDAMENTO', 'Em Andamento'),
         ('FINALIZADO', 'Finalizado'),
+        ('RECUSADO', 'Recusado'),
     )
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='EM_ABERTO')
