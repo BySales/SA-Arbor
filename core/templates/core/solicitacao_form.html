@@ -9,86 +9,118 @@
         {% endif %}
     </h2>
 
-    {% if form.instance.imagem %}
-        <div class="mb-3">
-            <p><strong>Imagem atual:</strong></p>
-            <img src="{{ form.instance.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 300px;">
-        </div>
-    {% endif %}
-
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-
-        {# Campos visíveis para todos os usuários #}
-        {{ form.tipo.label_tag }}
-        {{ form.tipo }}
-        <br><br>
-        {{ form.descricao.label_tag }}
-        {{ form.descricao }}
-        <br><br>
-        {{ form.latitude.label_tag }}
+        
         {{ form.latitude }}
-        <br><br>
-        {{ form.longitude.label_tag }}
         {{ form.longitude }}
-        <br><br>
-        {{ form.imagem.label_tag }}
-        {{ form.imagem }}
-        <br><br>
 
-        {# =============================================== #}
-        {#      ÁREA RESTRITA PARA ADMINS / STAFF          #}
-        {# =============================================== #}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_tipo" class="form-label">{{ form.tipo.label }}</label>
+                    {{ form.tipo }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_descricao" class="form-label">{{ form.descricao.label }}</label>
+                    {{ form.descricao }}
+                </div>
+                
+                {# --- NOVO CAMPO DE IMAGENS --- #}
+                <div class="mb-3">
+                    <label for="id_imagens" class="form-label">{{ form.imagens.label }}</label>
+                    {{ form.imagens }}
+                </div>
+
+                {# --- GALERIA DE IMAGENS EXISTENTES (SÓ NO UPDATE) --- #}
+                {% if solicitacao.imagens.all %}
+                <hr>
+                <p><strong>Imagens atuais:</strong></p>
+                <div class="d-flex flex-wrap">
+                    {% for imagem_obj in solicitacao.imagens.all %}
+                        <div class="me-2 mb-2">
+                             <a href="{{ imagem_obj.imagem.url }}" target="_blank">
+                                <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="height: 100px; width: auto; object-fit: cover;">
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <p><strong>Marque o local no mapa:</strong></p>
+                <div id="map-picker" style="height: 400px; border-radius: 5px; border: 1px solid #ccc;"></div>
+            </div>
+        </div>
+
         {% if user.is_staff or user.is_superuser %}
             <hr>
             <h4>Gestão da Solicitação</h4>
-            
-            <div class="mb-3">
-                <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
-                {{ form.status }}
-            </div>
-
-            <div class="mb-3" id="equipe-wrapper" style="display: none;">
-                <label for="{{ form.equipe_delegada.id_for_label }}" class="form-label">{{ form.equipe_delegada.label }}</label>
-                {{ form.equipe_delegada }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_status" class="form-label">Status da Solicitação</label>
+                    {{ form.status }}
+                </div>
+                <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;">
+                    <label for="id_equipe_delegada" class="form-label">Delegar para a Equipe</label>
+                    {{ form.equipe_delegada }}
+                </div>
             </div>
         {% endif %}
         
         <hr>
-        <button type="submit" class="btn btn-success">Salvar</button>
-
+        <button type="submit" class="btn btn-success">Salvar Solicitação</button>
         {% if form.instance.pk %}
             <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger">Deletar</a>
         {% endif %}
     </form>
-
-
-    {# ======================================================== #}
-    {#      SCRIPT CORRIGIDO PARA MOSTRAR/ESCONDER O CAMPO      #}
-    {# ======================================================== #}
-    {% if user.is_staff or user.is_superuser %}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // AQUI ESTÁ A CORREÇÃO: Usamos o ID gerado pelo Django para pegar o elemento
-            const statusSelect = document.getElementById('id_status');
-            const equipeWrapper = document.getElementById('equipe-wrapper');
+            const latInput = document.getElementById('id_latitude');
+            const lonInput = document.getElementById('id_longitude');
 
-            function toggleEquipeField() {
-                // A condição continua a mesma
-                if (statusSelect.value === 'EM_ANDAMENTO') {
-                    equipeWrapper.style.display = 'block';
-                } else {
-                    equipeWrapper.style.display = 'none';
-                }
+            const initialLat = latInput.value ? parseFloat(latInput.value) : -24.0965;
+            const initialLon = lonInput.value ? parseFloat(lonInput.value) : -46.6212;
+            const initialZoom = latInput.value ? 18 : 13;
+
+            const map = L.map('map-picker').setView([initialLat, initialLon], initialZoom);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            let marker = null;
+
+            if (latInput.value && lonInput.value) {
+                marker = L.marker([initialLat, initialLon]).addTo(map);
             }
 
-            // Executa quando a página carrega
-            toggleEquipeField();
+            map.on('click', function(e) {
+                const { lat, lng } = e.latlng;
+                
+                latInput.value = lat.toFixed(6);
+                lonInput.value = lng.toFixed(6);
 
-            // Executa toda vez que o status mudar
-            statusSelect.addEventListener('change', toggleEquipeField);
+                if (marker === null) {
+                    marker = L.marker(e.latlng).addTo(map);
+                } else {
+                    marker.setLatLng(e.latlng);
+                }
+            });
+
+            {% if user.is_staff or user.is_superuser %}
+                const statusSelect = document.getElementById('id_status');
+                const equipeWrapper = document.getElementById('equipe-wrapper');
+
+                function toggleEquipeField() {
+                    if (statusSelect.value === 'EM_ANDAMENTO') {
+                        equipeWrapper.style.display = 'block';
+                    } else {
+                        equipeWrapper.style.display = 'none';
+                    }
+                }
+                toggleEquipeField();
+                statusSelect.addEventListener('change', toggleEquipeField);
+            {% endif %}
         });
     </script>
-    {% endif %}
-
 {% endblock %}

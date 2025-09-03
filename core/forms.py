@@ -4,13 +4,27 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .models import Solicitacao, Area, Profile, Equipe, Especie# Adicionamos o Profile aqui
 
 class SolicitacaoForm(forms.ModelForm):
+    # 1. A gente define o campo de imagens de forma mais simples aqui
+    imagens = forms.ImageField(
+        required=False,
+        # O widget agora é definido depois, então não precisa colocar aqui
+        label='Anexar imagens (segure CTRL para selecionar várias)'
+    )
+
+    # 2. A MÁGICA ACONTECE AQUI, no construtor do formulário
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # A gente acessa o widget do campo 'imagens' DEPOIS que ele foi criado
+        # e adiciona o atributo 'multiple' na marra.
+        self.fields['imagens'].widget.attrs.update({'multiple': True})
+
     class Meta:
         model = Solicitacao
-        fields = ['tipo', 'descricao', 'latitude', 'longitude', 'imagem', 'status', 'equipe_delegada']
+        fields = ['tipo', 'descricao', 'latitude', 'longitude', 'status', 'equipe_delegada']
         widgets = {
             'descricao': forms.Textarea(attrs={'autocomplete': 'off', 'rows': 4}),
-            'latitude': forms.TextInput(attrs={'autocomplete': 'off'}),
-            'longitude': forms.TextInput(attrs={'autocomplete': 'off'}),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
         }
         labels = {
             'status': 'Status da Solicitação',

@@ -41,11 +41,23 @@
                         <div class="card-body">
                             <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
                             <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
-                            {% if solicitacao.imagem %}
-                                <p><strong>Imagem:</strong></p>
-                                <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
+
+                            {% if solicitacao.imagens.all %}
+                                <p><strong>Imagens:</strong></p>
+                                <div class="d-flex flex-wrap">
+                                {% for imagem_obj in solicitacao.imagens.all %}
+                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                        <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 150px; max-width: 150px; object-fit: cover;">
+                                    </a>
+                                {% endfor %}
+                                </div>
                             {% endif %}
+
                             <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
+                            
+                            {% if solicitacao.latitude and solicitacao.longitude %}
+                                <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-info btn-sm mt-2">Ver no Mapa</a>
+                            {% endif %}
                         </div>
                     </div>
                 {% empty %}
@@ -126,11 +138,20 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
-                    {% if solicitacao.imagem %}
-                        <p><strong>Imagem:</strong></p>
-                        <img src="{{ solicitacao.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 200px;">
+                    {% if solicitacao.imagens.all %}
+                        <p><strong>Imagens:</strong></p>
+                        <div class="d-flex flex-wrap">
+                        {% for imagem_obj in solicitacao.imagens.all %}
+                             <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 150px; max-width: 150px; object-fit: cover;">
+                            </a>
+                        {% endfor %}
+                        </div>
                     {% endif %}
                     <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
+                    {% if solicitacao.latitude and solicitacao.longitude %}
+                        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-info btn-sm mt-2">Ver no Mapa</a>
+                    {% endif %}
                 </div>
             </div>
         {% empty %}

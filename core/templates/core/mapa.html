@@ -38,6 +38,7 @@
     {{ arvores_data|json_script:"arvores-data-json" }}
     {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
     {{ areas_data|json_script:"areas-data-json" }}
+    {{ solicitacao_foco_id|json_script:"solicitacao-foco-id" }}
 
     <div class="modal fade" id="areaFormModal" tabindex="-1">
         <div class="modal-dialog">
@@ -161,6 +162,7 @@
             }
         });
 
+        const solicitacaoMarkers = {};
         const solicitacoesData = JSON.parse(document.getElementById('solicitacoes-data-json').textContent);
         solicitacoesData.forEach(function(solicitacao) {
             if (solicitacao.lat && solicitacao.lon) {
@@ -173,6 +175,7 @@
                     detailsPanel.classList.remove('d-none');
                 });
                 camadaSolicitacoes.addLayer(marker);
+                solicitacaoMarkers[solicitacao.id] = marker;
             }
         });
 
@@ -198,7 +201,7 @@
             }
         }
 
-        dataLayersContainer.innerHTML = `<div class="form-check"><input class="form-check-input" type="checkbox" id="arvoresCheck" checked><label class="form-check-label" for="arvoresCheck">Árvores</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="solicitacoesCheck" checked><label class="form-check-label" for="solicitacoesCheck">Solicitações Abertas</label></div>`;
+        dataLayersContainer.innerHTML = `<div class="form-check"><input class="form-check-input" type="checkbox" id="arvoresCheck" checked><label class="form-check-label" for="arvoresCheck">Árvores</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="solicitacoesCheck" checked><label class="form-check-label" for="solicitacoesCheck">Solicitações</label></div>`;
         document.getElementById('arvoresCheck').addEventListener('change', function() { toggleLayer(this, camadaArvores); });
         document.getElementById('solicitacoesCheck').addEventListener('change', function() { toggleLayer(this, camadaSolicitacoes); });
 
@@ -383,7 +386,6 @@
                         detailsContent.innerHTML = content;
                         detailsPanel.classList.remove('d-none');
                     });
-
                 } else {
                     showToast('Erro ao Salvar', data.message, true);
                 }
@@ -393,6 +395,16 @@
             });
         });
 
+        const solicitacaoFocoId = JSON.parse(document.getElementById('solicitacao-foco-id').textContent);
+
+        if (solicitacaoFocoId) {
+            const markerToFocus = solicitacaoMarkers[solicitacaoFocoId];
+            if (markerToFocus) {
+                const latLng = markerToFocus.getLatLng();
+                map.flyTo(latLng, 18);
+                markerToFocus.fire('click');
+            }
+        }
 
         var coordsDisplay = document.getElementById('coords-display');
         map.on('mousemove', function(e) {
