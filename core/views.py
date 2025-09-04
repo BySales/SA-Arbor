@@ -1,5 +1,7 @@
 import json
 from datetime import date, timedelta, datetime
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -9,6 +11,7 @@ from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, Instancia
 from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from django.core.paginator import Paginator
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -19,8 +22,8 @@ def solicitacao_list(request):
     status = request.GET.get('status')
     ordenar = request.GET.get('ordenar')
 
+    # --- Lógica de Filtros ---
     solicitacoes_base = Solicitacao.objects.all()
-
     if status:
         solicitacoes_base = solicitacoes_base.filter(status=status)
 
@@ -44,25 +47,57 @@ def solicitacao_list(request):
         um_mes_atras = date.today() - timedelta(days=30)
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
 
+    # --- CORREÇÃO AQUI: Garantindo que 'solicitacoes' seja definida ---
     if request.user.is_superuser or request.user.is_staff:
-        solicitacoes = solicitacoes_filtradas
+        solicitacoes_query = solicitacoes_filtradas
     else:
-        solicitacoes = solicitacoes_filtradas.filter(cidadao=request.user)
+        solicitacoes_query = solicitacoes_filtradas.filter(cidadao=request.user)
 
     if ordenar == 'data_asc':
-        solicitacoes = solicitacoes.order_by('data_criacao')
+        solicitacoes_ordenadas = solicitacoes_query.order_by('data_criacao')
     elif ordenar == 'tipo':
-        solicitacoes = solicitacoes.order_by('tipo')
+        solicitacoes_ordenadas = solicitacoes_query.order_by('tipo')
     else:
-        solicitacoes = solicitacoes.order_by('-data_criacao')
+        solicitacoes_ordenadas = solicitacoes_query.order_by('-data_criacao')
 
+    # --- Paginação ---
+    paginator = Paginator(solicitacoes_ordenadas, 5) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # --- Cálculos para o Dashboard ---
     abertas_count = dashboard_qs.filter(status='EM_ABERTO').count()
     andamento_count = dashboard_qs.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = dashboard_qs.filter(status='FINALIZADO').count()
     recusadas_count = dashboard_qs.filter(status='RECUSADO').count()
+    
+    denuncias_count = dashboard_qs.filter(tipo='DENUNCIA').count()
+    sugestoes_count = dashboard_qs.filter(tipo='SUGESTAO').count()
+
+    ultimos_7_dias = [date.today() - timedelta(days=i) for i in range(6, -1, -1)]
+    solicitacoes_por_dia = (
+        Solicitacao.objects.filter(data_criacao__date__in=ultimos_7_dias)
+        .annotate(dia=TruncDate('data_criacao'))
+        .values('dia')
+        .annotate(total=Count('id'))
+        .order_by('dia')
+    )
+    dados_recente = {dia_obj['dia']: dia_obj['total'] for dia_obj in solicitacoes_por_dia}
+    datas_recente_labels = [dia.strftime('%d/%m') for dia in ultimos_7_dias]
+    contagem_recente_data = [dados_recente.get(dia, 0) for dia in ultimos_7_dias]
+
+    solicitacoes_em_andamento = Solicitacao.objects.filter(status='EM_ANDAMENTO')
+    equipes_data = (
+        solicitacoes_em_andamento.exclude(equipe_delegada__isnull=True)
+        .values('equipe_delegada__nome')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    equipes_labels = [item['equipe_delegada__nome'] for item in equipes_data]
+    equipes_contagem = [item['total'] for item in equipes_data]
 
     context = {
-        'solicitacoes': solicitacoes,
+        'solicitacoes': page_obj,
         'abertas_count': abertas_count,
         'andamento_count': andamento_count,
         'finalizadas_count': finalizadas_count,
@@ -70,25 +105,27 @@ def solicitacao_list(request):
         'periodo_selecionado': periodo,
         'status_selecionado': status,
         'ordenar_selecionado': ordenar,
+        'denuncias_count': denuncias_count,
+        'sugestoes_count': sugestoes_count,
+        'datas_recente_labels': json.dumps(datas_recente_labels),
+        'contagem_recente_data': json.dumps(contagem_recente_data),
+        'equipes_labels': json.dumps(equipes_labels),
+        'equipes_contagem': json.dumps(equipes_contagem),
     }
     return render(request, 'core/solicitacao_list.html', context)
+
 
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
         form = SolicitacaoForm(request.POST, request.FILES)
         if form.is_valid():
-            # Primeiro, salvamos a solicitação para ela ter um ID
             solicitacao = form.save(commit=False)
             solicitacao.cidadao = request.user
             solicitacao.save()
-
-            # AGORA A MÁGICA: Pegamos a lista de imagens enviadas
             imagens = request.FILES.getlist('imagens')
             for imagem in imagens:
-                # Para cada imagem, criamos um registro no nosso "álbum"
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
-
             messages.success(request, 'Solicitação criada com sucesso!')
             return redirect('solicitacao_list')
     else:
@@ -102,17 +139,13 @@ def solicitacao_update(request, pk):
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao)
         if form.is_valid():
             form.save()
-
-            # A mesma mágica aqui para o update
             imagens = request.FILES.getlist('imagens')
             for imagem in imagens:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
-
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
             return redirect('solicitacao_list')
     else:
         form = SolicitacaoForm(instance=solicitacao)
-    # Adicionamos as imagens existentes ao contexto para poder mostrá-las no template
     context = {
         'form': form,
         'solicitacao': solicitacao 

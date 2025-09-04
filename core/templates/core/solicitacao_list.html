@@ -34,16 +34,21 @@
                 </div>
                 
                 {% for solicitacao in solicitacoes %}
-                    <div class="card mb-3">
+                    <div class="card mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
                         <div class="card-header">
                             {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
                         </div>
                         <div class="card-body">
                             <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
-                            <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+                            
+                            <p><strong>Descrição:</strong></p>
+                            <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
+                                <p id="desc-text-{{ solicitacao.id }}">{{ solicitacao.descricao }}</p>
+                            </div>
+                            <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
 
                             {% if solicitacao.imagens.all %}
-                                <p><strong>Imagens:</strong></p>
+                                <p class="mt-3"><strong>Imagens:</strong></p>
                                 <div class="d-flex flex-wrap">
                                 {% for imagem_obj in solicitacao.imagens.all %}
                                     <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
@@ -52,7 +57,7 @@
                                 {% endfor %}
                                 </div>
                             {% endif %}
-
+                            <br>
                             <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
                             
                             {% if solicitacao.latitude and solicitacao.longitude %}
@@ -65,6 +70,35 @@
                         Nenhuma solicitação encontrada para o período e status selecionados.
                     </div>
                 {% endfor %}
+
+                <nav aria-label="Navegação das solicitações" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if solicitacoes.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; Primeira</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="True">
+                                Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}
+                            </a>
+                        </li>
+
+                        {% if solicitacoes.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}">Última &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
             </div>
 
             <div class="col-lg-4">
@@ -74,54 +108,31 @@
                         <a href="?periodo=hoje" class="btn btn-sm {% if periodo_selecionado == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">Hoje</a>
                         <a href="?periodo=semana" class="btn btn-sm {% if periodo_selecionado == 'semana' %}btn-primary{% else %}btn-outline-primary{% endif %}">7d</a>
                         <a href="?periodo=mes" class="btn btn-sm {% if periodo_selecionado == 'mes' %}btn-primary{% else %}btn-outline-primary{% endif %}">30d</a>
-                        <a href="{% url 'home' %}" class="btn btn-sm {% if periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Total</a>
+                        <a href="{% url 'home' %}" class="btn btn-sm {% if not periodo_selecionado or periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Total</a>
                     </div>
                 </div>
                 <hr class="mt-0">
                 
-                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none">
-                    <div class="card text-white bg-danger mb-3">
-                        <div class="card-header d-flex justify-content-between">
-                            <span>Em Aberto</span>
-                            <span class="badge bg-light text-danger">{{ abertas_count }}</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none">
-                    <div class="card text-white bg-warning mb-3">
-                        <div class="card-header d-flex justify-content-between">
-                           <span>Em Andamento</span>
-                           <span class="badge bg-light text-warning">{{ andamento_count }}</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none">
-                    <div class="card text-white bg-success mb-3">
-                        <div class="card-header d-flex justify-content-between">
-                            <span>Finalizadas</span>
-                            <span class="badge bg-light text-success">{{ finalizadas_count }}</span>
-                        </div>
-                    </div>
-                </a>
+                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none"><div class="card text-white bg-danger mb-3"><div class="card-header d-flex justify-content-between"><span>Em Aberto</span><span class="badge bg-light text-danger">{{ abertas_count }}</span></div></div></a>
+                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none"><div class="card text-white bg-warning mb-3"><div class="card-header d-flex justify-content-between"><span>Em Andamento</span><span class="badge bg-light text-warning">{{ andamento_count }}</span></div></div></a>
+                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none"><div class="card text-white bg-success mb-3"><div class="card-header d-flex justify-content-between"><span>Finalizadas</span><span class="badge bg-light text-success">{{ finalizadas_count }}</span></div></div></a>
+                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none"><div class="card text-white bg-dark mb-3"><div class="card-header d-flex justify-content-between"><span>Recusadas</span><span class="badge bg-light text-dark">{{ recusadas_count }}</span></div></div></a>
 
-                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none">
-                    <div class="card text-white bg-dark mb-3">
-                        <div class="card-header d-flex justify-content-between">
-                            <span>Recusadas</span>
-                            <span class="badge bg-light text-dark">{{ recusadas_count }}</span>
-                        </div>
-                    </div>
-                </a>
-
-                <div class="card">
-                    <div class="card-header">
-                        Gráfico de Solicitações
-                    </div>
-                    <div class="card-body">
-                        <canvas id="statusChart"></canvas>
-                    </div>
+                <div class="card mb-3">
+                    <div class="card-header">Status das Solicitações</div>
+                    <div class="card-body"><canvas id="statusChart"></canvas></div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">Tipos de Solicitação</div>
+                    <div class="card-body"><canvas id="tiposChart"></canvas></div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">Atividade na Última Semana</div>
+                    <div class="card-body"><canvas id="recenteChart"></canvas></div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">Carga de Trabalho por Equipe (Em Andamento)</div>
+                    <div class="card-body"><canvas id="equipesChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -132,14 +143,18 @@
         </div>
         
         {% for solicitacao in solicitacoes %}
-            <div class="card mb-3">
+            <div class="card mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
                 <div class="card-header">
                     {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
                 </div>
                 <div class="card-body">
-                    <p><strong>Descrição:</strong> {{ solicitacao.descricao }}</p>
+                    <p><strong>Descrição:</strong></p>
+                    <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
+                        <p id="desc-text-{{ solicitacao.id }}">{{ solicitacao.descricao }}</p>
+                    </div>
+                    <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
                     {% if solicitacao.imagens.all %}
-                        <p><strong>Imagens:</strong></p>
+                        <p class="mt-3"><strong>Imagens:</strong></p>
                         <div class="d-flex flex-wrap">
                         {% for imagem_obj in solicitacao.imagens.all %}
                              <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
@@ -148,6 +163,7 @@
                         {% endfor %}
                         </div>
                     {% endif %}
+                    <br>
                     <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
                     {% if solicitacao.latitude and solicitacao.longitude %}
                         <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-info btn-sm mt-2">Ver no Mapa</a>
@@ -159,42 +175,85 @@
                 Você ainda não criou nenhuma solicitação.
             </div>
         {% endfor %}
+
+        <nav aria-label="Navegação das solicitações" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if solicitacoes.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a></li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
+                {% if solicitacoes.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a></li>
+                {% endif %}
+            </ul>
+        </nav>
     {% endif %}
+
+    <script>
+        function toggleDescricao(solicitacaoId) {
+            const container = document.getElementById('desc-container-' + solicitacaoId);
+            const linkElement = document.getElementById('ler-mais-' + solicitacaoId);
+            if (container.classList.contains('expandida')) {
+                container.classList.remove('expandida');
+                linkElement.textContent = 'Ler mais';
+            } else {
+                container.classList.add('expandida');
+                linkElement.textContent = 'Ler menos';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.descricao-container').forEach(container => {
+                const textP = container.querySelector('p');
+                if (textP.scrollHeight <= container.clientHeight) {
+                    const solicitacaoId = container.id.split('-')[2];
+                    const lerMaisBtn = document.getElementById('ler-mais-' + solicitacaoId);
+                    if (lerMaisBtn) {
+                        lerMaisBtn.style.display = 'none';
+                    }
+                    container.style.maxHeight = 'none';
+                    container.classList.add('expandida');
+                }
+            });
+        });
+    </script>
 
     {% if user.is_staff or user.is_superuser %}
         <script>
-            const ctx = document.getElementById('statusChart');
-            new Chart(ctx, {
-                type: 'pie',
+            const ctxStatus = document.getElementById('statusChart');
+            new Chart(ctxStatus, {
+                type: 'doughnut',
                 data: {
                     labels: ['Em Aberto', 'Em Andamento', 'Finalizadas', 'Recusadas'],
-                    datasets: [{
-                        label: '# de Solicitações',
-                        data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}, {{ recusadas_count }}],
-                        backgroundColor: [
-                            'rgba(220, 53, 69, 0.7)',
-                            'rgba(255, 193, 7, 0.7)',
-                            'rgba(25, 135, 84, 0.7)',
-                            'rgba(33, 37, 41, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(220, 53, 69, 1)',
-                            'rgba(255, 193, 7, 1)',
-                            'rgba(25, 135, 84, 1)',
-                            'rgba(33, 37, 41, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
+                    datasets: [{ data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}, {{ recusadas_count }}], backgroundColor: ['#dc3545', '#ffc107', '#198754', '#212529'] }]
+                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+            });
+
+            const ctxTipos = document.getElementById('tiposChart');
+            new Chart(ctxTipos, {
+                type: 'pie',
+                data: {
+                    labels: ['Denúncias', 'Sugestões'],
+                    datasets: [{ data: [{{ denuncias_count }}, {{ sugestoes_count }}], backgroundColor: ['#f8d7da', '#d1e7dd'] }]
+                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+            });
+
+            const ctxRecente = document.getElementById('recenteChart');
+            new Chart(ctxRecente, {
+                type: 'bar',
+                data: {
+                    labels: {{ datas_recente_labels|safe }},
+                    datasets: [{ label: 'Novas Solicitações', data: {{ contagem_recente_data|safe }}, backgroundColor: 'rgba(0, 123, 255, 0.7)' }]
+                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            const ctxEquipes = document.getElementById('equipesChart');
+            new Chart(ctxEquipes, {
+                type: 'bar',
+                data: {
+                    labels: {{ equipes_labels|safe }},
+                    datasets: [{ label: 'Solicitações Ativas', data: {{ equipes_contagem|safe }}, backgroundColor: ['#6f42c1', '#fd7e14', '#20c997', '#0dcaf0'] }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                    }
-                }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         </script>
     {% endif %}
