@@ -4,7 +4,8 @@ from .views import (
     solicitacao_list, solicitacao_create, solicitacao_update, solicitacao_delete,
     especie_list, especie_create, especie_update, especie_delete,
     mapa_view, cadastro_view, salvar_area, area_manage_api, 
-    configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api
+    configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
+    search_results_view
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -12,6 +13,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     # --- URLs da Homepage ---
     path('', solicitacao_list, name='home'),
+
+    # --- URLs da Busca ---
+    path('busca/', search_results_view, name='search_results'),
 
     # --- URLs de Solicitação ---
     path('solicitacoes/', solicitacao_list, name='solicitacao_list'),

@@ -12,6 +12,8 @@ from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm,
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
+
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -451,3 +453,29 @@ def instancia_arvore_create_api(request):
             return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
     
     return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
+
+def search_results_view(request):
+    query = request.GET.get('q')
+    context = {'query': query}
+
+    if query:
+        # Busca em Solicitações (descrição OU cidadão)
+        solicitacoes_results = Solicitacao.objects.filter(
+            Q(descricao__icontains=query) | Q(cidadao__username__icontains=query)
+        ).distinct()
+        context['solicitacoes_results'] = solicitacoes_results
+
+        # Busca em Espécies (nome popular OU científico)
+        especies_results = Especie.objects.filter(
+            Q(nome_popular__icontains=query) | Q(nome_cientifico__icontains=query)
+        ).distinct()
+        context['especies_results'] = especies_results
+
+        # Busca em Equipes (nome)
+        equipes_results = Equipe.objects.filter(
+            Q(nome__icontains=query)
+        ).distinct()
+        context['equipes_results'] = equipes_results
+
+    # Renderiza um NOVO template que vamos criar no próximo passo
+    return render(request, 'core/search_results.html', context)
