@@ -1,0 +1,46 @@
+{% extends 'core/base_externa.html' %}
+{% block body_class %}recuperar-senha-page{% endblock %}
+
+{% block info_content %}
+    <h1>Dinâmico, Novo, e Melhor</h1>
+    <p>Com Arbor, sua cidade está mais comprometida com o Desenvolvimento Urbano Sustentável!</p>
+{% endblock %}
+
+{% block content %}
+<div class="login-card">
+    <div class="login-header">
+        <h2>Esqueceu sua senha?</h2>
+        <p>Normal! Isso acontece com frequência!</p>
+    </div>
+
+    <form class="login-form">
+        <div class="form-group text-center">
+            <p class="email-info">Enviamos um Código com o Email Associado a essa Conta Arbor</p>
+            <p class="email-masked">pessoalby****@gmail.com</p>
+            <a href="#" class="no-access-link">Não possuo acesso ao Email</a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+            <label>Insira o Código</label>
+            <div class="code-inputs">
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+                <span>-</span>
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+                <input type="text" maxlength="1" pattern="[0-9]" required>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button type="submit" class="btn-primary-custom">Inserir</button>
+            <a href="{% url 'login' %}" class="btn-secondary-custom text-center">Cancelar</a>
+        </div>
+        
+        <a href="#" class="resend-code-link">Reenviar Código</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,10 +1,50 @@
 {% extends 'core/base_externa.html' %}
+{% block body_class %}login-page{% endblock %}
+
+{% block info_content %}
+    <h1>Eficiente, Rápido e Produtivo</h1>
+    <p>Arbor é um sistema que facilita a gestão de municípios em todo o Brasil!</p>
+{% endblock %}
 
 {% block content %}
-    <h2>Login</h2>
-    <form method="POST" autocomplete="off">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Entrar</button>
-    </form>
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Login</h2>
+            <p>Faça login com suas credenciais</p>
+        </div>
+
+        <form method="POST" autocomplete="off" class="login-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Email ou Usuário</label>
+                {{ form.username }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Senha</label>
+                <div class="password-input-wrapper">
+                    {{ form.password }}
+                    <i class="bi bi-eye-slash" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <a href="{% url 'recuperar_senha' %}" class="forgot-password">Esqueceu sua senha?</a>
+
+            <div class="divider">
+                <span>Tente com</span>
+            </div>
+
+            <div class="social-login">
+                <a href="#" class="social-btn">Login com Google</a>
+                <a href="#" class="social-btn">Login com Apple</a>
+            </div>
+            
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+
+        <div class="signup-link">
+            Não tem login? <a href="{% url 'cadastro' %}">Cadastre-se</a>
+        </div>
+    </div>
 {% endblock %}

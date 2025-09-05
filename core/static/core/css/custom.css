@@ -1,0 +1,636 @@
+/* --- ESTILOS GERAIS --- */
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f4f7f6;
+}
+
+/* Esconde a rolagem nas páginas de autenticação */
+.login-page, .cadastro-page, .recuperar-senha-page {
+    overflow: hidden;
+}
+
+
+/* --- ESTRUTURA DAS PÁGINAS DE LOGIN/CADASTRO --- */
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.info-column {
+    flex: 1;
+    color: #1E5943;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Gradiente da página de Login */
+.login-page .info-column {
+    background: linear-gradient(135deg, #BFF0C9 0%, #6ACF7F 100%);
+}
+
+/* Gradiente da página de Cadastro */
+.cadastro-page .info-column {
+    background: linear-gradient(135deg, #1E5943 0%, #154231 100%);
+    color: #f0f0f0;
+}
+
+.cadastro-page .info-content h1,
+.cadastro-page .info-content p,
+.cadastro-page .info-footer span {
+    color: #f0f0f0;
+}
+
+/* Gradiente da página de Recuperar Senha */
+.recuperar-senha-page .info-column {
+    background: linear-gradient(135deg, #A4A6F1 0%, #6D6BE1 100%);
+    color: #fff;
+}
+
+.recuperar-senha-page .info-content h1,
+.recuperar-senha-page .info-content p,
+.recuperar-senha-page .info-footer span {
+    color: #fff;
+}
+
+
+.info-content {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.info-content .logo {
+    position: absolute;
+    top: 60px;
+    left: 60px;
+}
+
+.info-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1E5943;
+}
+
+.info-content p {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #1E5943;
+    max-width: 400px;
+}
+
+.info-footer {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #1E5943;
+}
+
+.form-column {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #F4F7F6;
+}
+
+/* --- CARD DE LOGIN/CADASTRO --- */
+.login-card {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-header h2 {
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.login-header p {
+    color: #888;
+    margin-bottom: 30px;
+}
+
+/* --- FORMULÁRIO --- */
+.login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.login-form p {
+    margin: 0;
+}
+.login-form input[type="text"],
+.login-form input[type="password"],
+.login-form input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus,
+.login-form input[type="email"]:focus {
+    outline: none;
+    border-color: #6ACF7F;
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #1E5943;
+    text-decoration: none;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+.divider {
+    text-align: center;
+    color: #aaa;
+    margin: 25px 0;
+    position: relative;
+}
+.divider span {
+    background-color: #fff;
+    padding: 0 10px;
+    position: relative;
+    z-index: 1;
+}
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+    z-index: 0;
+}
+
+.social-login {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.social-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: background-color 0.3s, border-color 0.3s;
+    font-size: 0.9rem;
+}
+.social-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #c0c0c0;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1E5943;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-login:hover {
+    background-color: #154231;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 25px;
+    color: #888;
+}
+
+.signup-link a {
+    color: #1E5943;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper input {
+    padding-right: 40px; 
+}
+
+#togglePassword, #togglePassword2 {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+    font-size: 1.15rem;
+}
+
+.recuperar-senha-page .login-header {
+    text-align: center;
+}
+.email-info {
+    font-size: 0.9rem;
+    color: #555;
+}
+.email-masked {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+}
+.no-access-link {
+    font-size: 0.8rem;
+    color: #666;
+}
+.code-inputs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.code-inputs input {
+    width: 45px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.code-inputs span {
+    font-size: 1.5rem;
+    color: #ddd;
+}
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+.btn-primary-custom, .btn-secondary-custom {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all 0.3s;
+}
+.btn-primary-custom {
+    background-color: #6D6BE1;
+    border-color: #6D6BE1;
+    color: #fff;
+}
+.btn-primary-custom:hover {
+    background-color: #5857c3;
+    border-color: #5857c3;
+}
+.btn-secondary-custom {
+    background-color: #fff;
+    border-color: #ddd;
+    color: #555;
+}
+.btn-secondary-custom:hover {
+    background-color: #f8f8f8;
+    border-color: #ccc;
+}
+.resend-code-link {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1E5943;
+    text-decoration: none;
+}
+
+/* --- ESTILOS GERAIS DO APP --- */
+.app-body {
+    background-color: #F4F7F6;
+    overflow-y: auto;
+}
+
+.app-container {
+    display: flex;
+}
+
+/* --- BARRA LATERAL (SIDEBAR) --- */
+.sidebar {
+    width: 230px; /* LARGURA REDUZIDA */
+    background-color: #fff;
+    height: calc(100vh - 40px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* EMPURRA O FOOTER PARA BAIXO */
+    border-right: 1px solid #e0e0e0;
+    position: fixed;
+    margin: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: width 0.3s ease; /* Transição suave */
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-logo span {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1E5943;
+}
+.sidebar-logo img {
+    width: 32px;
+}
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #555;
+    cursor: pointer;
+}
+
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sidebar-menu .menu-header {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #999;
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+.sidebar-menu li a:hover {
+    background-color: #f0f0f0;
+}
+.sidebar-menu li a.active {
+    background-color: #1E5943;
+    color: #fff;
+}
+.sidebar-menu li a i {
+    font-size: 1.2rem;
+}
+
+
+/* --- CONTEÚDO PRINCIPAL --- */
+.main-content {
+    flex-grow: 1;
+    margin-left: 270px; /* Nova largura (230px) + margens (40px) */
+    padding: 20px;
+    transition: margin-left 0.3s ease; /* Transição suave */
+}
+
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.header-greeting h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.header-search {
+    position: relative;
+    width: 300px;
+}
+.header-search input {
+    width: 100%;
+    padding: 8px 15px 8px 40px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+}
+.header-search i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.header-actions > a {
+    font-size: 1.3rem;
+    color: #555;
+}
+
+.header-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.header-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.profile-info strong {
+    font-weight: 600;
+}
+.profile-info small {
+    color: #888;
+}
+
+/* --- ESTILOS DA SIDEBAR COLAPSÁVEL --- */
+/* --- ESTILOS DA SIDEBAR COLAPSÁVEL --- */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-logo-text, 
+.sidebar-menu .menu-text, 
+.sidebar-menu .menu-header span {
+    transition: opacity 0.2s ease;
+    opacity: 1;
+    white-space: nowrap;
+}
+
+/* --- ESTADO ENCOLHIDO --- */
+.sidebar.collapsed {
+    width: 90px;
+}
+
+/* Esconde só textos, mantém logo */
+.sidebar.collapsed .sidebar-logo-text,
+.sidebar.collapsed .sidebar-menu .menu-text,
+.sidebar.collapsed .sidebar-menu .menu-header span {
+    display: none;
+}
+
+/* Mantém a logo visível (ícone centralizado) */
+.sidebar.collapsed .sidebar-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebar.collapsed .sidebar-logo img {
+    max-width: 40px;
+    height: auto;
+}
+
+/* Ícones centralizados */
+.sidebar.collapsed .sidebar-menu li a {
+    justify-content: center;
+    width: 60px;
+    height: 45px;
+    margin: 5px auto;
+    padding: 0;
+}
+
+/* Item ativo vira círculo */
+.sidebar.collapsed .sidebar-menu li a.active {
+    background: #1E5943;
+    width: 45px;
+    height: 45px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+/* Botão de toggle centralizado no topo */
+.sidebar.collapsed .sidebar-toggle {
+    position: relative;
+    margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    left: 0;
+    transform: none;
+}
+
+/* Ajuste do conteúdo */
+.sidebar.collapsed + .main-content {
+    margin-left: 130px;
+}
+
+
+/* ESTILOS DOS CARDS (para reuso) */
+.card-denuncia {
+    border-left: 5px solid #FFADAD;
+}
+.card-sugestao {
+    border-left: 5px solid #A0C4A4;
+}
+
+.descricao-container {
+    position: relative;
+    max-height: 4.5em;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+.descricao-container.expandida {
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
+}
+.descricao-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 1.5em;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+}
+.descricao-container.expandida::after {
+    display: none;
+}
+.ler-mais-btn {
+    color: #6c757d;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ler-mais-btn:hover {
+    color: #212529;
+    text-decoration: underline;
+}

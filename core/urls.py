@@ -7,7 +7,7 @@ from .views import (
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
     search_results_view,
     obras_view,
-    analisar_area_api # <-- 1. IMPORTAMOS A NOVA VIEW
+    analisar_area_api, recuperar_senha_view
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -41,6 +41,7 @@ urlpatterns = [
     path('cadastro/', cadastro_view, name='cadastro'),
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('recuperar-senha/', recuperar_senha_view, name='recuperar_senha'),
     path('configuracoes/', configuracoes_view, name='configuracoes'),
 
     # --- API Endpoints ---

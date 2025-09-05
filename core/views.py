@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.utils import timezone
 
 
 
@@ -181,8 +182,38 @@ def solicitacao_delete(request, pk):
 
 @login_required
 def equipe_list(request):
-    equipes = Equipe.objects.all()
-    return render(request, 'core/equipe_list.html', {'equipes': equipes})
+    equipes_qs = Equipe.objects.prefetch_related('membros').all()
+    trinta_dias_atras = timezone.now() - timedelta(days=30)
+    
+    equipes_com_stats = []
+    for equipe in equipes_qs:
+        tarefas_ativas = Solicitacao.objects.filter(equipe_delegada=equipe, status='EM_ANDAMENTO').count()
+        tarefas_concluidas = Solicitacao.objects.filter(
+            equipe_delegada=equipe, 
+            status='FINALIZADO',
+            # Adicionar um campo de data de finalização no futuro
+            # data_finalizacao__gte=trinta_dias_atras 
+        ).count()
+        
+        denuncias_count = Solicitacao.objects.filter(equipe_delegada=equipe, tipo='DENUNCIA').count()
+        sugestoes_count = Solicitacao.objects.filter(equipe_delegada=equipe, tipo='SUGESTAO').count()
+
+        equipes_com_stats.append({
+            'equipe': equipe,
+            'tarefas_ativas': tarefas_ativas,
+            'tarefas_concluidas': tarefas_concluidas,
+            'denuncias_count': denuncias_count,
+            'sugestoes_count': sugestoes_count,
+        })
+
+    # Pega usuários que são staff mas não estão em nenhuma equipe
+    agentes_livres = User.objects.filter(is_staff=True, equipes__isnull=True)
+
+    context = {
+        'equipes_com_stats': equipes_com_stats,
+        'agentes_livres': agentes_livres,
+    }
+    return render(request, 'core/equipe_list.html', context)
 
 @login_required
 def equipe_create(request):
@@ -649,3 +680,8 @@ def analisar_area_api(request):
         'contagem_arvores': arvores_na_area,
         'contagem_solicitacoes': solicitacoes_na_area,
     })
+
+def recuperar_senha_view(request):
+    # Por enquanto, esta view apenas renderiza o template.
+    # A lógica de envio de email e validação de código será adicionada no futuro.
+    return render(request, 'core/recuperar_senha.html')

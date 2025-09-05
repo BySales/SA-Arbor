@@ -2,35 +2,88 @@
 
 {% block content %}
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Gestão de Equipes</h2>
+        <h2>Painel de Controle de Equipes</h2>
         <a href="{% url 'equipe_create' %}" class="btn btn-primary">Cadastrar Nova Equipe</a>
     </div>
 
-    {% for equipe in equipes %}
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>{{ equipe.nome }}</strong>
-                <div>
-                    <a href="{% url 'equipe_update' pk=equipe.pk %}" class="btn btn-secondary btn-sm">Editar</a>
-                    <a href="{% url 'equipe_delete' pk=equipe.pk %}" class="btn btn-danger btn-sm">Deletar</a>
+    {% if agentes_livres %}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <strong>Agentes Livres (Usuários sem equipe)</strong>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for agente in agentes_livres %}
+                    <span class="badge bg-secondary">{{ agente.username }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row">
+        {% for item in equipes_com_stats %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>{{ item.equipe.nome }}</strong>
+                        <div>
+                            <a href="{% url 'equipe_update' pk=item.equipe.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                            <a href="{% url 'equipe_delete' pk=item.equipe.pk %}" class="btn btn-danger btn-sm">Deletar</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="card-title">Membros:</h6>
+                                {% if item.equipe.membros.all %}
+                                    <ul class="list-inline">
+                                        {% for membro in item.equipe.membros.all %}
+                                            <li class="list-inline-item mb-1"><span class="badge bg-info text-dark">{{ membro.username }}</span></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted small">Nenhum membro.</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="card-title">Desempenho:</h6>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        Tarefas Ativas: <span class="badge rounded-pill bg-primary">{{ item.tarefas_ativas }}</span>
+                                    </li>
+                                    <li>
+                                        Concluídas (30d): <span class="badge rounded-pill bg-success">{{ item.tarefas_concluidas }}</span>
+                                    </li>
+                                </ul>
+
+                                <h6 class="card-title mt-3">Foco de Atuação:</h6>
+                                <div class="progress" style="height: 15px;">
+                                    {% with total=item.denuncias_count|add:item.sugestoes_count %}
+                                        {% if total > 0 %}
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio item.denuncias_count total 100 %}%" title="{{ item.denuncias_count }} Denúncias">
+                                                <small>{{ item.denuncias_count }} D</small>
+                                            </div>
+                                            <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {% widthratio item.sugestoes_count total 100 %}%" title="{{ item.sugestoes_count }} Sugestões">
+                                                <small>{{ item.sugestoes_count }} S</small>
+                                            </div>
+                                        {% else %}
+                                            <div class="progress-bar bg-light text-dark" role="progressbar" style="width: 100%">N/D</div>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <h6 class="card-title">Membros da Equipe:</h6>
-                {% if equipe.membros.all %}
-                    <ul>
-                        {% for membro in equipe.membros.all %}
-                            <li>{{ membro.username }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">Nenhum membro cadastrado nesta equipe.</p>
-                {% endif %}
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    Nenhuma equipe encontrada.
+                </div>
             </div>
-        </div>
-    {% empty %}
-        <div class="alert alert-warning">
-            Nenhuma equipe encontrada.
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 {% endblock %}
