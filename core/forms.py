@@ -52,6 +52,7 @@ class AreaForm(forms.ModelForm):
         fields = ['nome', 'tipo', 'status', 'responsavel', 'tipo_vegetacao', 'especies']
         widgets = {
             'nome': forms.TextInput(attrs={'autocomplete': 'off'}),
+            'especies': forms.SelectMultiple(attrs={'class': 'select2-multiple', 'style': 'width: 100%;'}),
         }
 
 class UserUpdateForm(forms.ModelForm):

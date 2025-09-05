@@ -121,11 +121,16 @@ def solicitacao_list(request):
 def solicitacao_create(request):
     if request.method == 'POST':
         form = SolicitacaoForm(request.POST, request.FILES)
+        imagens = request.FILES.getlist('imagens')
+
+        if len(imagens) > 10:
+            messages.error(request, 'Você só pode enviar no máximo 10 imagens por solicitação.')
+            return render(request, 'core/solicitacao_form.html', {'form': form})
+
         if form.is_valid():
             solicitacao = form.save(commit=False)
             solicitacao.cidadao = request.user
             solicitacao.save()
-            imagens = request.FILES.getlist('imagens')
             for imagem in imagens:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
             messages.success(request, 'Solicitação criada com sucesso!')
@@ -139,9 +144,16 @@ def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao)
+        imagens = request.FILES.getlist('imagens')
+        
+        # Soma as imagens existentes com as novas
+        total_imagens = solicitacao.imagens.count() + len(imagens)
+        if total_imagens > 10:
+            messages.error(request, f'Você não pode ter mais de 10 imagens. Esta solicitação já tem {solicitacao.imagens.count()} e você está tentando adicionar mais {len(imagens)}.')
+            return render(request, 'core/solicitacao_form.html', {'form': form, 'solicitacao': solicitacao})
+
         if form.is_valid():
             form.save()
-            imagens = request.FILES.getlist('imagens')
             for imagem in imagens:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
@@ -258,6 +270,7 @@ def especie_delete(request, pk):
 
 def mapa_view(request):
     solicitacao_foco_id = request.GET.get('solicitacao_id')
+    area_foco_id = request.GET.get('area_id')
 
     instancias_de_arvores = InstanciaArvore.objects.select_related('especie').all()
     arvores_data = [
@@ -298,6 +311,7 @@ def mapa_view(request):
         'todas_especies': todas_especies,
         'opcoes_saude': opcoes_saude,
         'solicitacao_foco_id': solicitacao_foco_id,
+        'area_foco_id': area_foco_id,
     }
     return render(request, 'core/mapa.html', context)
 
@@ -361,18 +375,29 @@ def salvar_area(request):
         data = json.loads(request.body)
         form_data = data.get('form_data')
         geometry_data = data.get('geometry')
+
         if not form_data or not geometry_data:
             return JsonResponse({'status': 'erro', 'message': 'Dados incompletos.'}, status=400)
+        
         form = AreaForm(form_data)
+
         if form.is_valid():
+            # Pega o primeiro projeto ou cria um padrão se não existir nenhum
+            projeto, created = Projeto.objects.get_or_create(
+                id=1, 
+                defaults={'nome': 'Projeto Padrão', 'cidade': 'Mongaguá'}
+            )
+
             area = form.save(commit=False)
             area.geom = geometry_data
-            area.projeto = Projeto.objects.first()
+            area.projeto = projeto
             area.save()
-            form.save_m2m()
+            form.save_m2m() # Salva as relações ManyToMany (espécies)
+            
             return JsonResponse({'status': 'ok', 'message': 'Área salva com sucesso!', 'id': area.id})
         else:
             return JsonResponse({'status': 'erro', 'message': 'Dados do formulário inválidos.', 'errors': form.errors.as_json()}, status=400)
+            
     return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
 
 @csrf_exempt
@@ -479,3 +504,148 @@ def search_results_view(request):
 
     # Renderiza um NOVO template que vamos criar no próximo passo
     return render(request, 'core/search_results.html', context)
+
+
+# --- VIEW DE OBRAS (KANBAN) ---
+
+@login_required
+def obras_view(request):
+    arvores = InstanciaArvore.objects.all()
+
+    # Função para contar árvores em uma área
+    def contar_arvores_na_area(area):
+        if not area.geom:
+            return 0
+        
+        polygon_coords = area.geom['coordinates'][0]
+        polygon = [(lat, lon) for lon, lat in polygon_coords]
+        
+        count = 0
+        for arvore in arvores:
+            ponto_arvore = (arvore.latitude, arvore.longitude)
+            if is_point_in_polygon(ponto_arvore, polygon):
+                count += 1
+        return count
+
+    # Coluna 1: A Fazer / Planejamento
+    solicitacoes_a_fazer = Solicitacao.objects.filter(status='EM_ABERTO').order_by('-data_criacao')
+    areas_a_fazer_qs = Area.objects.filter(status__in=['PLANEJANDO', 'AGUARDANDO_APROVAÇAO']).order_by('-data_criacao')
+    
+    # Adiciona a contagem de árvores a cada área
+    areas_a_fazer = []
+    for area in areas_a_fazer_qs:
+        area.contagem_arvores = contar_arvores_na_area(area)
+        areas_a_fazer.append(area)
+
+    # Coluna 2: Em Execução
+    solicitacoes_em_execucao = Solicitacao.objects.filter(status='EM_ANDAMENTO').order_by('-data_criacao')
+    areas_em_execucao_qs = Area.objects.filter(status='EM_EXECUCAO').order_by('-data_criacao')
+    areas_em_execucao = []
+    for area in areas_em_execucao_qs:
+        area.contagem_arvores = contar_arvores_na_area(area)
+        areas_em_execucao.append(area)
+
+
+    # Coluna 3: Concluídas
+    solicitacoes_concluidas = Solicitacao.objects.filter(status='FINALIZADO').order_by('-data_criacao')
+    areas_concluidas_qs = Area.objects.filter(status='FINALIZADO').order_by('-data_criacao')
+    areas_concluidas = []
+    for area in areas_concluidas_qs:
+        area.contagem_arvores = contar_arvores_na_area(area)
+        areas_concluidas.append(area)
+
+    # A gente calcula o total de cada coluna aqui na view
+    count_a_fazer = solicitacoes_a_fazer.count() + len(areas_a_fazer)
+    count_em_execucao = solicitacoes_em_execucao.count() + len(areas_em_execucao)
+    count_concluido = solicitacoes_concluidas.count() + len(areas_concluidas)
+
+    context = {
+        'solicitacoes_a_fazer': solicitacoes_a_fazer,
+        'areas_a_fazer': areas_a_fazer,
+        'solicitacoes_em_execucao': solicitacoes_em_execucao,
+        'areas_em_execucao': areas_em_execucao,
+        'solicitacoes_concluidas': solicitacoes_concluidas,
+        'areas_concluidas': areas_concluidas,
+        
+        # E manda os números prontos para o template
+        'count_a_fazer': count_a_fazer,
+        'count_em_execucao': count_em_execucao,
+        'count_concluido': count_concluido,
+    }
+
+    return render(request, 'core/obras.html', context)
+
+
+# --- NOVA API DE ANÁLISE DE ÁREA ---
+
+def is_point_in_polygon(point, polygon):
+    """
+    Verifica se um ponto (lat, lon) está dentro de um polígono.
+    Usa o algoritmo Ray Casting.
+    `point` é uma tupla (latitude, longitude).
+    `polygon` é uma lista de tuplas [(lat1, lon1), (lat2, lon2), ...].
+    """
+    lat, lon = point
+    n = len(polygon)
+    inside = False
+    
+    p1_lat, p1_lon = polygon[0]
+    for i in range(n + 1):
+        p2_lat, p2_lon = polygon[i % n]
+        if lat > min(p1_lat, p2_lat):
+            if lat <= max(p1_lat, p2_lat):
+                if lon <= max(p1_lon, p2_lon):
+                    if p1_lat != p2_lat:
+                        lon_intersection = (lat - p1_lat) * (p2_lon - p1_lon) / (p2_lat - p1_lat) + p1_lon
+                    if p1_lon == p2_lon or lon <= lon_intersection:
+                        inside = not inside
+        p1_lat, p1_lon = p2_lat, p2_lon
+        
+    return inside
+
+
+@csrf_exempt
+@login_required
+def analisar_area_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        geometry = data.get('geometry')
+        if not geometry or 'coordinates' not in geometry:
+            return JsonResponse({'status': 'erro', 'message': 'Geometria inválida ou ausente.'}, status=400)
+        
+        # O GeoJSON formata como (lon, lat), então precisamos pegar a lista de pontos
+        polygon_coords = geometry['coordinates'][0]
+        # E converter para (lat, lon) para a nossa função
+        polygon = [(lat, lon) for lon, lat in polygon_coords]
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'erro', 'message': 'JSON mal formatado.'}, status=400)
+
+    # Buscar todos os objetos com coordenadas
+    arvores = InstanciaArvore.objects.filter(latitude__isnull=False, longitude__isnull=False)
+    solicitacoes = Solicitacao.objects.filter(latitude__isnull=False, longitude__isnull=False)
+
+    # Contadores
+    arvores_na_area = 0
+    solicitacoes_na_area = 0
+
+    # Testar cada árvore
+    for arvore in arvores:
+        ponto_arvore = (arvore.latitude, arvore.longitude)
+        if is_point_in_polygon(ponto_arvore, polygon):
+            arvores_na_area += 1
+            
+    # Testar cada solicitação
+    for solicitacao in solicitacoes:
+        ponto_solicitacao = (solicitacao.latitude, solicitacao.longitude)
+        if is_point_in_polygon(ponto_solicitacao, polygon):
+            solicitacoes_na_area += 1
+
+    return JsonResponse({
+        'status': 'ok',
+        'contagem_arvores': arvores_na_area,
+        'contagem_solicitacoes': solicitacoes_na_area,
+    })

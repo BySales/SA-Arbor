@@ -1,0 +1,166 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    /* Estilos para o nosso painel Kanban */
+    .kanban-board {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto; /* Permite rolar horizontalmente se não couber */
+        padding-bottom: 15px;
+    }
+    .kanban-column {
+        flex: 1; /* Faz as colunas ocuparem o mesmo espaço */
+        min-width: 300px; /* Largura mínima pra não amassar muito */
+        background-color: #f8f9fa; /* Um cinza bem claro */
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .kanban-column h4 {
+        text-align: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .kanban-card {
+        background-color: #fff;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card-title-area {
+        color: #6f42c1; /* Roxo para Áreas */
+    }
+    .card-title-solicitacao {
+        color: #fd7e14; /* Laranja para Solicitações */
+    }
+    .card-footer-text {
+        font-size: 0.8em;
+        color: #6c757d;
+    }
+    .kanban-card a {
+        text-decoration: none;
+        color: inherit;
+    }
+    .kanban-card a:hover h6 {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Painel de Obras</h2>
+    </div>
+
+<div class="kanban-board">
+
+    <div class="kanban-column">
+        <h4><span class="badge bg-secondary me-2">{{ count_a_fazer }}</span> A Fazer / Planejamento</h4>
+        
+        {% for area in areas_a_fazer %}
+            <div class="kanban-card">
+                <a href="{% url 'mapa' %}?area_id={{ area.id }}">
+                    <h6 class="card-title-area"><strong>Área:</strong> {{ area.nome }}</h6>
+                </a>
+                <p class="mb-1 small"><strong>Status:</strong> {{ area.get_status_display }}</p>
+                <p class="mb-1 small"><strong>Árvores no local:</strong> {{ area.contagem_arvores }}</p>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Projeto #{{ area.projeto.id }}</span>
+                    <span>Criado em: {{ area.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for solicitacao in solicitacoes_a_fazer %}
+            <div class="kanban-card">
+                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}">
+                    <h6 class="card-title-solicitacao"><strong>Solicitação:</strong> #{{ solicitacao.id }} - {{ solicitacao.get_tipo_display }}</h6>
+                </a>
+                <p class="mb-1 small">{{ solicitacao.descricao|truncatewords:15 }}</p>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Por: {{ solicitacao.cidadao.username }}</span>
+                    <span>Criado em: {{ solicitacao.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if not areas_a_fazer and not solicitacoes_a_fazer %}
+            <p class="text-center text-muted small">Nenhuma tarefa aqui.</p>
+        {% endif %}
+    </div>
+
+    <div class="kanban-column">
+        <h4><span class="badge bg-primary me-2">{{ count_em_execucao }}</span> Em Execução</h4>
+        
+        {% for area in areas_em_execucao %}
+            <div class="kanban-card">
+                <a href="{% url 'mapa' %}?area_id={{ area.id }}">
+                    <h6 class="card-title-area"><strong>Área:</strong> {{ area.nome }}</h6>
+                </a>
+                <p class="mb-1 small"><strong>Responsável:</strong> {{ area.responsavel.username|default:"N/D" }}</p>
+                <p class="mb-1 small"><strong>Árvores no local:</strong> {{ area.contagem_arvores }}</p>
+                 <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Projeto #{{ area.projeto.id }}</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for solicitacao in solicitacoes_em_execucao %}
+            <div class="kanban-card">
+                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}">
+                    <h6 class="card-title-solicitacao"><strong>Solicitação:</strong> #{{ solicitacao.id }} - {{ solicitacao.get_tipo_display }}</h6>
+                </a>
+                <p class="mb-1 small"><strong>Equipe:</strong> {{ solicitacao.equipe_delegada.nome|default:"N/D" }}</p>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Por: {{ solicitacao.cidadao.username }}</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if not areas_em_execucao and not solicitacoes_em_execucao %}
+            <p class="text-center text-muted small">Nenhuma tarefa aqui.</p>
+        {% endif %}
+    </div>
+
+    <div class="kanban-column">
+        <h4><span class="badge bg-success me-2">{{ count_concluido }}</span> Concluído</h4>
+
+        {% for area in areas_concluidas %}
+            <div class="kanban-card">
+                <a href="{% url 'mapa' %}?area_id={{ area.id }}">
+                    <h6 class="card-title-area"><strong>Área:</strong> {{ area.nome }}</h6>
+                </a>
+                <p class="mb-1 small"><strong>Árvores no local:</strong> {{ area.contagem_arvores }}</p>
+                 <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Projeto #{{ area.projeto.id }}</span>
+                    <span>Finalizado em: ...</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for solicitacao in solicitacoes_concluidas %}
+            <div class="kanban-card">
+                <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}">
+                    <h6 class="card-title-solicitacao"><strong>Solicitação:</strong> #{{ solicitacao.id }} - {{ solicitacao.get_tipo_display }}</h6>
+                </a>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between card-footer-text">
+                    <span>Por: {{ solicitacao.cidadao.username }}</span>
+                     <span>Finalizado em: ...</span>
+                </div>
+            </div>
+        {% endfor %}
+        
+        {% if not areas_concluidas and not solicitacoes_concluidas %}
+            <p class="text-center text-muted small">Nenhuma tarefa aqui.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

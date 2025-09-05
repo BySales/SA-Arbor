@@ -9,7 +9,7 @@
         {% endif %}
     </h2>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" id="solicitacao-form">
         {% csrf_token %}
         
         {{ form.latitude }}
@@ -26,16 +26,19 @@
                     {{ form.descricao }}
                 </div>
                 
-                {# --- NOVO CAMPO DE IMAGENS --- #}
+                {# --- CAMPO DE IMAGENS --- #}
                 <div class="mb-3">
                     <label for="id_imagens" class="form-label">{{ form.imagens.label }}</label>
                     {{ form.imagens }}
+                    <div id="image-count-warning" class="form-text text-danger d-none">
+                        Atenção: Você só pode selecionar no máximo 10 imagens.
+                    </div>
                 </div>
 
                 {# --- GALERIA DE IMAGENS EXISTENTES (SÓ NO UPDATE) --- #}
                 {% if solicitacao.imagens.all %}
                 <hr>
-                <p><strong>Imagens atuais:</strong></p>
+                <p><strong>Imagens atuais ({{ solicitacao.imagens.count }}):</strong></p>
                 <div class="d-flex flex-wrap">
                     {% for imagem_obj in solicitacao.imagens.all %}
                         <div class="me-2 mb-2">
@@ -121,6 +124,21 @@
                 toggleEquipeField();
                 statusSelect.addEventListener('change', toggleEquipeField);
             {% endif %}
+
+            // --- NOSSO SCRIPT "SEGURANÇA DA PORTA" ---
+            const imageInput = document.querySelector('input[name="imagens"]');
+            const warningDiv = document.getElementById('image-count-warning');
+
+            imageInput.addEventListener('change', function(event) {
+                const files = event.target.files;
+                if (files.length > 10) {
+                    warningDiv.classList.remove('d-none'); // Mostra o aviso
+                    alert('Você selecionou ' + files.length + ' imagens. O máximo permitido é 10. Por favor, selecione novamente.');
+                    event.target.value = ''; // Limpa a seleção de arquivos
+                } else {
+                    warningDiv.classList.add('d-none'); // Esconde o aviso se estiver tudo certo
+                }
+            });
         });
     </script>
 {% endblock %}

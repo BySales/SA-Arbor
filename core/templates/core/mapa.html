@@ -39,6 +39,7 @@
     {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
     {{ areas_data|json_script:"areas-data-json" }}
     {{ solicitacao_foco_id|json_script:"solicitacao-foco-id" }}
+    {{ area_foco_id|json_script:"area-foco-id" }}
 
     <div class="modal fade" id="areaFormModal" tabindex="-1">
         <div class="modal-dialog">
@@ -104,6 +105,11 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        $('.select2-multiple').select2({
+            placeholder: "Selecione as espécies",
+            allowClear: true
+        });
+
         function showToast(title, message, isError=false) {
             const toastEl = document.getElementById('liveToast');
             const toastTitle = document.getElementById('toast-title');
@@ -133,7 +139,8 @@
         var alertIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
         var suggestionIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
 
-        var camadaArvores = L.layerGroup().addTo(map);
+        var camadaArvores = L.markerClusterGroup();
+        map.addLayer(camadaArvores);
         var camadaSolicitacoes = L.layerGroup().addTo(map);
         const areaLayers = {};
         const detailsPanel = document.getElementById('details-panel');
@@ -143,6 +150,12 @@
         closeDetailsBtn.addEventListener('click', function() { detailsPanel.classList.add('d-none'); });
 
         const arvoresData = JSON.parse(document.getElementById('arvores-data-json').textContent);
+        
+        const heatPoints = arvoresData.map(function(arvore) {
+            return [arvore.lat, arvore.lon, 1];
+        });
+        var camadaHeatmap = L.heatLayer(heatPoints, {radius: 25});
+
         arvoresData.forEach(function(arvore) {
             if (arvore.lat && arvore.lon) {
                 var marker = L.marker([arvore.lat, arvore.lon], {icon: treeIcon});
@@ -183,8 +196,37 @@
         areasData.forEach(function(area) {
             if (area.geom) {
                 var areaLayer = L.geoJSON(area.geom);
-                areaLayer.on('click', function() {
-                    openEditModal(area.id);
+                
+                areaLayer.on('click', function(e) {
+                    const layer = e.target;
+                    layer.bindPopup("Analisando área...").openPopup();
+
+                    const featureCollection = layer.toGeoJSON();
+                    const geometry = featureCollection.features[0].geometry;
+
+                    fetch("{% url 'analisar_area_api' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ geometry: geometry })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            const popupContent = `
+                                <h6>${area.nome}</h6>
+                                <hr class="my-1">
+                                <p class="mb-1 small"><strong>Árvores na área:</strong> ${data.contagem_arvores}</p>
+                                <p class="mb-1 small"><strong>Solicitações na área:</strong> ${data.contagem_solicitacoes}</p>
+                                <button class="btn btn-sm btn-primary mt-2" onclick="openEditModal(${area.id})">Editar Detalhes</button>
+                            `;
+                            layer.setPopupContent(popupContent);
+                        } else {
+                            layer.setPopupContent(`Erro ao analisar: ${data.message || 'Tente novamente'}`);
+                        }
+                    }).catch(error => {
+                        console.error("Erro no Fetch:", error);
+                        layer.setPopupContent("Erro de comunicação com o servidor.");
+                    });
                 });
                 areaLayers[area.id] = areaLayer;
             }
@@ -201,8 +243,13 @@
             }
         }
 
-        dataLayersContainer.innerHTML = `<div class="form-check"><input class="form-check-input" type="checkbox" id="arvoresCheck" checked><label class="form-check-label" for="arvoresCheck">Árvores</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="solicitacoesCheck" checked><label class="form-check-label" for="solicitacoesCheck">Solicitações</label></div>`;
+        dataLayersContainer.innerHTML = `
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="arvoresCheck" checked><label class="form-check-label" for="arvoresCheck">Árvores (Clusters)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="heatmapCheck"><label class="form-check-label" for="heatmapCheck">Mapa de Calor</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="solicitacoesCheck" checked><label class="form-check-label" for="solicitacoesCheck">Solicitações</label></div>
+        `;
         document.getElementById('arvoresCheck').addEventListener('change', function() { toggleLayer(this, camadaArvores); });
+        document.getElementById('heatmapCheck').addEventListener('change', function() { toggleLayer(this, camadaHeatmap); });
         document.getElementById('solicitacoesCheck').addEventListener('change', function() { toggleLayer(this, camadaSolicitacoes); });
 
         if (areasData.length > 0) {
@@ -232,7 +279,8 @@
         var drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: false, rectangle: true, circle: false, marker: true } });
         map.addControl(drawControl);
 
-        const areaModal = new bootstrap.Modal(document.getElementById('areaFormModal'));
+        const areaModalEl = document.getElementById('areaFormModal');
+        const areaModal = new bootstrap.Modal(areaModalEl);
         const instanciaModal = new bootstrap.Modal(document.getElementById('instanciaFormModal'));
         const saveAreaButton = document.getElementById('saveAreaButton');
         const deleteAreaButton = document.getElementById('deleteAreaButton');
@@ -257,7 +305,7 @@
         }
         const csrftoken = getCookie('csrftoken');
 
-        function openEditModal(areaId) {
+        window.openEditModal = function(areaId) {
             editingAreaId = areaId;
             temporaryLayer = null;
             modalTitle.textContent = 'Editar Detalhes da Área';
@@ -268,28 +316,101 @@
                 areaForm.elements['nome'].value = data.nome;
                 areaForm.elements['tipo'].value = data.tipo;
                 areaForm.elements['status'].value = data.status;
+                
+                $('#id_especies').val(data.especies).trigger('change');
+
                 areaModal.show();
             });
         }
+        
+        areaModalEl.addEventListener('shown.bs.modal', function () {
+            $('.select2-multiple').select2({
+                placeholder: "Selecione as espécies",
+                allowClear: true,
+                dropdownParent: $('#areaFormModal')
+            });
+        })
 
+        // --- CORREÇÃO FINAL DO BUG DE TIMING AQUI ---
         map.on(L.Draw.Event.CREATED, function (event) {
             temporaryLayer = event.layer;
             
             if (event.layerType === 'marker') {
                 document.getElementById('instancia-arvore-form').reset();
                 instanciaModal.show();
-            } else {
-                editingAreaId = null;
-                areaForm.reset();
-                modalTitle.textContent = 'Detalhes da Nova Área';
-                deleteAreaButton.classList.add('d-none');
-                areaModal.show();
+            } else { 
+                drawnItems.addLayer(temporaryLayer);
+                
+                temporaryLayer.bindPopup("Analisando...").openPopup();
+                const geometry = temporaryLayer.toGeoJSON().geometry;
+
+                fetch("{% url 'analisar_area_api' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    body: JSON.stringify({ geometry: geometry })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // 1. Cria um elemento div em memória
+                        const container = document.createElement('div');
+
+                        // 2. Coloca o conteúdo HTML dentro dele
+                        container.innerHTML = `
+                            <h6>Diagnóstico Rápido</h6>
+                            <hr class="my-1">
+                            <p class="mb-1 small"><strong>Árvores na área:</strong> ${data.contagem_arvores}</p>
+                            <p class="mb-1 small"><strong>Solicitações na área:</strong> ${data.contagem_solicitacoes}</p>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-success" id="btn-salvar-desenho">Salvar</button>
+                                <button class="btn btn-sm btn-danger" id="btn-descartar-desenho">Descartar</button>
+                            </div>
+                        `;
+
+                        // 3. Acha os botões DENTRO desse elemento em memória
+                        const saveBtn = container.querySelector('#btn-salvar-desenho');
+                        const discardBtn = container.querySelector('#btn-descartar-desenho');
+
+                        // 4. Adiciona os eventos de clique a eles
+                        saveBtn.addEventListener('click', function() {
+                            editingAreaId = null;
+                            areaForm.reset();
+                            $('#id_especies').val(null).trigger('change');
+                            modalTitle.textContent = 'Detalhes da Nova Área';
+                            deleteAreaButton.classList.add('d-none');
+                            areaModal.show();
+                        });
+                        discardBtn.addEventListener('click', function() {
+                            drawnItems.removeLayer(temporaryLayer);
+                        });
+
+                        // 5. Agora sim, define o conteúdo do popup como o container já com os eventos
+                        temporaryLayer.setPopupContent(container);
+
+                    } else {
+                        temporaryLayer.setPopupContent(`Erro: ${data.message}`);
+                    }
+                });
             }
         });
 
         saveAreaButton.addEventListener('click', function() {
             const formData = new FormData(areaForm);
-            const formObject = Object.fromEntries(formData.entries());
+            const formObject = {};
+            formData.forEach((value, key) => {
+                if (formObject.hasOwnProperty(key)) {
+                    if (!Array.isArray(formObject[key])) {
+                        formObject[key] = [formObject[key]];
+                    }
+                    formObject[key].push(value);
+                } else {
+                    formObject[key] = value;
+                }
+            });
+            if (!formObject.hasOwnProperty('especies')) {
+                formObject['especies'] = [];
+            }
+
             let url, method, finalData;
 
             if (editingAreaId) {
@@ -396,13 +517,21 @@
         });
 
         const solicitacaoFocoId = JSON.parse(document.getElementById('solicitacao-foco-id').textContent);
-
         if (solicitacaoFocoId) {
             const markerToFocus = solicitacaoMarkers[solicitacaoFocoId];
             if (markerToFocus) {
                 const latLng = markerToFocus.getLatLng();
                 map.flyTo(latLng, 18);
                 markerToFocus.fire('click');
+            }
+        }
+
+        const areaFocoId = JSON.parse(document.getElementById('area-foco-id').textContent);
+        if (areaFocoId) {
+            const layerToFocus = areaLayers[areaFocoId];
+            if (layerToFocus) {
+                map.fitBounds(layerToFocus.getBounds());
+                layerToFocus.fire('click');
             }
         }
 

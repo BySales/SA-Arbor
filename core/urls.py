@@ -5,7 +5,9 @@ from .views import (
     especie_list, especie_create, especie_update, especie_delete,
     mapa_view, cadastro_view, salvar_area, area_manage_api, 
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
-    search_results_view
+    search_results_view,
+    obras_view,
+    analisar_area_api # <-- 1. IMPORTAMOS A NOVA VIEW
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -28,7 +30,9 @@ urlpatterns = [
     path('especies/nova/', especie_create, name='especie_create'),
     path('especies/<int:pk>/editar/', especie_update, name='especie_update'),
     path('especies/<int:pk>/deletar/', especie_delete, name='especie_delete'),
-    path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
+    
+    # --- URL da Tela de Obras ---
+    path('obras/', obras_view, name='obras_list'), 
 
     # --- URLs do Mapa ---
     path('mapa/', mapa_view, name='mapa'),
@@ -40,10 +44,12 @@ urlpatterns = [
     path('configuracoes/', configuracoes_view, name='configuracoes'),
 
     # --- API Endpoints ---
+    path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
     path('api/salvar_area/', salvar_area, name='salvar_area'),
-    # A NOVA ROTA QUE FAZ TUDO (GET, PUT, DELETE) PARA UMA ÁREA ESPECÍFICA
     path('api/areas/<int:pk>/', area_manage_api, name='area_manage_api'),
+    path('api/analisar-area/', analisar_area_api, name='analisar_area_api'), # <-- 2. ADICIONAMOS A NOVA ROTA DA API
 
+    # --- URLs de Equipe ---
     path('equipes/', equipe_list, name='equipe_list'),
     path('equipes/nova/', equipe_create, name='equipe_create'),
     path('equipes/<int:pk>/editar/', equipe_update, name='equipe_update'),
