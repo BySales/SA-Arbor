@@ -15,14 +15,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setupToggle('#togglePassword', '#id_password');
     setupToggle('#togglePassword2', '#id_password2');
 
-    // --- LÓGICA DA SIDEBAR COLAPSÁVEL ---
-    const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.querySelector('#sidebar-toggle');
-
-    if (sidebar && sidebarToggle) {
-        sidebarToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            sidebar.classList.toggle('collapsed');
-        });
-    }
+    // A LÓGICA DA SIDEBAR FOI COMPLETAMENTE REMOVIDA DAQUI.
 });

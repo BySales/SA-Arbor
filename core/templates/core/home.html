@@ -1,0 +1,114 @@
+{% extends 'core/base_app.html' %}
+
+{% block content %}
+    <div class="header-greeting mb-4">
+        <h2>Painel de Controle</h2>
+        <p class="text-muted">Aqui está um resumo rápido de tudo que está acontecendo no sistema Arbor.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="card-icon primary">
+                        <i class="bi bi-tree-fill"></i>
+                    </div>
+                    <div class="card-title-dashboard">Árvores Mapeadas</div>
+                    <div class="card-number">{{ instancias_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="card-icon danger">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                    <div class="card-title-dashboard">Solicitações em Aberto</div>
+                    <div class="card-number">{{ solicitacoes_abertas_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="card-icon info">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="card-title-dashboard">Equipes Cadastradas</div>
+                    <div class="card-number">{{ equipes_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="card-icon success">
+                        <i class="bi bi-collection-fill"></i>
+                    </div>
+                    <div class="card-title-dashboard">Espécies no Catálogo</div>
+                    <div class="card-number">{{ especies_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: #1E5943;">Últimas Solicitações Recebidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover stylish-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col">Descrição</th>
+                                    <th scope="col">Cidadão</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for solicitacao in ultimas_solicitacoes %}
+                                    <tr onclick="window.location='{% url 'solicitacao_update' pk=solicitacao.pk %}';">
+                                        <td>
+                                            {% if solicitacao.tipo == 'DENUNCIA' %}
+                                                <span class="bi bi-exclamation-triangle-fill text-danger me-2" title="Denúncia"></span>
+                                            {% else %}
+                                                <span class="bi bi-lightbulb-fill text-warning me-2" title="Sugestão"></span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ solicitacao.descricao|truncatewords:10 }}</td>
+                                        <td>{{ solicitacao.cidadao.username }}</td>
+                                        <td>
+                                            {% if solicitacao.status == 'EM_ABERTO' %}
+                                                <span class="badge bg-danger-soft">{{ solicitacao.get_status_display }}</span>
+                                            {% elif solicitacao.status == 'EM_ANDAMENTO' %}
+                                                <span class="badge bg-warning-soft">{{ solicitacao.get_status_display }}</span>
+                                            {% elif solicitacao.status == 'FINALIZADO' %}
+                                                <span class="badge bg-success-soft">{{ solicitacao.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-dark-soft">{{ solicitacao.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ solicitacao.data_criacao|timesince }} atrás</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Nenhuma solicitação encontrada ainda.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

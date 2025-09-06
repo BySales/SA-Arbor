@@ -7,14 +7,14 @@ from .views import (
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
     search_results_view,
     obras_view,
-    analisar_area_api, recuperar_senha_view
+    analisar_area_api, recuperar_senha_view, home_view
 )
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     # --- URLs da Homepage ---
-    path('', solicitacao_list, name='home'),
+    path('', home_view, name='home'),
 
     # --- URLs da Busca ---
     path('busca/', search_results_view, name='search_results'),

@@ -64,7 +64,7 @@ body {
 
 
 .info-content {
-    flex-grow: 1; 
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -250,7 +250,7 @@ body {
 }
 
 .password-input-wrapper input {
-    padding-right: 40px; 
+    padding-right: 40px;
 }
 
 #togglePassword, #togglePassword2 {
@@ -341,31 +341,25 @@ body {
     text-decoration: none;
 }
 
-/* --- ESTILOS GERAIS DO APP --- */
-.app-body {
-    background-color: #F4F7F6;
-    overflow-y: auto;
-}
-
+/* --- ESTRUTURA PRINCIPAL DO APP (LAYOUT FIXO) --- */
 .app-container {
     display: flex;
 }
 
-/* --- BARRA LATERAL (SIDEBAR) --- */
+/* --- BARRA LATERAL (SIDEBAR) (LAYOUT FIXO) --- */
 .sidebar {
-    width: 230px; /* LARGURA REDUZIDA */
+    width: 270px; /* Largura fixa da sidebar */
     background-color: #fff;
-    height: calc(100vh - 40px);
+    height: 100vh; /* Ocupa a altura inteira da tela */
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* EMPURRA O FOOTER PARA BAIXO */
+    justify-content: space-between;
     border-right: 1px solid #e0e0e0;
-    position: fixed;
-    margin: 20px;
-    border-radius: 15px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: width 0.3s ease; /* Transição suave */
+    flex-shrink: 0; /* Impede a sidebar de ser "esmagada" */
+    position: sticky; /* Deixa ela fixa no lugar enquanto rola a página */
+    top: 0;
 }
 
 .sidebar-header {
@@ -388,14 +382,6 @@ body {
 .sidebar-logo img {
     width: 32px;
 }
-.sidebar-toggle {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #555;
-    cursor: pointer;
-}
-
 
 .sidebar-menu {
     list-style: none;
@@ -433,13 +419,10 @@ body {
     font-size: 1.2rem;
 }
 
-
-/* --- CONTEÚDO PRINCIPAL --- */
+/* --- CONTEÚDO PRINCIPAL (LAYOUT FIXO) --- */
 .main-content {
-    flex-grow: 1;
-    margin-left: 270px; /* Nova largura (230px) + margens (40px) */
+    flex-grow: 1; /* Faz o conteúdo ocupar todo o resto do espaço */
     padding: 20px;
-    transition: margin-left 0.3s ease; /* Transição suave */
 }
 
 .main-header {
@@ -505,94 +488,6 @@ body {
     color: #888;
 }
 
-/* --- ESTILOS DA SIDEBAR COLAPSÁVEL --- */
-/* --- ESTILOS DA SIDEBAR COLAPSÁVEL --- */
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-}
-
-.sidebar-toggle {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.sidebar-logo-text, 
-.sidebar-menu .menu-text, 
-.sidebar-menu .menu-header span {
-    transition: opacity 0.2s ease;
-    opacity: 1;
-    white-space: nowrap;
-}
-
-/* --- ESTADO ENCOLHIDO --- */
-.sidebar.collapsed {
-    width: 90px;
-}
-
-/* Esconde só textos, mantém logo */
-.sidebar.collapsed .sidebar-logo-text,
-.sidebar.collapsed .sidebar-menu .menu-text,
-.sidebar.collapsed .sidebar-menu .menu-header span {
-    display: none;
-}
-
-/* Mantém a logo visível (ícone centralizado) */
-.sidebar.collapsed .sidebar-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.sidebar.collapsed .sidebar-logo img {
-    max-width: 40px;
-    height: auto;
-}
-
-/* Ícones centralizados */
-.sidebar.collapsed .sidebar-menu li a {
-    justify-content: center;
-    width: 60px;
-    height: 45px;
-    margin: 5px auto;
-    padding: 0;
-}
-
-/* Item ativo vira círculo */
-.sidebar.collapsed .sidebar-menu li a.active {
-    background: #1E5943;
-    width: 45px;
-    height: 45px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-/* Botão de toggle centralizado no topo */
-.sidebar.collapsed .sidebar-toggle {
-    position: relative;
-    margin: 10px auto;
-    display: flex;
-    justify-content: center;
-    top: 0;
-    left: 0;
-    transform: none;
-}
-
-/* Ajuste do conteúdo */
-.sidebar.collapsed + .main-content {
-    margin-left: 130px;
-}
-
-
 /* ESTILOS DOS CARDS (para reuso) */
 .card-denuncia {
     border-left: 5px solid #FFADAD;
@@ -633,4 +528,193 @@ body {
 .ler-mais-btn:hover {
     color: #212529;
     text-decoration: underline;
+}
+
+/* --- ESTILOS DOS CARDS DO DASHBOARD (BASEADO NO FIGMA) --- */
+.card {
+    border: none; /* Remove a borda padrão */
+    border-radius: 12px; /* Bordas mais arredondadas */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+}
+
+.card-body {
+    padding: 15px; /* Um pouco mais de padding interno */
+    display: flex; /* Para centralizar os itens com flexbox */
+    flex-direction: column; /* Conteúdo em coluna */
+    align-items: flex-start; /* Alinha o conteúdo à esquerda */
+    text-align: left; /* Garante que o texto comece à esquerda */
+}
+
+.card-icon {
+    font-size: 1.3rem; /* Ícone maior */
+    margin-bottom: 12px; /* Espaço abaixo do ícone */
+    width: 40px; /* Largura fixa para o círculo do ícone */
+    height: 40px; /* Altura fixa para o círculo do ícone */
+    border-radius: 30%; /* Faz o círculo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-icon.primary {
+    background-color: #E6F3EB; /* Verde claro */
+    color: #1E5943; /* Verde escuro */
+}
+
+.card-icon.danger {
+    background-color: #F8EAEA; /* Vermelho claro */
+    color: #DC3545; /* Vermelho escuro */
+}
+
+.card-icon.info {
+    background-color: #EAF4F9; /* Azul claro */
+    color: #17A2B8; /* Azul escuro */
+}
+
+.card-icon.success {
+    background-color: #EBF8EE; /* Verde claro mais suave */
+    color: #28A745; /* Verde padrão */
+}
+
+.card-title-dashboard {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem; /* Título menor, como no Figma */
+    font-weight: 500; /* Medium weight */
+    color: #6c757d; /* Cor cinza */
+    margin-bottom: 5px; /* Espaço abaixo do título */
+    text-transform: none; /* Sem uppercase */
+}
+
+.card-number {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem; /* Número maior e em destaque */
+    font-weight: 600; /* Semi-bold */
+    color: #343a40; /* Cor mais escura para destaque */
+    line-height: 1; /* Garante que o número não quebre linha */
+}
+
+.card-body .row.no-gutters {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card-body .row.no-gutters .col.mr-2 {
+    margin-right: 0 !important; /* Remove margem extra */
+}
+
+.card-body .row.no-gutters .col-auto {
+    display: none; /* Esconde o ícone antigo do canto */
+}
+
+.card-body .text-xs,
+.card-body .h5 {
+    font-weight: normal !important;
+    text-transform: none !important;
+    margin-bottom: 0 !important;
+}
+
+/* --- ESTILO DA TABELA DE SOLICITAÇÕES (HOME) --- */
+
+.stylish-table {
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Espaçamento vertical entre as linhas */
+}
+
+.stylish-table thead th {
+    border: none;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.stylish-table tbody tr {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.stylish-table tbody tr:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stylish-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border: none;
+}
+
+.stylish-table tbody td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.stylish-table tbody td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.badge.bg-danger-soft {
+    background-color: #F8EAEA !important;
+    color: #DC3545 !important;
+}
+.badge.bg-warning-soft {
+    background-color: #FFF8E1 !important;
+    color: #FFC107 !important;
+}
+.badge.bg-success-soft {
+    background-color: #EBF8EE !important;
+    color: #28A745 !important;
+}
+.badge.bg-dark-soft {
+    background-color: #E9ECEF !important;
+    color: #343A40 !important;
+}
+
+.map-page-container {
+    padding: 0px; /* Remove padding extra do container para o mapa ficar colado nas bordas do card */
+}
+
+/* Card que envolve o mapa */
+.map-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px; /* Margem abaixo do card */
+    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
+}
+
+.map-header-card {
+    padding: 15px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.map-header-card h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #1E5943;
+}
+
+/* Container do mapa para definir o tamanho exato */
+#map-container {
+    height: 60vh; /* ALTURA FIXA E DIMINUIDA PARA O MAPA */
+    width: 100%;
+    border-bottom-left-radius: 12px; /* Arredonda os cantos inferiores */
+    border-bottom-right-radius: 12px; /* Arredonda os cantos inferiores */
+}
+
+/* O mapa em si deve ocupar 100% do seu container */
+#map {
+    height: 100%;
+    width: 100%;
+    z-index: 1; /* Garante que o mapa esteja sobre outros elementos */
+}
+.main-content {
+    overflow-y: hidden; /* Evita a barra de rolagem vertical na página */
 }

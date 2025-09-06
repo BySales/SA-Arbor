@@ -685,3 +685,24 @@ def recuperar_senha_view(request):
     # Por enquanto, esta view apenas renderiza o template.
     # A lógica de envio de email e validação de código será adicionada no futuro.
     return render(request, 'core/recuperar_senha.html')
+
+# Adicione esta nova view
+@login_required
+def home_view(request):
+    # Buscando os dados para o nosso dashboard
+    instancias_count = InstanciaArvore.objects.count()
+    solicitacoes_abertas_count = Solicitacao.objects.filter(status='EM_ABERTO').count()
+    equipes_count = Equipe.objects.count()
+    especies_count = Especie.objects.count()
+
+    # Pegando as 5 solicitações mais recentes pra mostrar na tela
+    ultimas_solicitacoes = Solicitacao.objects.order_by('-data_criacao')[:5]
+
+    context = {
+        'instancias_count': instancias_count,
+        'solicitacoes_abertas_count': solicitacoes_abertas_count,
+        'equipes_count': equipes_count,
+        'especies_count': especies_count,
+        'ultimas_solicitacoes': ultimas_solicitacoes,
+    }
+    return render(request, 'core/home.html', context)

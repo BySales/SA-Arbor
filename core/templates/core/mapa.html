@@ -1,37 +1,46 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_app.html' %}
 
 {% block content %}
-    <h2>Mapa de Gestão</h2>
-    
-    <div id="map-container" style="position: relative; height: 600px;" class="mb-3">
-        <div id="map" style="height: 100%;"></div>
+    <div class="header-greeting mb-4">
+        <h2>Mapa Interativo</h2>
+        <p class="text-muted">Visualize, gerencie e planeje as áreas verdes da cidade.</p>
+    </div>
+
+    <div class="card map-card">
+        <div class="card-header">
+            <h6>Visão Geral do Mapeamento</h6>
+        </div>
         
-        <div id="custom-layer-control" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 250px; max-height: 90%; overflow-y: auto;">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Camadas</h5>
-                <button id="toggle-layers-btn" class="btn btn-sm btn-outline-secondary">-</button>
-            </div>
-            <hr class="my-2">
-            <div id="layer-control-content">
-                <h6>Dados do Sistema</h6>
-                <div id="data-layers"></div>
+        <div id="map-container" style="position: relative;" class="mb-3">
+            <div id="map" style="height: 100%;"></div>
+            
+            <div id="custom-layer-control" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 250px; max-height: 90%; overflow-y: auto;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Camadas</h5>
+                    <button id="toggle-layers-btn" class="btn btn-sm btn-outline-secondary">-</button>
+                </div>
                 <hr class="my-2">
-                <h6>Áreas Planejadas</h6>
-                <div id="drawn-layers"></div>
+                <div id="layer-control-content">
+                    <h6>Dados do Sistema</h6>
+                    <div id="data-layers"></div>
+                    <hr class="my-2">
+                    <h6>Áreas Planejadas</h6>
+                    <div id="drawn-layers"></div>
+                </div>
             </div>
-        </div>
-        
-        <div id="details-panel" class="d-none" style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 250px;">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 id="details-title" class="mb-0">Detalhes</h5>
-                <button id="close-details-btn" type="button" class="btn-close"></button>
+            
+            <div id="details-panel" class="d-none" style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 250px;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 id="details-title" class="mb-0">Detalhes</h5>
+                    <button id="close-details-btn" type="button" class="btn-close"></button>
+                </div>
+                <hr class="my-2">
+                <div id="details-content"></div>
             </div>
-            <hr class="my-2">
-            <div id="details-content"></div>
-        </div>
-        
-        <div id="coords-display" style="position: absolute; bottom: 10px; right: 10px; z-index: 1000; background: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-family: monospace;">
-            Lat: -- | Lon: --
+            
+            <div id="coords-display" style="position: absolute; bottom: 10px; right: 10px; z-index: 1000; background: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-family: monospace;">
+                Lat: -- | Lon: --
+            </div>
         </div>
     </div>
 
@@ -42,65 +51,10 @@
     {{ area_foco_id|json_script:"area-foco-id" }}
 
     <div class="modal fade" id="areaFormModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Detalhes da Área</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="area-form">
-                        {{ form_area.as_p }}
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="deleteAreaButton" class="btn btn-danger me-auto d-none">Excluir</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="saveAreaButton" class="btn btn-primary">Salvar</button>
-                </div>
-            </div>
         </div>
-    </div>
 
     <div class="modal fade" id="instanciaFormModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Adicionar Nova Árvore ao Mapa</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="instancia-arvore-form" autocomplete="off">
-                        <div class="mb-3">
-                            <label for="especie-select" class="form-label">Espécie</label>
-                            <select id="especie-select" class="form-select" required>
-                                <option value="" disabled selected>Selecione a espécie...</option>
-                                {% for especie in todas_especies %}
-                                    <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="saude-select" class="form-label">Estado de Saúde</label>
-                            <select id="saude-select" class="form-select">
-                                {% for value, label in opcoes_saude %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="plantio-date" class="form-label">Data de Plantio</label>
-                            <input type="date" id="plantio-date" class="form-control">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="saveInstanciaButton" class="btn btn-primary">Salvar Árvore</button>
-                </div>
-            </div>
         </div>
-    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -331,7 +285,6 @@
             });
         })
 
-        // --- CORREÇÃO FINAL DO BUG DE TIMING AQUI ---
         map.on(L.Draw.Event.CREATED, function (event) {
             temporaryLayer = event.layer;
             
@@ -352,10 +305,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'ok') {
-                        // 1. Cria um elemento div em memória
                         const container = document.createElement('div');
-
-                        // 2. Coloca o conteúdo HTML dentro dele
                         container.innerHTML = `
                             <h6>Diagnóstico Rápido</h6>
                             <hr class="my-1">
@@ -366,12 +316,8 @@
                                 <button class="btn btn-sm btn-danger" id="btn-descartar-desenho">Descartar</button>
                             </div>
                         `;
-
-                        // 3. Acha os botões DENTRO desse elemento em memória
                         const saveBtn = container.querySelector('#btn-salvar-desenho');
                         const discardBtn = container.querySelector('#btn-descartar-desenho');
-
-                        // 4. Adiciona os eventos de clique a eles
                         saveBtn.addEventListener('click', function() {
                             editingAreaId = null;
                             areaForm.reset();
@@ -383,8 +329,6 @@
                         discardBtn.addEventListener('click', function() {
                             drawnItems.removeLayer(temporaryLayer);
                         });
-
-                        // 5. Agora sim, define o conteúdo do popup como o container já com os eventos
                         temporaryLayer.setPopupContent(container);
 
                     } else {

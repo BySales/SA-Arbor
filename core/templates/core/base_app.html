@@ -20,6 +20,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="{% static 'core/css/custom.css' %}">
+
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -34,26 +35,24 @@
     <div class="app-container">
         <nav class="sidebar">
             <div>
-                <div class="sidebar-header">
+               <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <img src="{% static 'core/img/arvore-logo.png' %}" alt="Logo Arbor">
                         <span class="sidebar-logo-text">Arbor</span>
                     </div>
-                    <button class="sidebar-toggle" id="sidebar-toggle">
-                        <i class="bi bi-list"></i>
-                    </button>
                 </div>
-                <ul class="sidebar-menu">
+                                 <ul class="sidebar-menu">
                     <li class="menu-header"><span>Início</span></li>
-                    <li><a href="#"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
-                    <li><a href="{% url 'mapa' %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
-                    <li><a href="{% url 'solicitacao_list' %}" class="active"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
-                    <li><a href="#"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
+                    
+                    <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
+                    <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
+                    <li><a href="{% url 'solicitacao_list' %}" class="{% if request.resolver_match.url_name == 'solicitacao_list' %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
+                    <li><a href="{% url 'obras_list' %}" class="{% if request.resolver_match.url_name == 'obras_list' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
                     <li><a href="#"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
 
                     <li class="menu-header"><span>Cadastros</span></li>
-                    <li><a href="{% url 'especie_list' %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Árvores</span></a></li>
-                    <li><a href="{% url 'equipe_list' %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
+                    <li><a href="{% url 'especie_list' %}" class="{% if request.resolver_match.url_name == 'especie_list' or request.resolver_match.url_name == 'especie_create' or request.resolver_match.url_name == 'especie_update' %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Árvores</span></a></li>
+                    <li><a href="{% url 'equipe_list' %}" class="{% if request.resolver_match.url_name == 'equipe_list' or request.resolver_match.url_name == 'equipe_create' or request.resolver_match.url_name == 'equipe_update' %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
                 </ul>
             </div>
 
