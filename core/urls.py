@@ -48,7 +48,7 @@ urlpatterns = [
     path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
     path('api/salvar_area/', salvar_area, name='salvar_area'),
     path('api/areas/<int:pk>/', area_manage_api, name='area_manage_api'),
-    path('api/analisar-area/', analisar_area_api, name='analisar_area_api'), # <-- 2. ADICIONAMOS A NOVA ROTA DA API
+    path('api/analisar-area/', analisar_area_api, name='analisar_area_api'), 
 
     # --- URLs de Equipe ---
     path('equipes/', equipe_list, name='equipe_list'),
