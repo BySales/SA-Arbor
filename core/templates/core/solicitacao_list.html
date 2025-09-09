@@ -3,66 +3,158 @@
 {% block content %}
     
     {% if user.is_staff or user.is_superuser %}
-        <div class="row">
+        {% comment %} 
+        ============================================================
+        INÍCIO DA VISÃO DO ADMINISTRADOR (VERSÃO FINAL)
+        ============================================================
+        {% endcomment %}
+
+        {% comment %} PAINEL DE CONTROLE SUPERIOR {% endcomment %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="mb-0">Painel de Controle</h2>
+                <p class="text-muted mb-0">Uma rápida olhada no que está acontecendo.</p>
+            </div>
+             <div class="d-flex align-items-center">
+                {% comment %} BOTÃO NOVA SOLICITAÇÃO MOVIDO PARA CÁ {% endcomment %}
+                <a href="{% url 'solicitacao_create' %}" class="btn btn-primary btn-principal-acao me-3">
+                    <i class="bi bi-plus-circle-fill me-1"></i>
+                    <span>Nova Solicitação</span>
+                </a>
+                <div class="filter-pills">
+                    <a href="?periodo=hoje" class="{% if periodo_selecionado == 'hoje' %}active{% endif %}">Hoje</a>
+                    <a href="?periodo=semana" class="{% if periodo_selecionado == 'semana' %}active{% endif %}">7d</a>
+                    <a href="?periodo=mes" class="{% if periodo_selecionado == 'mes' %}active{% endif %}">30d</a>
+                    <a href="{% url 'solicitacao_list' %}" class="{% if not periodo_selecionado or periodo_selecionado == 'total' %}active{% endif %}">Total</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ABERTO' %}card-status-active-danger{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon danger mb-2"><i class="bi bi-exclamation-octagon"></i></div>
+                            <div class="card-title-dashboard text-danger">Solicitações em Aberto</div>
+                            <div class="card-number">{{ abertas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ANDAMENTO' %}card-status-active-warning{% endif %}">
+                        <div class="card-body">
+                             <div class="card-icon warning-soft mb-2"><i class="bi bi-hourglass-split"></i></div>
+                            <div class="card-title-dashboard text-warning">Em Andamento</div>
+                            <div class="card-number">{{ andamento_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'FINALIZADO' %}card-status-active-success{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon success mb-2"><i class="bi bi-check2-circle"></i></div>
+                            <div class="card-title-dashboard text-success">Finalizadas</div>
+                            <div class="card-number">{{ finalizadas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'RECUSADO' %}card-status-active-dark{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon dark-soft mb-2"><i class="bi bi-slash-circle"></i></div>
+                            <div class="card-title-dashboard text-dark">Recusadas</div>
+                            <div class="card-number">{{ recusadas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% comment %} ÁREA DA LISTA DE SOLICITAÇÕES E GRÁFICOS {% endcomment %}
+        <div class="row mt-4">
             <div class="col-lg-8">
+                {% comment %} CABEÇALHO DA LISTA {% endcomment %}
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h2 class="mb-0">
+                        <h4 class="mb-0">
                             {% if status_selecionado %}
-                                Solicitações: {{ status_selecionado|cut:"EM_"|cut:"_"|title }}
+                                Detalhes: {{ status_selecionado|cut:"EM_"|cut:"_"|title }}
                             {% else %}
                                 Todas as Solicitações
                             {% endif %}
-                        </h2>
+                        </h4>
+                        <p class="text-muted mb-0">
+                            Exibindo {{ solicitacoes.start_index }}–{{ solicitacoes.end_index }} de {{ solicitacoes.paginator.count }} resultados.
+                        </p>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <a href="{% url 'solicitacao_create' %}" class="btn btn-primary me-3">Criar Nova Solicitação</a>
-                        <form method="GET" class="d-flex">
-                            <input type="hidden" name="periodo" value="{{ periodo_selecionado }}">
-                            {% if status_selecionado %}
-                                <input type="hidden" name="status" value="{{ status_selecionado }}">
-                            {% endif %}
-                            
-                            <select name="ordenar" class="form-select" onchange="this.form.submit()">
+                    <form method="GET">
+                        <input type="hidden" name="periodo" value="{{ periodo_selecionado }}">
+                        {% if status_selecionado %}
+                            <input type="hidden" name="status" value="{{ status_selecionado }}">
+                        {% endif %}
+                        
+                        <div class="custom-select-wrapper">
+                            <select name="ordenar" class="form-select-custom" onchange="this.form.submit()">
                                 <option value="">Ordenar por...</option>
                                 <option value="data_desc" {% if not ordenar_selecionado or ordenar_selecionado == 'data_desc' %}selected{% endif %}>Mais Recentes</option>
                                 <option value="data_asc" {% if ordenar_selecionado == 'data_asc' %}selected{% endif %}>Mais Antigos</option>
                                 <option value="tipo" {% if ordenar_selecionado == 'tipo' %}selected{% endif %}>Tipo (A-Z)</option>
                             </select>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
                 
+                {% comment %} LISTA DE SOLICITAÇÕES COM O CARD MODERNO {% endcomment %}
                 {% for solicitacao in solicitacoes %}
-                    <div class="card mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
-                        <div class="card-header">
-                            {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
+                    <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}
+                                </small>
+                            </div>
+                            <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
                         </div>
                         <div class="card-body">
-                            <p><strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}</p>
+                            <p class="card-metadata">
+                                <i class="bi bi-person"></i> 
+                                <strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}
+                            </p>
                             
-                            <p><strong>Descrição:</strong></p>
+                            <p class="mb-2"><strong>Descrição:</strong></p>
                             <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
-                                <p id="desc-text-{{ solicitacao.id }}">{{ solicitacao.descricao }}</p>
+                                <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
                             </div>
                             <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
 
                             {% if solicitacao.imagens.all %}
-                                <p class="mt-3"><strong>Imagens:</strong></p>
+                                <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
                                 <div class="d-flex flex-wrap">
-                                {% for imagem_obj in solicitacao.imagens.all %}
-                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
-                                        <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 150px; max-width: 150px; object-fit: cover;">
-                                    </a>
-                                {% endfor %}
+                                    {% for imagem_obj in solicitacao.imagens.all %}
+                                        <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                            <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao">
+                                        </a>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
-                            <br>
-                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
-                            
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-end align-items-center">
                             {% if solicitacao.latitude and solicitacao.longitude %}
-                                <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-info btn-sm mt-2">Ver no Mapa</a>
+                                <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
+                                    <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
+                                </a>
                             {% endif %}
+                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-pencil-square"></i> Detalhes / Editar
+                            </a>
                         </div>
                     </div>
                 {% empty %}
@@ -71,14 +163,15 @@
                     </div>
                 {% endfor %}
 
+                {% comment %} PAGINAÇÃO COM A CORREÇÃO DOS FILTROS {% endcomment %}
                 <nav aria-label="Navegação das solicitações" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if solicitacoes.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page=1">&laquo; Primeira</a>
+                                <a class="page-link" href="?page=1{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">&laquo; Primeira</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a>
+                                <a class="page-link" href="?page={{ solicitacoes.previous_page_number }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Anterior</a>
                             </li>
                         {% endif %}
 
@@ -90,34 +183,18 @@
 
                         {% if solicitacoes.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a>
+                                <a class="page-link" href="?page={{ solicitacoes.next_page_number }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Próxima</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}">Última &raquo;</a>
+                                <a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Última &raquo;</a>
                             </li>
                         {% endif %}
                     </ul>
                 </nav>
-
             </div>
 
+            {% comment %} GRÁFICOS NA LATERAL {% endcomment %}
             <div class="col-lg-4">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5>Dashboard</h5>
-                    <div class="btn-group" role="group">
-                        <a href="?periodo=hoje" class="btn btn-sm {% if periodo_selecionado == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">Hoje</a>
-                        <a href="?periodo=semana" class="btn btn-sm {% if periodo_selecionado == 'semana' %}btn-primary{% else %}btn-outline-primary{% endif %}">7d</a>
-                        <a href="?periodo=mes" class="btn btn-sm {% if periodo_selecionado == 'mes' %}btn-primary{% else %}btn-outline-primary{% endif %}">30d</a>
-                        <a href="{% url 'home' %}" class="btn btn-sm {% if not periodo_selecionado or periodo_selecionado == 'total' %}btn-primary{% else %}btn-outline-primary{% endif %}">Total</a>
-                    </div>
-                </div>
-                <hr class="mt-0">
-                
-                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none"><div class="card text-white bg-danger mb-3"><div class="card-header d-flex justify-content-between"><span>Em Aberto</span><span class="badge bg-light text-danger">{{ abertas_count }}</span></div></div></a>
-                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none"><div class="card text-white bg-warning mb-3"><div class="card-header d-flex justify-content-between"><span>Em Andamento</span><span class="badge bg-light text-warning">{{ andamento_count }}</span></div></div></a>
-                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none"><div class="card text-white bg-success mb-3"><div class="card-header d-flex justify-content-between"><span>Finalizadas</span><span class="badge bg-light text-success">{{ finalizadas_count }}</span></div></div></a>
-                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none"><div class="card text-white bg-dark mb-3"><div class="card-header d-flex justify-content-between"><span>Recusadas</span><span class="badge bg-light text-dark">{{ recusadas_count }}</span></div></div></a>
-
                 <div class="card mb-3">
                     <div class="card-header">Status das Solicitações</div>
                     <div class="card-body"><canvas id="statusChart"></canvas></div>
@@ -131,43 +208,61 @@
                     <div class="card-body"><canvas id="recenteChart"></canvas></div>
                 </div>
                 <div class="card mb-3">
-                    <div class="card-header">Carga de Trabalho por Equipe (Em Andamento)</div>
+                    <div class="card-header">Carga de Trabalho por Equipe</div>
                     <div class="card-body"><canvas id="equipesChart"></canvas></div>
                 </div>
             </div>
         </div>
+
     {% else %}
+        {% comment %} 
+        ============================================================
+        INÍCIO DA VISÃO DO USUÁRIO COMUM (Layout não muda)
+        ============================================================
+        {% endcomment %}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Minhas Solicitações</h2>
             <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
         </div>
         
         {% for solicitacao in solicitacoes %}
-            <div class="card mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
-                <div class="card-header">
-                    {{ solicitacao.get_tipo_display }} #{{ solicitacao.id }} - <strong>Status: {{ solicitacao.get_status_display }}</strong>
+            <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}
+                        </small>
+                    </div>
+                    <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Descrição:</strong></p>
+                    <p class="mb-2"><strong>Descrição:</strong></p>
                     <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
-                        <p id="desc-text-{{ solicitacao.id }}">{{ solicitacao.descricao }}</p>
+                        <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
                     </div>
                     <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
+
                     {% if solicitacao.imagens.all %}
-                        <p class="mt-3"><strong>Imagens:</strong></p>
+                        <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
                         <div class="d-flex flex-wrap">
-                        {% for imagem_obj in solicitacao.imagens.all %}
-                             <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
-                                <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded" style="max-height: 150px; max-width: 150px; object-fit: cover;">
-                            </a>
-                        {% endfor %}
+                            {% for imagem_obj in solicitacao.imagens.all %}
+                                <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                    <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao">
+                                </a>
+                            {% endfor %}
                         </div>
                     {% endif %}
-                    <br>
-                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm mt-2">Editar</a>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-end align-items-center">
                     {% if solicitacao.latitude and solicitacao.longitude %}
-                        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-info btn-sm mt-2">Ver no Mapa</a>
+                        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
+                            <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
+                        </a>
                     {% endif %}
+                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
                 </div>
             </div>
         {% empty %}
@@ -189,6 +284,7 @@
         </nav>
     {% endif %}
 
+    {% comment %} SCRIPTS (permanecem os mesmos) {% endcomment %}
     <script>
         function toggleDescricao(solicitacaoId) {
             const container = document.getElementById('desc-container-' + solicitacaoId);

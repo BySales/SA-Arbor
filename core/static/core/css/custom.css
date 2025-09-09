@@ -303,30 +303,12 @@ body {
     gap: 15px;
     margin-top: 30px;
 }
-.btn-primary-custom, .btn-secondary-custom {
-    flex: 1;
-    padding: 14px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid;
-    transition: all 0.3s;
-}
-.btn-primary-custom {
-    background-color: #6D6BE1;
-    border-color: #6D6BE1;
-    color: #fff;
-}
+
 .btn-primary-custom:hover {
     background-color: #5857c3;
     border-color: #5857c3;
 }
-.btn-secondary-custom {
-    background-color: #fff;
-    border-color: #ddd;
-    color: #555;
-}
+
 .btn-secondary-custom:hover {
     background-color: #f8f8f8;
     border-color: #ccc;
@@ -488,14 +470,13 @@ body {
     color: #888;
 }
 
-/* ESTILOS DOS CARDS (para reuso) */
-.card-denuncia {
-    border-left: 5px solid #FFADAD;
-}
-.card-sugestao {
-    border-left: 5px solid #A0C4A4;
-}
 
+/* ========================================================================== */
+/* --- INÍCIO DAS NOVAS CUSTOMIZAÇÕES E MELHORIAS DE ESTILO --- */
+/* ========================================================================== */
+
+
+/* --- ESTILO "LER MAIS" --- */
 .descricao-container {
     position: relative;
     max-height: 4.5em;
@@ -524,292 +505,183 @@ body {
     font-weight: bold;
     text-decoration: none;
     cursor: pointer;
+    font-size: 0.9rem;
 }
 .ler-mais-btn:hover {
-    color: #212529;
+    color: #1e5943;
     text-decoration: underline;
 }
 
-/* --- ESTILOS DOS CARDS DO DASHBOARD (BASEADO NO FIGMA) --- */
+/* --- ESTILOS DOS CARDS DO PAINEL DE CONTROLE (BASEADO NO FIGMA) --- */
 .card {
-    border: none; /* Remove a borda padrão */
-    border-radius: 12px; /* Bordas mais arredondadas */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
-}
-
-.card-body {
-    padding: 15px; /* Um pouco mais de padding interno */
-    display: flex; /* Para centralizar os itens com flexbox */
-    flex-direction: column; /* Conteúdo em coluna */
-    align-items: flex-start; /* Alinha o conteúdo à esquerda */
-    text-align: left; /* Garante que o texto comece à esquerda */
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .card-icon {
-    font-size: 1.3rem; /* Ícone maior */
-    margin-bottom: 12px; /* Espaço abaixo do ícone */
-    width: 40px; /* Largura fixa para o círculo do ícone */
-    height: 40px; /* Altura fixa para o círculo do ícone */
-    border-radius: 30%; /* Faz o círculo */
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.card-icon.primary {
-    background-color: #E6F3EB; /* Verde claro */
-    color: #1E5943; /* Verde escuro */
-}
+.card-icon.primary { background-color: #E6F3EB; color: #1E5943; }
+.card-icon.danger { background-color: #F8EAEA; color: #DC3545; }
+.card-icon.info { background-color: #EAF4F9; color: #17A2B8; }
+.card-icon.success { background-color: #EBF8EE; color: #28A745; }
+.card-icon.warning-soft { background-color: #FFF8E1; color: #d69d00; }
+.card-icon.dark-soft { background-color: #E9ECEF; color: #343A40; }
 
-.card-icon.danger {
-    background-color: #F8EAEA; /* Vermelho claro */
-    color: #DC3545; /* Vermelho escuro */
-}
-
-.card-icon.info {
-    background-color: #EAF4F9; /* Azul claro */
-    color: #17A2B8; /* Azul escuro */
-}
-
-.card-icon.success {
-    background-color: #EBF8EE; /* Verde claro mais suave */
-    color: #28A745; /* Verde padrão */
-}
 
 .card-title-dashboard {
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem; /* Título menor, como no Figma */
-    font-weight: 500; /* Medium weight */
-    color: #6c757d; /* Cor cinza */
-    margin-bottom: 5px; /* Espaço abaixo do título */
-    text-transform: none; /* Sem uppercase */
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 5px;
 }
 
 .card-number {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.8rem; /* Número maior e em destaque */
-    font-weight: 600; /* Semi-bold */
-    color: #343a40; /* Cor mais escura para destaque */
-    line-height: 1; /* Garante que o número não quebre linha */
-}
-
-.card-body .row.no-gutters {
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.card-body .row.no-gutters .col.mr-2 {
-    margin-right: 0 !important; /* Remove margem extra */
-}
-
-.card-body .row.no-gutters .col-auto {
-    display: none; /* Esconde o ícone antigo do canto */
-}
-
-.card-body .text-xs,
-.card-body .h5 {
-    font-weight: normal !important;
-    text-transform: none !important;
-    margin-bottom: 0 !important;
-}
-
-/* --- ESTILO DA TABELA DE SOLICITAÇÕES (HOME) --- */
-
-.stylish-table {
-    border-collapse: separate;
-    border-spacing: 0 10px; /* Espaçamento vertical entre as linhas */
-}
-
-.stylish-table thead th {
-    border: none;
-    color: #6c757d;
-    font-size: 0.85rem;
-    text-transform: uppercase;
+    font-size: 1.8rem;
     font-weight: 600;
+    color: #343a40;
+    line-height: 1;
 }
 
-.stylish-table tbody tr {
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
+/* EFEITOS DE HOVER E ATIVO PARA CARDS DE STATUS */
+.card-status-hover { transition: all 0.3s ease-in-out; }
+.card-status-hover:hover { transform: translateY(-5px); border-color: #ccc; }
+
+.card[class*="card-status-active-"] { color: #fff !important; }
+.card[class*="card-status-active-"] .card-title-dashboard,
+.card[class*="card-status-active-"] .card-number { color: #fff !important; }
+.card[class*="card-status-active-"] .card-icon { background-color: rgba(255, 255, 255, 0.2) !important; color: #fff !important; }
+
+.card-status-active-danger { background-color: #dc3545; border-color: #c82333; }
+.card-status-active-warning { background-color: #ffc107; border-color: #e0a800; }
+.card-status-active-warning .card-title-dashboard,
+.card-status-active-warning .card-number,
+.card-status-active-warning .card-icon { color: #212529 !important; }
+.card-status-active-success { background-color: #198754; border-color: #157347; }
+.card-status-active-dark { background-color: #343a40; border-color: #212529; }
+
+
+/* FILTRO DE PERÍODO ESTILO PÍLULA */
+.filter-pills { display: flex; background-color: #f0f2f5; border-radius: 50px; padding: 5px; gap: 5px; }
+.filter-pills a { padding: 6px 16px; text-decoration: none; font-size: 0.9rem; font-weight: 500; color: #6c757d; border-radius: 50px; transition: all 0.3s ease; border: none; }
+.filter-pills a:not(.active):hover { background-color: #e9ecef; color: #343a40; }
+.filter-pills a.active { background-color: #1e5943; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); font-weight: 600; }
+
+
+/* BOTÃO DE AÇÃO PRINCIPAL (EX: NOVA SOLICITAÇÃO) */
+.btn-principal-acao {
+  background-color: #1e5943 !important;
+  border-color: #1e5943 !important;
+  color: #ffffff !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px;
+  box-shadow: 0 4px 12px rgba(30, 89, 67, 0.2);
+  transition: all 0.2s ease-out;
+}
+.btn-principal-acao:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 89, 67, 0.3);
 }
 
-.stylish-table tbody tr:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+/* SELETOR DE ORDENAÇÃO CUSTOMIZADO */
+.custom-select-wrapper { position: relative; }
+.form-select-custom { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 50px; padding: 8px 36px 8px 16px; font-weight: 500; color: #343a40; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; }
+.form-select-custom:hover { border-color: #adb5bd; background-color: #f8f9fa; }
+.form-select-custom:focus { outline: none; border-color: #1e5943; box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25); }
+.custom-select-wrapper::after { content: '\f282'; font-family: "bootstrap-icons"; font-size: 0.9rem; font-weight: bold; color: #6c757d; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
-.stylish-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-    border: none;
-}
 
-.stylish-table tbody td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-}
-.stylish-table tbody td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
+/* ESTILO REFINADO PARA O CARD DE SOLICITAÇÃO */
+.card-denuncia { border-left: 5px solid #FFADAD; }
+.card-sugestao { border-left: 5px solid #A0C4A4; }
 
-.badge.bg-danger-soft {
+.card-solicitacao { border: 1px solid #e9ecef; transition: all 0.2s ease-in-out; border-radius: 12px; background-color: #fff; overflow: hidden; }
+.card-solicitacao:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); border-color: #dee2e6; }
+.card-solicitacao .card-header { background-color: #fff; border-bottom: 1px solid #f0f2f5; padding: 1rem 1.25rem; }
+.card-solicitacao .card-header h6 { font-weight: 600; color: #343a40; }
+.card-solicitacao .card-header small { font-weight: 500; }
+.card-solicitacao .card-body { padding: 1.25rem; }
+.card-metadata { font-size: 0.9rem; color: #6c757d; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f2f5; }
+.card-metadata i { color: #1E5943; margin-right: 4px; }
+.img-thumbnail-solicitacao { height: 80px !important; width: 80px !important; object-fit: cover; border: 2px solid #e9ecef; padding: 3px; transition: transform 0.2s; border-radius: 8px; }
+.img-thumbnail-solicitacao:hover { transform: scale(1.05); border-color: #1E5943; }
+.card-solicitacao .card-footer { background-color: #f8f9fa; border-top: 1px solid #f0f2f5; gap: 8px; padding: 0.75rem 1.25rem; }
+.card-solicitacao .card-footer .btn { border-radius: 50px !important; font-weight: 600 !important; padding: 6px 16px !important; display: inline-flex !important; align-items: center !important; gap: 5px; transition: all 0.2s ease-out; }
+.card-solicitacao .card-footer .btn-outline-info { border-color: #1e5943 !important; color: #1e5943 !important; }
+.card-solicitacao .card-footer .btn-outline-info:hover { background-color: #1e5943 !important; color: #fff !important; }
+.card-solicitacao .card-footer .btn-primary { background-color: #1e5943 !important; border-color: #1e5943 !important; box-shadow: 0 4px 12px rgba(30, 89, 67, 0.2); }
+.card-solicitacao .card-footer .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(30, 89, 67, 0.3); }
+
+.status-badge { padding: 0.4em 0.8em; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; border-radius: 20px; letter-spacing: 0.5px; }
+
+
+/* ESTILO GLOBAL PARA FORMULÁRIOS MODERNOS */
+.page-header { border-bottom: 1px solid #e9ecef; padding-bottom: 1rem; }
+.form-control-custom { border-radius: 8px !important; border: 1px solid #ced4da !important; padding: 0.75rem 1rem !important; transition: all 0.2s ease-in-out; }
+.form-control-custom:focus { outline: none !important; border-color: #1e5943 !important; box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important; }
+textarea.form-control-custom { resize: vertical; }
+.form-section { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #f0f2f5; }
+.form-section-title { font-size: 1.1rem; font-weight: 600; color: #343a40; margin-bottom: 1.5rem; }
+.map-container-form { border-radius: 12px; border: 1px solid #dee2e6; width: 100%; }
+.btn-secondary-custom { border-radius: 50px !important; font-weight: 500 !important; padding: 8px 16px !important; background-color: #f0f2f5; border: 1px solid #f0f2f5; color: #343a40; display: inline-flex; align-items: center; }
+.btn-secondary-custom:hover { background-color: #e2e6ea; border-color: #e2e6ea; }
+.btn-danger-outline { border-radius: 50px !important; font-weight: 600 !important; padding: 8px 20px !important; background-color: transparent !important; border: 2px solid #dc3545 !important; color: #dc3545 !important; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease-out; }
+.btn-danger-outline:hover { background-color: #dc3545 !important; color: #fff !important; }
+
+/* UPLOAD DE IMAGEM CUSTOMIZADO */
+.custom-file-upload { border: 2px dashed #dee2e6; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; position: relative; transition: all 0.2s ease-in-out; }
+.custom-file-upload:hover { border-color: #1e5943; background-color: #f8f9fa; }
+.custom-file-upload i { font-size: 2rem; color: #1e5943; display: block; margin-bottom: 0.5rem; }
+.custom-file-upload span { color: #6c757d; font-weight: 500; }
+.custom-file-upload input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+/* GALERIA DE IMAGENS EXISTENTES */
+.image-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; }
+.gallery-item { position: relative; overflow: hidden; border-radius: 8px; border: 1px solid #e9ecef; }
+.gallery-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
+.gallery-item .view-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0; transition: opacity 0.2s ease-in-out; }
+.gallery-item:hover .view-icon { opacity: 1; }
+
+/* AJUSTES DE COMPACIDADE PARA REDUZIR ROLAGEM */
+.page-header { padding-bottom: 0.75rem; margin-bottom: 1.5rem !important; }
+.form-section-title { margin-bottom: 1.25rem; }
+.card .mb-3 { margin-bottom: 0.9rem !important; }
+.map-container-form { height: 380px; }
+.custom-file-upload { padding: 1.5rem; }
+.custom-file-upload i { font-size: 1.8rem; }
+.image-gallery-grid { gap: 0.75rem; }
+
+/* --- CORES PARA OS BADGES DE STATUS DA TABELA --- */
+
+.status-em_aberto {
     background-color: #F8EAEA !important;
     color: #DC3545 !important;
 }
-.badge.bg-warning-soft {
+
+.status-em_andamento {
     background-color: #FFF8E1 !important;
-    color: #FFC107 !important;
+    color: #d69d00 !important;
 }
-.badge.bg-success-soft {
+
+.status-finalizado {
     background-color: #EBF8EE !important;
     color: #28A745 !important;
 }
-.badge.bg-dark-soft {
+
+.status-recusado {
     background-color: #E9ECEF !important;
     color: #343A40 !important;
-}
-
-.map-page-container {
-    padding: 0px; /* Remove padding extra do container para o mapa ficar colado nas bordas do card */
-}
-
-/* Card que envolve o mapa */
-.map-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px; /* Margem abaixo do card */
-    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
-}
-
-.map-header-card {
-    padding: 15px 20px;
-    background-color: #fff;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.map-header-card h6 {
-    margin: 0;
-    font-weight: 600;
-    color: #1E5943;
-}
-
-/* Container do mapa para definir o tamanho exato */
-#map-container {
-    height: 60vh; /* ALTURA FIXA E DIMINUIDA PARA O MAPA */
-    width: 100%;
-    border-bottom-left-radius: 12px; /* Arredonda os cantos inferiores */
-    border-bottom-right-radius: 12px; /* Arredonda os cantos inferiores */
-}
-
-/* O mapa em si deve ocupar 100% do seu container */
-#map {
-    height: 100%;
-    width: 100%;
-    z-index: 1; /* Garante que o mapa esteja sobre outros elementos */
-}
-.main-content {
-    overflow-y: hidden; /* Evita a barra de rolagem vertical na página */
-}
-
-/* --- AJUSTE DE ESPAÇAMENTO NA PÁGINA DO MAPA --- */
-/* Esta regra é para a div que contém "Mapa Interativo".
-  Vamos reduzir a margem inferior dela.
-*/
-.page-content .header-greeting {
-    margin-bottom: 1rem; /* Diminui o espaçamento para 16px */
-}
-
-/* E esta regra diminui a margem padrão do título H2
-  para deixar tudo mais compacto.
-*/
-.page-content .header-greeting h2 {
-    margin-bottom: 0.25rem; /* Diminui o espaçamento abaixo do título */
-}
-
-/* --- ESTILO DOS CONTROLES DO MAPA (VERSÃO CORRIGIDA) --- */
-
-/* 1. Move a barra de ferramentas para o topo e centro */
-.leaflet-top.leaflet-left {
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1001;
-}
-
-/* 2. Deixa as barras na horizontal */
-.leaflet-draw-section .leaflet-draw-toolbar,
-.leaflet-draw-actions {
-    display: flex;
-    gap: 8px; /* Espaço entre os botões */
-    align-items: center;
-}
-.leaflet-draw-actions {
-    background: none !important;
-    box-shadow: none !important;
-}
-.leaflet-bar {
-    box-shadow: none !important; /* Remove sombra extra do container */
-}
-
-
-/* 3. Estilo geral dos botões (agora redondos e focados no ícone) */
-.leaflet-draw-toolbar a,
-.leaflet-draw-actions a {
-    background-image: none !important; /* Esconde o ícone original */
-    background-color: #fff !important;
-    border: 1px solid #ddd !important;
-    border-radius: 50% !important; /* Deixa os botões perfeitamente redondos */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
-    width: 40px !important;  /* Largura fixa */
-    height: 40px !important; /* Altura fixa */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important; /* Centraliza o ícone */
-    padding: 0 !important;
-    transition: all 0.2s ease;
-}
-
-.leaflet-draw-toolbar a:hover,
-.leaflet-draw-actions a:hover {
-    background-color: #f5f5f5 !important;
-    border-color: #ccc !important;
-}
-
-/* 4. SUBSTITUI OS ÍCONES USANDO O BOOTSTRAP ICONS */
-.leaflet-draw-toolbar a::before,
-.leaflet-draw-actions a::before {
-    font-family: "bootstrap-icons" !important;
-    font-size: 1.1rem; /* Tamanho do ícone */
-    line-height: 1;
-    /* Propriedades para garantir a renderização correta da fonte de ícones */
-    font-style: normal;
-    font-weight: normal !important;
-    font-variant: normal;
-    text-transform: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Define qual ícone vai em qual botão */
-.leaflet-draw-draw-polygon a::before { content: "\F51B"; } /* Ícone de pentágono */
-.leaflet-draw-draw-rectangle a::before { content: "\F5B1"; } /* Ícone de retângulo com cantos */
-.leaflet-draw-draw-marker a::before { content: "\F3E8"; } /* Ícone de pino de mapa */
-.leaflet-edit-edit a::before { content: "\F4CA"; } /* Ícone de lápis */
-.leaflet-edit-remove a::before { content: "\F5DE"; } /* Ícone de lixeira */
-.leaflet-draw-actions li:first-child a::before { content: "\F28A"; } /* Ícone de check */
-.leaflet-draw-actions li:last-child a::before { content: "\F62A"; } /* Ícone de X */
-
-/* Destaque para o botão quando uma ferramenta está ativa */
-.leaflet-draw-toolbar a.leaflet-draw-enabled {
-    background-color: #E6F3EB !important;
-    color: #1E5943 !important;
-    border-color: #1E5943 !important;
 }

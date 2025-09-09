@@ -87,15 +87,9 @@
                                         <td>{{ solicitacao.descricao|truncatewords:10 }}</td>
                                         <td>{{ solicitacao.cidadao.username }}</td>
                                         <td>
-                                            {% if solicitacao.status == 'EM_ABERTO' %}
-                                                <span class="badge bg-danger-soft">{{ solicitacao.get_status_display }}</span>
-                                            {% elif solicitacao.status == 'EM_ANDAMENTO' %}
-                                                <span class="badge bg-warning-soft">{{ solicitacao.get_status_display }}</span>
-                                            {% elif solicitacao.status == 'FINALIZADO' %}
-                                                <span class="badge bg-success-soft">{{ solicitacao.get_status_display }}</span>
-                                            {% else %}
-                                                <span class="badge bg-dark-soft">{{ solicitacao.get_status_display }}</span>
-                                            {% endif %}
+                                            <span class="badge status-badge status-{{ solicitacao.status|lower }}">
+                                                {{ solicitacao.get_status_display }}
+                                            </span>
                                         </td>
                                         <td>{{ solicitacao.data_criacao|timesince }} atrás</td>
                                     </tr>
