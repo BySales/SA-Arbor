@@ -718,3 +718,98 @@ body {
 .main-content {
     overflow-y: hidden; /* Evita a barra de rolagem vertical na página */
 }
+
+/* --- AJUSTE DE ESPAÇAMENTO NA PÁGINA DO MAPA --- */
+/* Esta regra é para a div que contém "Mapa Interativo".
+  Vamos reduzir a margem inferior dela.
+*/
+.page-content .header-greeting {
+    margin-bottom: 1rem; /* Diminui o espaçamento para 16px */
+}
+
+/* E esta regra diminui a margem padrão do título H2
+  para deixar tudo mais compacto.
+*/
+.page-content .header-greeting h2 {
+    margin-bottom: 0.25rem; /* Diminui o espaçamento abaixo do título */
+}
+
+/* --- ESTILO DOS CONTROLES DO MAPA (VERSÃO CORRIGIDA) --- */
+
+/* 1. Move a barra de ferramentas para o topo e centro */
+.leaflet-top.leaflet-left {
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+}
+
+/* 2. Deixa as barras na horizontal */
+.leaflet-draw-section .leaflet-draw-toolbar,
+.leaflet-draw-actions {
+    display: flex;
+    gap: 8px; /* Espaço entre os botões */
+    align-items: center;
+}
+.leaflet-draw-actions {
+    background: none !important;
+    box-shadow: none !important;
+}
+.leaflet-bar {
+    box-shadow: none !important; /* Remove sombra extra do container */
+}
+
+
+/* 3. Estilo geral dos botões (agora redondos e focados no ícone) */
+.leaflet-draw-toolbar a,
+.leaflet-draw-actions a {
+    background-image: none !important; /* Esconde o ícone original */
+    background-color: #fff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 50% !important; /* Deixa os botões perfeitamente redondos */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+    width: 40px !important;  /* Largura fixa */
+    height: 40px !important; /* Altura fixa */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* Centraliza o ícone */
+    padding: 0 !important;
+    transition: all 0.2s ease;
+}
+
+.leaflet-draw-toolbar a:hover,
+.leaflet-draw-actions a:hover {
+    background-color: #f5f5f5 !important;
+    border-color: #ccc !important;
+}
+
+/* 4. SUBSTITUI OS ÍCONES USANDO O BOOTSTRAP ICONS */
+.leaflet-draw-toolbar a::before,
+.leaflet-draw-actions a::before {
+    font-family: "bootstrap-icons" !important;
+    font-size: 1.1rem; /* Tamanho do ícone */
+    line-height: 1;
+    /* Propriedades para garantir a renderização correta da fonte de ícones */
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Define qual ícone vai em qual botão */
+.leaflet-draw-draw-polygon a::before { content: "\F51B"; } /* Ícone de pentágono */
+.leaflet-draw-draw-rectangle a::before { content: "\F5B1"; } /* Ícone de retângulo com cantos */
+.leaflet-draw-draw-marker a::before { content: "\F3E8"; } /* Ícone de pino de mapa */
+.leaflet-edit-edit a::before { content: "\F4CA"; } /* Ícone de lápis */
+.leaflet-edit-remove a::before { content: "\F5DE"; } /* Ícone de lixeira */
+.leaflet-draw-actions li:first-child a::before { content: "\F28A"; } /* Ícone de check */
+.leaflet-draw-actions li:last-child a::before { content: "\F62A"; } /* Ícone de X */
+
+/* Destaque para o botão quando uma ferramenta está ativa */
+.leaflet-draw-toolbar a.leaflet-draw-enabled {
+    background-color: #E6F3EB !important;
+    color: #1E5943 !important;
+    border-color: #1E5943 !important;
+}
