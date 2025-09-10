@@ -1,0 +1,89 @@
+{% extends 'core/base_app.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        Detalhes da Solicitação #{{ solicitacao.id }}
+    </h2>
+    <div>
+        <a href="{% url 'solicitacao_list' %}" class="btn btn-secondary-custom me-2">
+            <i class="bi bi-arrow-left me-1"></i>
+            Voltar
+        </a>
+        <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-principal-acao">
+            <i class="bi bi-pencil-fill me-1"></i>
+            Editar Solicitação
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-lg-6">
+                <h5 class="form-section-title">Informações Gerais</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Tipo:</dt>
+                    <dd class="col-sm-8">{{ solicitacao.get_tipo_display }}</dd>
+
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8"><span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span></dd>
+
+                    <dt class="col-sm-4">Cidadão:</dt>
+                    <dd class="col-sm-8">{{ solicitacao.cidadao.username }}</dd>
+
+                    <dt class="col-sm-4">Data de Criação:</dt>
+                    <dd class="col-sm-8">{{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</dd>
+                </dl>
+
+                <h5 class="form-section-title mt-4">Descrição</h5>
+                <p>{{ solicitacao.descricao|linebreaks }}</p>
+
+                {% if solicitacao.imagens.all %}
+                <div class="mb-3 mt-4">
+                    <h5 class="form-section-title">Imagens ({{ solicitacao.imagens.count }})</h5>
+                    <div class="image-gallery-grid">
+                        {% for imagem_obj in solicitacao.imagens.all %}
+                            <div class="gallery-item">
+                                <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação">
+                                <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="view-icon" title="Ver imagem"><i class="bi bi-eye-fill"></i></a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-6">
+                <h5 class="form-section-title">Localização</h5>
+                <div id="map-viewer" class="map-container-form"></div>
+            </div>
+        </div>
+
+        {% if user.is_staff or user.is_superuser %}
+        <div class="form-section">
+            <h5 class="form-section-title">Gestão da Solicitação (Admin)</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Equipe Delegada:</dt>
+                <dd class="col-sm-8">{{ solicitacao.equipe_delegada.nome|default:"Nenhuma equipe delegada." }}</dd>
+            </dl>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if solicitacao.latitude and solicitacao.longitude %}
+        const lat = {{ solicitacao.latitude|stringformat:"f" }};
+        const lon = {{ solicitacao.longitude|stringformat:"f" }};
+        const map = L.map('map-viewer').setView([lat, lon], 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([lat, lon]).addTo(map);
+    {% else %}
+        // Oculta o mapa se não houver coordenadas
+        document.getElementById('map-viewer').innerHTML = '<div class="alert alert-light text-center p-5">Sem informações de localização para exibir no mapa.</div>';
+    {% endif %}
+});
+</script>
+{% endblock %}

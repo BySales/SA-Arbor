@@ -1,26 +1,50 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Catálogo de Espécies</h2>
-        <a href="{% url 'especie_create' %}" class="btn btn-primary">Adicionar Nova Espécie</a>
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Catálogo de Espécies</h2>
+        <a href="{% url 'especie_create' %}" class="btn btn-principal-acao">
+            <i class="bi bi-plus-circle-fill me-1"></i>
+            Adicionar Nova Espécie
+        </a>
     </div>
 
     {% for especie in especies %}
-        <div class="card mb-3">
-            <div class="card-header">
-                <strong>{{ especie.nome_popular }}</strong>
-            </div>
+        <div class="card card-list-item mb-3">
             <div class="card-body">
-                <h5 class="card-title">{{ especie.nome_cientifico|default:"Nome científico não informado" }}</h5>
-                <p class="card-text">{{ especie.descricao|default:"Sem descrição." }}</p>
-                <a href="{% url 'especie_update' pk=especie.pk %}" class="btn btn-secondary btn-sm">Editar</a>
-                <a href="{% url 'especie_delete' pk=especie.pk %}" class="btn btn-danger btn-sm">Deletar</a>
+                <div class="d-flex justify-content-between align-items-start">
+                    
+                    <div class="me-3">
+                        <h5 class="mb-0">{{ especie.nome_popular }}</h5>
+                        <small class="text-muted fst-italic">{{ especie.nome_cientifico|default:"Nome científico não informado" }}</small>
+                        <p class="card-text mt-2">{{ especie.descricao|default:"Sem descrição."|truncatewords:40 }}</p>
+                    </div>
+
+<div class="card-actions">
+    <a href="{% url 'especie_update' pk=especie.pk %}" class="btn btn-secondary-custom btn-sm">
+        <i class="bi bi-pencil-fill me-1"></i>
+        <span>Editar</span>
+    </a>
+    <a href="{% url 'especie_delete' pk=especie.pk %}" class="btn btn-danger-outline btn-sm">
+         <i class="bi bi-trash-fill me-1"></i>
+         <span>Deletar</span>
+    </a>
+</div>
+
+                </div>
             </div>
         </div>
     {% empty %}
-        <div class="alert alert-warning">
-            Nenhuma espécie encontrada no catálogo.
+        <div class="empty-state-container text-center py-5">
+            <div class="empty-state-icon">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h4>Seu catálogo está vazio</h4>
+            <p class="text-muted">Comece adicionando a primeira espécie de árvore.</p>
+            <a href="{% url 'especie_create' %}" class="btn btn-principal-acao mt-3">
+                <i class="bi bi-plus-circle-fill me-1"></i>
+                Adicionar Espécie
+            </a>
         </div>
     {% endfor %}
 {% endblock %}

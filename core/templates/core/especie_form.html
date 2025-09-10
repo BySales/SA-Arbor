@@ -1,11 +1,48 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
-    <h2>{{ titulo }}</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Salvar Espécie</button>
-        <a href="{% url 'especie_list' %}" class="btn btn-light">Cancelar</a>
-    </form>
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{{ titulo }}</h2>
+    <a href="{% url 'especie_list' %}" class="btn btn-secondary-custom">
+        <i class="bi bi-arrow-left me-1"></i>
+        Voltar ao Catálogo
+    </a>
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="card">
+        <div class="card-body p-4">
+
+            <div class="mb-3">
+                <label for="{{ form.nome_popular.id_for_label }}" class="form-label">{{ form.nome_popular.label }}</label>
+                {{ form.nome_popular }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.nome_cientifico.id_for_label }}" class="form-label">{{ form.nome_cientifico.label }}</label>
+                {{ form.nome_cientifico }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.descricao.id_for_label }}" class="form-label">{{ form.descricao.label }}</label>
+                {{ form.descricao }}
+            </div>
+
+        </div>
+        <div class="card-footer text-end">
+            <a href="{% url 'especie_list' %}" class="btn btn-light me-2">Cancelar</a>
+            
+            {% comment %} LÓGICA PARA MUDAR O TEXTO DO BOTÃO {% endcomment %}
+            <button type="submit" class="btn btn-principal-acao">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                {% if form.instance.pk %}
+                    Atualizar Espécie
+                {% else %}
+                    Salvar Espécie
+                {% endif %}
+            </button>
+        </div>
+    </div>
+</form>
 {% endblock %}

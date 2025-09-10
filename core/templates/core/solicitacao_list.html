@@ -147,15 +147,16 @@
                             {% endif %}
                         </div>
                         <div class="card-footer bg-white d-flex justify-content-end align-items-center">
-                            {% if solicitacao.latitude and solicitacao.longitude %}
-                                <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
-                                    <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
-                                </a>
-                            {% endif %}
-                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
-                                <i class="bi bi-pencil-square"></i> Detalhes / Editar
-                            </a>
-                        </div>
+    {% if solicitacao.latitude and solicitacao.longitude %}
+        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
+            <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
+        </a>
+    {% endif %}
+    {% comment %} MUDANÇA PRINCIPAL AQUI {% endcomment %}
+    <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-eye-fill"></i> Ver Detalhes
+    </a>
+</div>
                     </div>
                 {% empty %}
                     <div class="alert alert-warning">

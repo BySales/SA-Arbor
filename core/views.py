@@ -141,6 +141,17 @@ def solicitacao_create(request):
     return render(request, 'core/solicitacao_form.html', {'form': form})
 
 @login_required
+def solicitacao_detail(request, pk):
+    solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    # Esta view simplesmente pega o objeto e manda para um novo template
+    # que vamos criar, o 'solicitacao_detail.html'.
+    context = {
+        'solicitacao': solicitacao
+    }
+    return render(request, 'core/solicitacao_detail.html', context)
+
+
+@login_required
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':

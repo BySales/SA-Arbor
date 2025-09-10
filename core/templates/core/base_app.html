@@ -2,7 +2,7 @@
 <!doctype html>
 <html lang="pt-br">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-g">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}" style="width: 60px;">
@@ -35,24 +35,24 @@
     <div class="app-container">
         <nav class="sidebar">
             <div>
-               <div class="sidebar-header">
+                <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <img src="{% static 'core/img/arvore-logo-verde.png' %}" alt="Logo Arbor" style="width: 48px;">
                         <span class="sidebar-logo-text">Arbor</span>
                     </div>
                 </div>
-                                 <ul class="sidebar-menu">
+                <ul class="sidebar-menu">
                     <li class="menu-header"><span>Início</span></li>
                     
                     <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
                     <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
-                    <li><a href="{% url 'solicitacao_list' %}" class="{% if request.resolver_match.url_name == 'solicitacao_list' %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
-                    <li><a href="{% url 'obras_list' %}" class="{% if request.resolver_match.url_name == 'obras_list' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
+                    <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
+                    <li><a href="{% url 'obras_list' %}" class="{% if 'obras' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
                     <li><a href="#"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
 
                     <li class="menu-header"><span>Cadastros</span></li>
-                    <li><a href="{% url 'especie_list' %}" class="{% if request.resolver_match.url_name == 'especie_list' or request.resolver_match.url_name == 'especie_create' or request.resolver_match.url_name == 'especie_update' %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Árvores</span></a></li>
-                    <li><a href="{% url 'equipe_list' %}" class="{% if request.resolver_match.url_name == 'equipe_list' or request.resolver_match.url_name == 'equipe_create' or request.resolver_match.url_name == 'equipe_update' %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
+                    <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Árvores</span></a></li>
+                    <li><a href="{% url 'equipe_list' %}" class="{% if 'equipe' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
                 </ul>
             </div>
 
@@ -71,11 +71,11 @@
                 </div>
 
                 <div class="header-search">
-    <form action="{% url 'search_results' %}" method="get" class="d-flex">
-        <i class="bi bi-search"></i>
-        <input class="form-control" type="search" name="q" placeholder="Buscar no sistema..." aria-label="Search">
-    </form>
-</div>
+                    <form action="{% url 'search_results' %}" method="get" class="d-flex">
+                        <i class="bi bi-search"></i>
+                        <input class="form-control" type="search" name="q" placeholder="Buscar no sistema..." aria-label="Search">
+                    </form>
+                </div>
 
                 <div class="header-actions">
                     <a href="#"><i class="bi bi-bell"></i></a>
@@ -90,25 +90,28 @@
                     <form action="{% url 'logout' %}" method="post" class="d-inline">
                         {% csrf_token %}
                          <button type="submit" class="btn btn-sm btn-outline-danger ms-3">Sair</button>
-                     </form>
+                      </form>
                 </div>
             </header>
 
             <div class="page-content">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                
-                {% block content %}{% endblock %}
+                <div class="container-xl">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% block content %}{% endblock %}
+                </div>
             </div>
         </main>
     </div>
 
     <script src="{% static 'core/js/main.js' %}"></script>
-  </body>
+    
+    {% block scripts %}{% endblock %} </body>
 </html>

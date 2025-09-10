@@ -685,3 +685,189 @@ textarea.form-control-custom { resize: vertical; }
     background-color: #E9ECEF !important;
     color: #343A40 !important;
 }
+
+/* --- ESTILOS PARA O PAINEL DE OBRAS (ACCORDION) --- */
+
+.accordion-item {
+    border: 1px solid #e9ecef !important;
+    border-radius: 12px !important;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+.accordion-header {
+    border-radius: 12px !important;
+}
+
+.accordion-button {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #343a40;
+    background-color: #f8f9fa !important;
+    border-radius: 12px !important;
+}
+
+.accordion-button:not(.collapsed) {
+    box-shadow: none !important;
+    color: #1e5943;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important;
+    border-color: transparent !important;
+}
+
+.accordion-button::after {
+    /* Customiza a seta do accordion */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.accordion-body {
+    background-color: #fdfdfd;
+    padding: 1.5rem;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* --- ESTILO PARA OS CARDS DE TAREFAS (OBRAS) --- */
+
+.card-obra {
+    position: relative;
+    border: 1px solid #e9ecef;
+    border-left-width: 5px; /* Borda lateral mais grossa */
+    transition: all 0.2s ease-in-out;
+}
+
+.card-obra:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-color: #ccc;
+}
+
+/* Cor da borda para Áreas */
+.card-obra-area {
+    border-left-color: #6f42c1; /* Roxo */
+}
+
+/* Cor da borda para Solicitações */
+.card-obra-solicitacao {
+    border-left-color: #fd7e14; /* Laranja */
+}
+
+.card-obra .card-body {
+    padding: 1rem;
+}
+
+.card-obra .card-title {
+    font-weight: 600;
+}
+
+.card-obra .card-footer-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* --- ESTILOS PARA LISTAS DE ITENS (EX: CATÁLOGO) --- */
+/* SUBSTITUA O SEU BLOCO ANTIGO POR ESTE AQUI */
+
+.card-list-item {
+    border: 1px solid #e9ecef;
+    border-left: 4px solid #e9ecef; /* Borda inicial neutra */
+    transition: all 0.2s ease-in-out;
+}
+
+.card-list-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-left-color: #1e5943; /* Borda fica verde no hover */
+}
+
+.card-list-item .card-body {
+    padding: 1.25rem;
+}
+
+.card-list-item h5 {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.card-list-item .card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0; /* Impede que os botões quebrem a linha */
+    align-items: center; /* Alinha os botões verticalmente com o texto */
+}
+
+/* AQUI ESTÁ A MUDANÇA: removemos a altura e largura fixas */
+.card-list-item .card-actions .btn.btn-sm {
+    padding: 6px 12px !important; /* Padding ajustado para botões pequenos */
+    font-size: 0.8rem !important; /* Fonte menor para botões de ação */
+}
+
+/* --- ESTILOS PARA A PÁGINA DO MAPA INTERATIVO --- */
+
+.map-card-container {
+    position: relative;
+    overflow: hidden; /* Garante que o mapa respeite as bordas arredondadas */
+    padding: 0 !important;
+}
+
+#map {
+    height: 75vh; /* Altura do mapa - 75% da altura da tela */
+    width: 100%;
+    z-index: 1;
+}
+
+/* Base para os painéis flutuantes no mapa */
+.map-overlay-panel {
+    position: absolute;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border: 1px solid #e9ecef;
+    padding: 10px 15px;
+    width: 280px;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+#details-panel {
+    top: 20px;
+    left: 20px;
+}
+
+/* Estilo do controle de camadas padrão do Leaflet */
+.leaflet-control-layers {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(5px);
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    border: 1px solid #e9ecef !important;
+    padding: 10px;
+}
+.leaflet-control-layers-base label, .leaflet-control-layers-overlays label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+.layer-name {
+    margin-left: 8px;
+}
+
+/* Estilo do exibidor de coordenadas */
+.map-coords-display {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}

@@ -1,5 +1,4 @@
 {% extends 'core/base_app.html' %}
-{% load widget_tweaks %}
 
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
@@ -19,8 +18,8 @@
 <form method="POST" enctype="multipart/form-data" id="solicitacao-form">
     {% csrf_token %}
     
-    {{ form.latitude|attr:"type:hidden" }}
-    {{ form.longitude|attr:"type:hidden" }}
+    {{ form.latitude }}
+    {{ form.longitude }}
 
     <div class="card">
         <div class="card-body p-4">
@@ -29,11 +28,11 @@
                     <h5 class="form-section-title">Detalhes da Solicitação</h5>
                     <div class="mb-3">
                         <label class="form-label">{{ form.tipo.label }}</label>
-                        {% render_field form.tipo class="form-select form-control-custom" %}
+                        {{ form.tipo }}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ form.descricao.label }}</label>
-                        {% render_field form.descricao class="form-control form-control-custom" rows="5" %}
+                        {{ form.descricao }}
                     </div>
                     
                     <div class="mb-3">
@@ -41,7 +40,7 @@
                         <div class="custom-file-upload">
                             <i class="bi bi-cloud-arrow-up-fill"></i>
                             <span>Clique para selecionar ou arraste as imagens aqui</span>
-                            {% render_field form.imagens %}
+                            {{ form.imagens }}
                         </div>
                         <div class="form-text">Você pode adicionar até 10 imagens.</div>
                          <div id="image-count-warning" class="form-text text-danger d-none">
@@ -77,11 +76,11 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">{{ form.status.label }}</label>
-                        {% render_field form.status class="form-select form-control-custom" %}
+                        {{ form.status }}
                     </div>
                     <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;">
                         <label class="form-label">{{ form.equipe_delegada.label }}</label>
-                        {% render_field form.equipe_delegada class="form-select form-control-custom" %}
+                        {{ form.equipe_delegada }}
                     </div>
                 </div>
             </div>
