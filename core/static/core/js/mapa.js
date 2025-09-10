@@ -1,4 +1,4 @@
-// Arquivo: static/core/js/mapa.js (VERSÃO COMPLETA COM DELETE FUNCIONAL)
+// Arquivo: static/core/js/mapa.js (VERSÃO FINAL COM DELETE INSTANTÂNEO NO MAPA)
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -237,7 +237,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.status === 'ok') {
                     showToast('Sucesso!', data.message);
                     areaModal.hide();
-                    setTimeout(() => window.location.reload(), 1500);
+                    
+                    // Remove o desenho do mapa instantaneamente
+                    if (areaLayers[editingAreaId]) {
+                        camadaAreas.removeLayer(areaLayers[editingAreaId]);
+                        delete areaLayers[editingAreaId];
+                    }
                 } else {
                     showToast('Erro ao Deletar', data.message, true);
                 }
