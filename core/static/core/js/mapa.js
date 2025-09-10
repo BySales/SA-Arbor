@@ -1,10 +1,31 @@
-// Arquivo: static/core/js/mapa.js (VERSÃO FINAL COM DELETE INSTANTÂNEO NO MAPA)
+// Arquivo: static/core/js/mapa.js (VERSÃO FINAL COM REDIRECIONAMENTO DE DELEÇÃO)
 
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- FUNÇÕES AUXILIARES ---
     function showToast(title, message, isError = false) {
-        alert(`${title}: ${message}`);
+        const toastContainer = document.querySelector('.toast-container');
+        const toastEl = document.createElement('div');
+        toastEl.classList.add('toast');
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+        toastEl.innerHTML = `
+            <div class="toast-header">
+                <strong class="me-auto ${isError ? 'text-danger' : ''}">${title}</strong>
+                <small>Agora</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        `;
+        toastContainer.appendChild(toastEl);
+        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+        toastEl.addEventListener('hidden.bs.toast', function () {
+            toastEl.remove();
+        });
     }
 
     function getCookie(name) {
@@ -142,7 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
     map.on(L.Draw.Event.CREATED, function (event) {
         temporaryLayer = event.layer;
         if (event.layerType === 'marker') {
-            alert('Lógica para adicionar árvore será implementada aqui.');
+            showToast('Em Breve', 'A lógica para adicionar uma nova árvore por aqui será implementada.', false);
+            map.removeLayer(event.layer);
         } else {
             drawnItems.addLayer(temporaryLayer);
             temporaryLayer.bindPopup("Analisando área...").openPopup();
@@ -225,28 +247,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // LÓGICA DO BOTÃO DELETAR
+    // --- LÓGICA DO BOTÃO DELETAR (ATUALIZADA PARA REDIRECIONAR) ---
+    // Agora, em vez de fazer a deleção via API, ele simplesmente
+    // manda o usuário para a nova página de confirmação que a gente criou.
     deleteAreaButton.addEventListener('click', function() {
-        if (editingAreaId && confirm('Tem certeza que quer deletar esta área permanentemente?')) {
-            fetch(`/api/areas/${editingAreaId}/`, {
-                method: 'DELETE',
-                headers: { 'X-CSRFToken': csrftoken }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    showToast('Sucesso!', data.message);
-                    areaModal.hide();
-                    
-                    // Remove o desenho do mapa instantaneamente
-                    if (areaLayers[editingAreaId]) {
-                        camadaAreas.removeLayer(areaLayers[editingAreaId]);
-                        delete areaLayers[editingAreaId];
-                    }
-                } else {
-                    showToast('Erro ao Deletar', data.message, true);
-                }
-            });
+        if (editingAreaId) {
+            window.location.href = `/areas/${editingAreaId}/delete/`;
         }
     });
 

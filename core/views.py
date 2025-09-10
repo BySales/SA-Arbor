@@ -1,5 +1,12 @@
 import json
 from datetime import date, timedelta, datetime
+
+# IMPORTS ADICIONADOS AQUI
+from django.views.generic import DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+# FIM DOS IMPORTS ADICIONADOS
+
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
@@ -306,6 +313,19 @@ def especie_delete(request, pk):
             messages.error(request, f'Não foi possível deletar a espécie "{especie.nome_popular}", pois ela já está sendo utilizada em árvores no mapa.')
         return redirect('especie_list')
     return render(request, 'core/especie_confirm_delete.html', {'object': especie})
+
+
+# --- VIEWS DE ÁREA (NOVA SEÇÃO) ---
+
+class AreaDeleteView(LoginRequiredMixin, DeleteView):
+    model = Area 
+    template_name = 'core/area_confirm_delete.html'
+    success_url = reverse_lazy('mapa')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo_pagina'] = 'Confirmar Deleção de Área'
+        return context
 
 
 # --- VIEW DO MAPA ---

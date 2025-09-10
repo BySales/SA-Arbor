@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="page-header">
-        <h2 class="mb-0">Mapa Interativo</h2>
+        <h2 class="mb-0">(Beta)Mapa Interativo</h2>
         <p class="text-muted">Visualize, gerencie e planeje as áreas verdes da cidade.</p>
     </div>
 
@@ -24,7 +24,6 @@
         </div>
     </div>
 
-    {% comment %} O HTML DO MODAL QUE ESTAVA FALTANDO ENTRA AQUI {% endcomment %}
     <div class="modal fade" id="areaFormModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -64,6 +63,9 @@
             </div>
         </div>
     </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        </div>
 
     {{ arvores_data|json_script:"arvores-data-json" }}
     {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
