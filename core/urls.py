@@ -3,7 +3,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import (
-    # Adicionamos a view de deleção de Área aqui na lista:
+    # Lista de todas as suas views
     solicitacao_list, solicitacao_create, solicitacao_update, solicitacao_delete, solicitacao_detail,
     especie_list, especie_create, especie_update, especie_delete,
     mapa_view, cadastro_view, salvar_area, area_manage_api, 
@@ -11,7 +11,8 @@ from .views import (
     search_results_view,
     obras_view,
     analisar_area_api, recuperar_senha_view, home_view,
-    AreaDeleteView # <<< PEÇA NOVA NA ÁREA
+    AreaDeleteView,
+    relatorios_view # Adicionada aqui
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -42,8 +43,8 @@ urlpatterns = [
     path('equipes/<int:pk>/editar/', equipe_update, name='equipe_update'),
     path('equipes/<int:pk>/deletar/', equipe_delete, name='equipe_delete'),
 
-    # --- URLs DE ÁREA (COM A NOVA ROTA) ---
-    path('areas/<int:pk>/delete/', AreaDeleteView.as_view(), name='area_delete'), # <<< ROTA NOVA
+    # --- URLs DE ÁREA ---
+    path('areas/<int:pk>/delete/', AreaDeleteView.as_view(), name='area_delete'), 
 
     # --- URLs do Mapa e APIs ---
     path('mapa/', mapa_view, name='mapa'),
@@ -59,6 +60,9 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('recuperar-senha/', recuperar_senha_view, name='recuperar_senha'),
     path('configuracoes/', configuracoes_view, name='configuracoes'),
+
+    # --- URL DE RELATÓRIOS ---
+    path('relatorios/', relatorios_view, name='relatorios'),
 ]
 
 if settings.DEBUG:

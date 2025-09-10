@@ -48,7 +48,7 @@
                     <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
                     <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
                     <li><a href="{% url 'obras_list' %}" class="{% if 'obras' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
-                    <li><a href="#"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
+                    <li><a href="{% url 'relatorios' %}" class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
 
                     <li class="menu-header"><span>Cadastros</span></li>
                     <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Árvores</span></a></li>

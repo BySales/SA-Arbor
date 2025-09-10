@@ -737,3 +737,63 @@ def home_view(request):
         'ultimas_solicitacoes': ultimas_solicitacoes,
     }
     return render(request, 'core/home.html', context)
+
+@login_required
+def relatorios_view(request):
+    """
+    View para a Central de Relatórios.
+    """
+    # --- 1. CÁLCULO DOS KPIs (INDICADORES CHAVE) ---
+    total_arvores = InstanciaArvore.objects.count()
+    diversidade_especies = Especie.objects.count()
+    solicitacoes_finalizadas = Solicitacao.objects.filter(status='FINALIZADO').count()
+    solicitacoes_em_aberto = Solicitacao.objects.filter(status='EM_ABERTO').count()
+
+    # --- 2. DADOS PARA O GRÁFICO DE SAÚDE (PIZZA) ---
+    # Usamos o values() para agrupar e o annotate() para contar. É mais eficiente.
+    dados_saude_query = InstanciaArvore.objects.values('estado_saude').annotate(total=Count('estado_saude')).order_by('estado_saude')
+    
+    # Mapeia os valores do banco ('BOA') para nomes legíveis ('Boa')
+    mapa_saude = dict(InstanciaArvore.ESTADO_SAUDE_CHOICES)
+    labels_saude = [mapa_saude.get(item['estado_saude'], 'N/A') for item in dados_saude_query]
+    valores_saude = [item['total'] for item in dados_saude_query]
+
+    # --- 3. DADOS PARA O GRÁFICO TOP 10 ESPÉCIES (BARRAS) ---
+    top_especies_query = InstanciaArvore.objects.values('especie__nome_popular') \
+        .annotate(total=Count('id')) \
+        .order_by('-total')[:10] # O '-total' ordena do maior pro menor
+
+    labels_top_especies = [item['especie__nome_popular'] for item in top_especies_query]
+    valores_top_especies = [item['total'] for item in top_especies_query]
+    
+    # --- 4. DADOS PARA O GRÁFICO DE PLANTIOS AO LONGO DO TEMPO (LINHA) ---
+    plantios_por_mes = InstanciaArvore.objects \
+        .annotate(mes_plantio=TruncMonth('data_plantio')) \
+        .values('mes_plantio') \
+        .annotate(total=Count('id')) \
+        .order_by('mes_plantio')
+
+    labels_plantio = [p['mes_plantio'].strftime('%b/%Y') for p in plantios_por_mes] # Formata a data pra "Jan/2025"
+    valores_plantio = [p['total'] for p in plantios_por_mes]
+
+
+    # --- Monta o "pacote" de dados para enviar para a página (template) ---
+    context = {
+        'pagina': 'relatorios',
+        
+        # KPIs
+        'total_arvores': total_arvores,
+        'diversidade_especies': diversidade_especies,
+        'solicitacoes_finalizadas': solicitacoes_finalizadas,
+        'solicitacoes_em_aberto': solicitacoes_em_aberto,
+        
+        # Dados dos Gráficos (convertidos para JSON para segurança no template)
+        'labels_saude': json.dumps(labels_saude),
+        'valores_saude': json.dumps(valores_saude),
+        'labels_top_especies': json.dumps(labels_top_especies),
+        'valores_top_especies': json.dumps(valores_top_especies),
+        'labels_plantio': json.dumps(labels_plantio),
+        'valores_plantio': json.dumps(valores_plantio),
+    }
+    
+    return render(request, 'core/relatorios.html', context)
