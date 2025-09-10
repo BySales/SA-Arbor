@@ -871,3 +871,92 @@ textarea.form-control-custom { resize: vertical; }
     font-size: 0.8rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+/* --- ESTILOS PARA LEAFLET.DRAW (FERRAMENTAS DE DESENHO NO MAPA) --- */
+
+/* Esconde o texto padrão dos botões de desenho */
+.leaflet-draw-toolbar a {
+    text-indent: -9999px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    font-size: 0 !important; /* Garante que nenhum texto residual apareça */
+    color: transparent !important; /* Garante que a cor do texto não apareça */
+}
+
+/* Define os ícones do Bootstrap Icons para cada ferramenta */
+/* Adicionando !important para forçar a aplicação */
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon:before {
+    content: "\F4E2" !important; /* bi-polygon */
+    font-family: "bootstrap-icons" !important;
+    text-indent: 0 !important;
+    display: inline-block !important;
+    font-size: 1.1rem !important; /* Tamanho do ícone */
+    color: #495057 !important; /* Cor dos ícones */
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle:before {
+    content: "\F4ED" !important; /* bi-square */
+    font-family: "bootstrap-icons" !important;
+    text-indent: 0 !important;
+    display: inline-block !important;
+    font-size: 1.1rem !important;
+    color: #495057 !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-marker:before {
+    content: "\F38C" !important; /* bi-geo-alt-fill */
+    font-family: "bootstrap-icons" !important;
+    text-indent: 0 !important;
+    display: inline-block !important;
+    font-size: 1.1rem !important;
+    color: #495057 !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-edit:before {
+    content: "\F3E7" !important; /* bi-pencil-fill */
+    font-family: "bootstrap-icons" !important;
+    text-indent: 0 !important;
+    display: inline-block !important;
+    font-size: 1.1rem !important;
+    color: #495057 !important;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-remove:before {
+    content: "\F4EB" !important; /* bi-trash-fill */
+    font-family: "bootstrap-icons" !important;
+    text-indent: 0 !important;
+    display: inline-block !important;
+    font-size: 1.1rem !important;
+    color: #495057 !important;
+}
+
+/* Ajusta o estilo geral dos botões */
+.leaflet-draw-toolbar a {
+    width: 30px !important; /* Largura do botão */
+    height: 30px !important; /* Altura do botão */
+    line-height: 30px !important; /* Alinhamento vertical do ícone */
+    text-align: center !important;
+    border-radius: 4px !important; /* Levemente arredondado */
+    background-color: white !important; /* Garante o fundo branco */
+    border: 1px solid #ced4da !important; /* Borda leve */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; /* Sombra sutil */
+    padding: 0 !important; /* Remove qualquer padding padrão */
+}
+
+.leaflet-draw-toolbar a:hover {
+    background-color: #f0f2f5 !important; /* Fundo leve no hover */
+    color: #1e5943 !important; /* Cor principal no hover */
+    border-color: #a7d0bf !important; /* Borda no hover */
+}
+
+/* Estilo para botões ativos */
+.leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
+    background-color: #e9ecef !important; /* Fundo mais escuro quando ativo */
+    color: #1e5943 !important; /* Cor principal quando ativo */
+    border-color: #1e5943 !important; /* Borda no hover */
+}
+
+/* Oculta as dicas de ferramenta padrão do Leaflet Draw */
+.leaflet-draw-tooltip {
+    display: none !important;
+}

@@ -8,7 +8,7 @@
     </div>
 
     <div class="card map-card-container">
-        <div id="map"></div>
+        <div id="map" data-analisar-url="{% url 'analisar_area_api' %}"></div>
 
         <div id="details-panel" class="map-overlay-panel d-none">
             <div class="d-flex justify-content-between align-items-center">
@@ -21,6 +21,47 @@
         
         <div id="coords-display" class="map-coords-display">
             Lat: -- | Lon: --
+        </div>
+    </div>
+
+    {% comment %} O HTML DO MODAL QUE ESTAVA FALTANDO ENTRA AQUI {% endcomment %}
+    <div class="modal fade" id="areaFormModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Detalhes da Nova Área</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="area-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_area.nome.label }}</label>
+                            {{ form_area.nome }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_area.tipo.label }}</label>
+                            {{ form_area.tipo }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form_area.status.label }}</label>
+                            {{ form_area.status }}
+                        </div>
+                         <div class="mb-3">
+                            <label class="form-label">{{ form_area.especies.label }}</label>
+                            {{ form_area.especies }}
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-principal-acao" id="saveAreaButton">
+                        <i class="bi bi-check-circle-fill me-1"></i>
+                        Salvar Área
+                    </button>
+                    <button type="button" class="btn btn-danger-outline d-none" id="deleteAreaButton">Deletar Área</button>
+                </div>
+            </div>
         </div>
     </div>
 

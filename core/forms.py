@@ -63,12 +63,24 @@ class EspecieForm(forms.ModelForm):
 class AreaForm(forms.ModelForm):
     class Meta: 
         model = Area
-        fields = ['nome', 'tipo', 'status', 'responsavel', 'tipo_vegetacao', 'especies']
+        # Agora só pede os campos que realmente existem no formulário do mapa
+        fields = ['nome', 'tipo', 'status', 'especies']
         widgets = {
-            'nome': forms.TextInput(attrs={'autocomplete': 'off'}),
-            'especies': forms.SelectMultiple(attrs={'class': 'select2-multiple', 'style': 'width: 100%;'}),
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control form-control-custom',
+                'autocomplete': 'off'
+            }),
+            'tipo': forms.Select(attrs={
+                'class': 'form-select form-control-custom'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select form-control-custom'
+            }),
+            'especies': forms.SelectMultiple(attrs={
+                'class': 'form-select form-control-custom select2-multiple', 
+                'style': 'width: 100%;'
+            }),
         }
-
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField()
 
