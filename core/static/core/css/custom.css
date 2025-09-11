@@ -891,7 +891,7 @@ textarea.form-control-custom { resize: vertical; }
     text-indent: 0 !important;
     display: inline-block !important;
     font-size: 1.1rem !important; /* Tamanho do ícone */
-    color: #495057 !important; /* Cor dos ícones */
+    color: #c70c0c !important; /* Cor dos ícones */
 }
 
 .leaflet-draw-toolbar .leaflet-draw-draw-rectangle:before {
@@ -959,4 +959,90 @@ textarea.form-control-custom { resize: vertical; }
 /* Oculta as dicas de ferramenta padrão do Leaflet Draw */
 .leaflet-draw-tooltip {
     display: none !important;
+}
+
+/* ========================================================================== */
+/* --- ESTILOS PARA A PÁGINA DE RELATÓRIOS --- */
+/* ========================================================================== */
+
+/* Bloco principal dos cards de gráfico */
+.card-grafico {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.card-grafico:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-color: #dee2e6;
+}
+
+.card-grafico .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #f0f2f5;
+    padding: 1rem 1.25rem;
+}
+
+/* Deixa a cor do texto do cabeçalho do gráfico igual a cor principal */
+.card-grafico .card-header h6 {
+    color: #1e5943 !important;
+}
+
+/* Garante que o gráfico ocupe o espaço direitinho */
+.chart-container {
+    position: relative;
+    height: 300px; /* Altura padrão para os gráficos */
+    width: 100%;
+}
+
+/* Ajusta o card de KPI pra não ter borda extra e ter a transição de hover */
+.card-kpi-report {
+    border: 1px solid #e9ecef;
+}
+.card-kpi-report:hover {
+    border-color: #ccc;
+}
+
+/* ========================================================================== */
+/* --- ESTILOS PARA OS CARDS KPI DA PÁGINA DE RELATÓRIOS --- */
+/* ========================================================================== */
+
+/* Base do novo card KPI */
+.card-kpi {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+/* Título do card (ex: "Em Aberto", "Total de Árvores") */
+.card-title-report {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+/* Número grande em destaque */
+.card-number-report {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #343a40;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Ajusta as cores do texto do título para combinar com o ícone */
+/* Bootstrap já faz isso, mas garantimos aqui */
+.card-title-report.text-primary { color: #1E5943 !important; }
+.card-title-report.text-danger { color: #DC3545 !important; }
+.card-title-report.text-info { color: #17A2B8 !important; }
+.card-title-report.text-success { color: #28A745 !important; }
+
+/* Removemos o estilo antigo que não vamos mais usar */
+.card-kpi-report {
+    /* Este seletor não é mais necessário, pode apagar se quiser */
 }

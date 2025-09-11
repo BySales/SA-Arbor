@@ -21,6 +21,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.db.models.functions import TruncMonth
 
 
 
@@ -741,45 +742,60 @@ def home_view(request):
 @login_required
 def relatorios_view(request):
     """
-    View para a Central de Relatórios.
+    View para a Central de Relatórios com filtros de período.
     """
-    # --- 1. CÁLCULO DOS KPIs (INDICADORES CHAVE) ---
+    # 1. PEGAR O FILTRO DA URL
+    # A gente pega o parâmetro 'periodo'. Se não vier nada, o padrão é 'mes'.
+    periodo_selecionado = request.GET.get('periodo', 'mes')
+
+    # 2. CALCULAR A DATA DE INÍCIO BASEADO NO FILTRO
+    today = timezone.now().date()
+    start_date = None
+
+    if periodo_selecionado == 'semana':
+        start_date = today - timedelta(days=7)
+    elif periodo_selecionado == 'ano':
+        start_date = today.replace(month=1, day=1)
+    else: # Padrão é 'mes'
+        start_date = today.replace(day=1)
+
+    # --- APLICAR O FILTRO NAS BUSCAS ---
+    # A gente só vai buscar registros cuja data seja MAIOR OU IGUAL (gte) a nossa start_date
+    
+    # KPIs
+    solicitacoes_finalizadas = Solicitacao.objects.filter(status='FINALIZADO', data_criacao__gte=start_date).count()
+    solicitacoes_em_aberto = Solicitacao.objects.filter(status='EM_ABERTO', data_criacao__gte=start_date).count()
+    
+    # Para os KPIs que não dependem de data, a gente mantém a busca completa
     total_arvores = InstanciaArvore.objects.count()
     diversidade_especies = Especie.objects.count()
-    solicitacoes_finalizadas = Solicitacao.objects.filter(status='FINALIZADO').count()
-    solicitacoes_em_aberto = Solicitacao.objects.filter(status='EM_ABERTO').count()
 
-    # --- 2. DADOS PARA O GRÁFICO DE SAÚDE (PIZZA) ---
-    # Usamos o values() para agrupar e o annotate() para contar. É mais eficiente.
+    # Gráfico de Saúde (não costuma ser filtrado por data, mas se quisesse, seria InstanciaArvore.objects.filter(data_plantio__gte=start_date)...)
     dados_saude_query = InstanciaArvore.objects.values('estado_saude').annotate(total=Count('estado_saude')).order_by('estado_saude')
-    
-    # Mapeia os valores do banco ('BOA') para nomes legíveis ('Boa')
     mapa_saude = dict(InstanciaArvore.ESTADO_SAUDE_CHOICES)
     labels_saude = [mapa_saude.get(item['estado_saude'], 'N/A') for item in dados_saude_query]
     valores_saude = [item['total'] for item in dados_saude_query]
 
-    # --- 3. DADOS PARA O GRÁFICO TOP 10 ESPÉCIES (BARRAS) ---
-    top_especies_query = InstanciaArvore.objects.values('especie__nome_popular') \
+    # Gráfico Top 10 Espécies (baseado em árvores plantadas no período)
+    top_especies_query = InstanciaArvore.objects.filter(data_plantio__gte=start_date) \
+        .values('especie__nome_popular') \
         .annotate(total=Count('id')) \
-        .order_by('-total')[:10] # O '-total' ordena do maior pro menor
-
+        .order_by('-total')[:10]
     labels_top_especies = [item['especie__nome_popular'] for item in top_especies_query]
     valores_top_especies = [item['total'] for item in top_especies_query]
     
-    # --- 4. DADOS PARA O GRÁFICO DE PLANTIOS AO LONGO DO TEMPO (LINHA) ---
-    plantios_por_mes = InstanciaArvore.objects \
+    # Gráfico de Plantios ao Longo do Tempo (já é filtrado por natureza, mas podemos refinar)
+    plantios_por_mes = InstanciaArvore.objects.filter(data_plantio__gte=start_date) \
         .annotate(mes_plantio=TruncMonth('data_plantio')) \
         .values('mes_plantio') \
         .annotate(total=Count('id')) \
         .order_by('mes_plantio')
-
-    labels_plantio = [p['mes_plantio'].strftime('%b/%Y') for p in plantios_por_mes] # Formata a data pra "Jan/2025"
+    labels_plantio = [p['mes_plantio'].strftime('%b/%Y') for p in plantios_por_mes]
     valores_plantio = [p['total'] for p in plantios_por_mes]
 
-
-    # --- Monta o "pacote" de dados para enviar para a página (template) ---
     context = {
         'pagina': 'relatorios',
+        'periodo_selecionado': periodo_selecionado, # <<< Manda o filtro ativo pro template!
         
         # KPIs
         'total_arvores': total_arvores,
@@ -787,7 +803,7 @@ def relatorios_view(request):
         'solicitacoes_finalizadas': solicitacoes_finalizadas,
         'solicitacoes_em_aberto': solicitacoes_em_aberto,
         
-        # Dados dos Gráficos (convertidos para JSON para segurança no template)
+        # Dados dos Gráficos
         'labels_saude': json.dumps(labels_saude),
         'valores_saude': json.dumps(valores_saude),
         'labels_top_especies': json.dumps(labels_top_especies),

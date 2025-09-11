@@ -3,90 +3,81 @@
 
 {% block content %}
 <div class="container-xl">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Central de Relatórios</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="bi bi-download me-2"></i> Gerar Relatório</a>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 page-header">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Central de Relatórios</h1>
+            <p class="mb-0 text-muted small">Análise de dados e performance do sistema Arbor.</p>
+        </div>
+<div class="filter-pills">
+    <a href="{% url 'relatorios' %}?periodo=mes" class="{% if periodo_selecionado == 'mes' %}active{% endif %}">Este Mês</a>
+    <a href="{% url 'relatorios' %}?periodo=semana" class="{% if periodo_selecionado == 'semana' %}active{% endif %}">Últimos 7 dias</a>
+    <a href="{% url 'relatorios' %}?periodo=ano" class="{% if periodo_selecionado == 'ano' %}active{% endif %}">Este Ano</a>
+</div>
     </div>
 
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start-primary shadow-sm h-100 py-2">
+            <div class="card card-kpi card-status-hover h-100">
                 <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col">
-                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total de Árvores</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ total_arvores|default:"0" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="bi bi-tree fs-2 text-gray-300"></i></div>
-                    </div>
+                    <div class="card-icon primary mb-3"><i class="bi bi-tree"></i></div>
+                    <h6 class="card-title-report text-primary">Total de Árvores</h6>
+                    <h3 class="card-number-report">{{ total_arvores|default:"0" }}</h3>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start-success shadow-sm h-100 py-2">
+            <div class="card card-kpi card-status-hover h-100">
                 <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col">
-                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Diversidade de Espécies</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ diversidade_especies|default:"0" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="bi bi-diagram-3 fs-2 text-gray-300"></i></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start-info shadow-sm h-100 py-2">
-                <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col">
-                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Solicitações Finalizadas</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ solicitacoes_finalizadas|default:"0" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="bi bi-check2-circle fs-2 text-gray-300"></i></div>
-                    </div>
+                    <div class="card-icon info mb-3"><i class="bi bi-diagram-3"></i></div>
+                    <h6 class="card-title-report text-info">Diversidade</h6>
+                    <h3 class="card-number-report">{{ diversidade_especies|default:"0" }}</h3>
                 </div>
             </div>
         </div>
         
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start-warning shadow-sm h-100 py-2">
+            <div class="card card-kpi card-status-hover h-100">
                 <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col">
-                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Solicitações em Aberto</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ solicitacoes_em_aberto|default:"0" }}</div>
-                        </div>
-                        <div class="col-auto"><i class="bi bi-hourglass-split fs-2 text-gray-300"></i></div>
-                    </div>
+                    <div class="card-icon success mb-3"><i class="bi bi-check2-circle"></i></div>
+                    <h6 class="card-title-report text-success">Finalizadas</h6>
+                    <h3 class="card-number-report">{{ solicitacoes_finalizadas|default:"0" }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-kpi card-status-hover h-100">
+                <div class="card-body">
+                    <div class="card-icon danger mb-3"><i class="bi bi-exclamation-octagon"></i></div>
+                    <h6 class="card-title-report text-danger">Em Aberto</h6>
+                    <h3 class="card-number-report">{{ solicitacoes_em_aberto|default:"0" }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card card-grafico h-100">
+                <div class="card-header">
                     <h6 class="m-0 fw-bold text-primary">Saúde das Árvores</h6>
                 </div>
-                <div class="card-body">
-                    <div class="chart-pie pt-4 pb-2" style="height: 320px;">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="chart-container">
                         <canvas id="graficoSaude"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card card-grafico h-100">
+                <div class="card-header">
                     <h6 class="m-0 fw-bold text-primary">Top 10 Espécies Mais Comuns</h6>
                 </div>
-                <div class="card-body">
-                    <div class="chart-bar" style="height: 320px;">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="chart-container">
                         <canvas id="graficoTopEspecies"></canvas>
                     </div>
                 </div>
@@ -96,12 +87,12 @@
     
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header py-3">
+            <div class="card card-grafico">
+                <div class="card-header">
                     <h6 class="m-0 fw-bold text-primary">Plantios ao Longo do Tempo</h6>
                 </div>
                 <div class="card-body">
-                    <div class="chart-area" style="height: 320px;">
+                    <div class="chart-container" style="height: 280px;">
                         <canvas id="graficoPlantios"></canvas>
                     </div>
                 </div>
@@ -114,18 +105,16 @@
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Cores padrão para usar nos gráficos
-    const CORES_GRAFICO = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69'];
-
+    // SEUS SCRIPTS DE GRÁFICO CONTINUAM IGUAIS AQUI...
     // 1. Gráfico de Pizza - SAÚDE
     var ctxSaude = document.getElementById("graficoSaude").getContext('2d');
-    var graficoSaude = new Chart(ctxSaude, {
+    new Chart(ctxSaude, {
       type: 'doughnut',
       data: {
         labels: JSON.parse('{{ labels_saude|safe }}'),
         datasets: [{
           data: JSON.parse('{{ valores_saude|safe }}'),
-          backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'], // Verde, Amarelo, Vermelho, Cinza
+          backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'],
         }],
       },
       options: {
@@ -136,16 +125,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 2. Gráfico de Barras - TOP 10 ESPÉCIES
     var ctxTopEspecies = document.getElementById("graficoTopEspecies").getContext('2d');
-    var graficoTopEspecies = new Chart(ctxTopEspecies, {
+    new Chart(ctxTopEspecies, {
         type: 'bar',
         data: {
             labels: JSON.parse('{{ labels_top_especies|safe }}'),
             datasets: [{
                 label: "Quantidade",
-                backgroundColor: "#4e73df",
-                hoverBackgroundColor: "#2e59d9",
-                borderColor: "#4e73df",
+                backgroundColor: "#1e5943",
+                hoverBackgroundColor: "#154231",
+                borderColor: "#1e5943",
                 data: JSON.parse('{{ valores_top_especies|safe }}'),
+                borderRadius: 4,
             }],
         },
         options: {
@@ -157,19 +147,21 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 3. Gráfico de Linha - PLANTIOS POR MÊS
     var ctxPlantios = document.getElementById("graficoPlantios").getContext('2d');
-    var graficoPlantios = new Chart(ctxPlantios, {
+    new Chart(ctxPlantios, {
         type: 'line',
         data: {
             labels: JSON.parse('{{ labels_plantio|safe }}'),
             datasets: [{
                 label: "Árvores Plantadas",
                 lineTension: 0.3,
-                backgroundColor: "rgba(78, 115, 223, 0.05)",
-                borderColor: "rgba(78, 115, 223, 1)",
-                pointRadius: 3,
-                pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                pointBorderColor: "rgba(78, 115, 223, 1)",
+                backgroundColor: "rgba(30, 89, 67, 0.08)",
+                borderColor: "#1e5943",
+                pointRadius: 4,
+                pointBackgroundColor: "#1e5943",
+                pointBorderColor: "#fff",
+                pointHoverRadius: 6,
                 data: JSON.parse('{{ valores_plantio|safe }}'),
+                fill: true,
             }],
         },
         options: {
