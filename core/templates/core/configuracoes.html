@@ -1,39 +1,101 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
-    <h2>Configurações da Conta</h2>
-    <p class="text-muted">Gerencie suas informações de perfil e segurança.</p>
-    <hr>
+<div class="container-xl">
+    <div class="page-header mb-4">
+        <h1 class="h3 mb-0 text-gray-800 fw-bold">Configurações da Conta</h1>
+        <p class="mb-0 text-muted small">Gerencie suas informações de perfil e segurança.</p>
+    </div>
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card mb-4">
+            <div class="card card-configuracoes">
                 <div class="card-header">
-                    <h4>Meu Perfil</h4>
+                    <h5 class="m-0 fw-bold text-primary">Informações do Perfil</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-4">
-                        <img src="{{ user.profile.imagem.url }}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                        <div class="ms-4">
-                            <h5>{{ user.first_name }} {{ user.last_name }}</h5>
-                            <p class="text-muted mb-0">@{{ user.username }}</p>
-                        </div>
-                    </div>
-
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {{ profile_form.as_p }}
-                        {{ user_form.as_p }}
-                        <button type="submit" name="update_profile" class="btn btn-primary mt-3">Salvar Perfil</button>
+                        
+                        <div class="d-flex align-items-start mb-4 pb-4 border-bottom">
+    <img src="{{ user.profile.imagem.url }}" class="profile-picture-md me-4">
+    <div class="flex-grow-1">
+        <label class="form-label fw-bold mb-2">Alterar foto de perfil</label>
+        <div class="custom-file-upload-wrapper">
+            <input type="file" id="{{ profile_form.imagem.id_for_label }}" name="{{ profile_form.imagem.name }}" class="d-none">
+            <label for="{{ profile_form.imagem.id_for_label }}" class="btn btn-secondary-custom btn-sm">
+                <i class="bi bi-upload me-2"></i> Escolher arquivo
+            </label>
+            <span id="file-name-display" class="ms-3 text-muted small">Nenhum arquivo escolhido</span>
+            <small class="form-text text-muted d-block mt-2">PNG ou JPG, tamanho máximo 2MB.</small>
+        </div>
+    </div>
+</div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">Nome</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Sobrenome</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ user_form.email }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ user_form.username.id_for_label }}" class="form-label">Nome de Usuário</label>
+                            {{ user_form.username }}
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" name="update_profile" class="btn btn-principal-acao">
+                                <i class="bi bi-check-circle me-2"></i> Salvar Alterações
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
-
-            <div class="card">
-                 </div>
         </div>
 
         <div class="col-lg-4">
-             </div>
+            <div class="card card-configuracoes">
+                <div class="card-header">
+                    <h5 class="m-0 fw-bold text-primary">Segurança</h5>
+                </div>
+                <div class="card-body">
+                    <p>Para alterar sua senha, você será redirecionado para uma página segura.</p>
+                    <a href="#" class="btn btn-secondary-custom w-100">
+                        <i class="bi bi-shield-lock me-2"></i> Alterar Senha
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pega o input de arquivo escondido
+        const fileInput = document.getElementById('{{ profile_form.imagem.id_for_label }}');
+        // Pega o span onde o nome do arquivo será exibido
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        // Adiciona um "ouvinte" para quando o valor do input de arquivo mudar
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                // Se um arquivo foi selecionado, mostra o nome dele
+                fileNameDisplay.textContent = this.files[0].name;
+            } else {
+                // Se nenhum arquivo foi selecionado (ou foi cancelado), volta para o padrão
+                fileNameDisplay.textContent = 'Nenhum arquivo escolhido';
+            }
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

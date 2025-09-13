@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao
+from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao,TagCategory, Tag
 from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -274,36 +274,60 @@ def equipe_delete(request, pk):
 
 @login_required
 def especie_list(request):
-    especies = Especie.objects.all()
-    return render(request, 'core/especie_list.html', {'especies': especies})
+    # Esta view já está atualizada e otimizada
+    especies = Especie.objects.prefetch_related('tags').order_by('nome_popular')
+    paginator = Paginator(especies, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'core/especie_list.html', {'especies': page_obj})
 
 @login_required
 def especie_create(request):
     if request.method == 'POST':
-        form = EspecieForm(request.POST)
+        form = EspecieForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Nova espécie cadastrada no catálogo!')
             return redirect('especie_list')
     else:
         form = EspecieForm()
-    return render(request, 'core/especie_form.html', {'form': form, 'titulo': 'Cadastrar Nova Espécie'})
+    
+    # Buscando as categorias com suas tags relacionadas
+    categorias_com_tags = TagCategory.objects.prefetch_related('tags').all()
+    
+    context = {
+        'form': form,
+        'titulo': 'Cadastrar Nova Espécie',
+        'categorias_com_tags': categorias_com_tags # Mandando para o template
+    }
+    return render(request, 'core/especie_form.html', context)
+
 
 @login_required
 def especie_update(request, pk):
     especie = get_object_or_404(Especie, pk=pk)
     if request.method == 'POST':
-        form = EspecieForm(request.POST, instance=especie)
+        form = EspecieForm(request.POST, request.FILES, instance=especie)
         if form.is_valid():
             form.save()
             messages.success(request, f'Espécie "{especie.nome_popular}" foi atualizada.')
             return redirect('especie_list')
     else:
         form = EspecieForm(instance=especie)
-    return render(request, 'core/especie_form.html', {'form': form, 'titulo': f'Editar Espécie: {especie.nome_popular}'})
+        
+    categorias_com_tags = TagCategory.objects.prefetch_related('tags').all()
+
+    context = {
+        'form': form, 
+        'titulo': f'Editar Espécie: {especie.nome_popular}',
+        'categorias_com_tags': categorias_com_tags
+    }
+    return render(request, 'core/especie_form.html', context)
+
 
 @login_required
 def especie_delete(request, pk):
+    # Esta view não precisa de mudanças
     especie = get_object_or_404(Especie, pk=pk)
     if request.method == 'POST':
         try:
