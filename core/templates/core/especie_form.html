@@ -31,17 +31,31 @@
                         {{ form.descricao }}
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{{ form.imagem.label }}</label>
+
+                <div class="col-lg-4 d-flex flex-column">
+                    <label class="form-label fw-bold">{{ form.imagem.label }}</label>
+                    
+                    <div class="image-upload-area flex-grow-1 d-flex flex-column">
                         {% if form.instance.imagem %}
-                            <img src="{{ form.instance.imagem.url }}" alt="Imagem atual" class="img-thumbnail mb-2" style="max-height: 150px; width: 100%; object-fit: cover;">
+                            <div class="image-preview-card mb-2">
+                                <img src="{{ form.instance.imagem.url }}" alt="Imagem atual" class="img-fluid rounded">
+                                <button type="button" class="btn btn-sm btn-danger remove-image-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Remover imagem">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
                         {% endif %}
-                        <label for="{{ form.imagem.id_for_label }}" class="custom-file-upload w-100">
-                            <i class="bi bi-cloud-arrow-up-fill"></i>
-                            <span id="file-name-display">Escolher arquivo...</span>
-                        </label>
-                        {{ form.imagem }}
+                
+                        <div class="custom-file-upload-container d-flex flex-column flex-grow-1 {% if form.instance.imagem %}d-none{% endif %}">
+                            <label for="{{ form.imagem.id_for_label }}" class="custom-file-upload w-100 h-100">
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                                <span id="file-name-display">Escolher arquivo...</span>
+                            </label>
+                            {{ form.imagem }}
+                        </div>
+                
+                        {% if form.instance.imagem %}
+                            <input type="checkbox" name="imagem-clear" id="id_imagem-clear" style="display: none;">
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -50,7 +64,7 @@
                 <h6 class="form-section-title">Tags (Categorias)</h6>
                 <div class="row">
                     {% for categoria in categorias_com_tags %}
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-lg-3 col-md-6 mb-3">
                         <strong class="d-block mb-2">{{ categoria.nome }}</strong>
                         {% for tag in categoria.tags.all %}
                         <div class="form-check">
@@ -82,18 +96,72 @@
 </form>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('{{ form.imagem.id_for_label }}');
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                const fileNameDisplay = document.getElementById('file-name-display');
-                if (this.files.length > 0) {
-                    fileNameDisplay.textContent = this.files[0].name;
-                } else {
-                    fileNameDisplay.textContent = 'Escolher arquivo...';
-                }
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Aplica as classes do Bootstrap nos campos de texto e textarea
+    const formFields = document.querySelectorAll('form input[type="text"], form textarea');
+    formFields.forEach(function(field) {
+        if (!field.classList.contains('form-control')) {
+            field.classList.add('form-control', 'form-control-custom');
         }
     });
+
+    // Aumenta a altura do campo de descrição
+    const descTextarea = document.querySelector('textarea[name="descricao"]');
+    if (descTextarea) {
+        descTextarea.rows = 8;
+    }
+
+    // --- LÓGICA ATUALIZADA PARA O UPLOAD DE IMAGEM ---
+    const fileInput = document.getElementById('{{ form.imagem.id_for_label }}');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const removeImageBtn = document.querySelector('.remove-image-btn');
+    const imageClearCheckbox = document.getElementById('id_imagem-clear');
+    const uploadContainer = document.querySelector('.custom-file-upload-container');
+
+    // Atualiza o nome do arquivo na área de upload
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileNameDisplay.textContent = this.files[0].name;
+                if(imageClearCheckbox) {
+                    imageClearCheckbox.checked = false;
+                }
+            }
+        });
+    }
+
+    // Lógica para o botão de remover imagem
+    if (removeImageBtn && imageClearCheckbox) {
+        removeImageBtn.addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja remover esta imagem?')) {
+                // Marca o checkbox para o Django remover a imagem
+                imageClearCheckbox.checked = true;
+                
+                // Esconde a imagem de preview
+                const imagePreviewCard = document.querySelector('.image-preview-card');
+                if (imagePreviewCard) {
+                    imagePreviewCard.style.display = 'none';
+                }
+
+                // Reseta o input de arquivo
+                fileInput.value = '';
+                
+                // Desativa o botão de remover
+                this.style.display = 'none';
+                
+                // REVELA A ÁREA DE UPLOAD
+                if (uploadContainer) {
+                    uploadContainer.classList.remove('d-none');
+                }
+            }
+        });
+    }
+
+    // Ativa os tooltips do Bootstrap (para o botão de lixeira)
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
 </script>
 {% endblock %}

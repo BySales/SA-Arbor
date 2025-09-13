@@ -1,18 +1,40 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-header">
-            <h3>Tem certeza?</h3>
-        </div>
-        <div class="card-body">
-            <p>Você está prestes a deletar permanentemente a equipe: <strong>"{{ object.nome }}"</strong>.</p>
-            <p>Esta ação não pode ser desfeita.</p>
-            <form method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Sim, quero deletar</button>
-                <a href="{% url 'equipe_list' %}" class="btn btn-secondary">Cancelar</a>
-            </form>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center border-danger border-2">
+            <div class="card-body p-4 p-md-5">
+
+                <div class="display-1 text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+
+                <h2 class="mb-3 fw-bold">Atenção! Exclusão Permanente</h2>
+                <p class="text-muted">Você está prestes a apagar permanentemente a equipe:</p>
+                
+                <div class="alert alert-danger-subtle d-inline-block px-4 py-2 my-3">
+                    <strong class="fs-5">"{{ object.nome }}"</strong>
+                </div>
+
+                <p class="mb-4"><strong>Esta ação não pode ser desfeita.</strong> Tem certeza que deseja continuar?</p>
+
+                <form method="POST" class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    {% csrf_token %}
+                    
+                    <a href="{% url 'equipe_list' %}" class="btn btn-secondary-custom btn-lg">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="bi bi-trash-fill me-1"></i>
+                        Sim, quero deletar
+                    </button>
+                </form>
+
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

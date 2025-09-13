@@ -589,7 +589,12 @@ def search_results_view(request):
         ).distinct()
         context['equipes_results'] = equipes_results
 
-    # Renderiza um NOVO template que vamos criar no próximo passo
+        # --- A MÁGICA ACONTECE AQUI ---
+        # Adiciona o total de resultados ao contexto
+        total_results = len(solicitacoes_results) + len(especies_results) + len(equipes_results)
+        context['total_results'] = total_results
+
+    # Renderiza o NOVO template com o contexto completo
     return render(request, 'core/search_results.html', context)
 
 

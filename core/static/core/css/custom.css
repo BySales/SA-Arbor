@@ -1196,3 +1196,304 @@ textarea.form-control-custom { resize: vertical; }
     background-color: #e9ecef !important; /* Fundo cinza claro */
     color: #495057 !important;       /* Texto cinza escuro */
 }
+.custom-file-upload.h-100 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ========================================================================== */
+/* --- ESTILOS MODERNOS PARA O CABEÇALHO (HEADER) --- */
+/* ========================================================================== */
+
+/* Ajusta o alinhamento de todos os itens no header */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaçamento entre os ícones e o perfil */
+}
+
+/* Estilo base para os botões de ícone (sino e carta) */
+.header-icon-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f0f2f5; /* Fundo cinza claro sutil */
+    border-radius: 50%; /* Deixa o botão redondo */
+    color: #555;
+    font-size: 1.1rem; /* Tamanho do ícone */
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Efeito ao passar o mouse por cima */
+.header-icon-btn:hover {
+    background-color: #e2e6ea;
+    color: #1E5943; /* Cor principal do sistema */
+    transform: translateY(-2px); /* Efeito de "saltar" */
+}
+
+
+/* --- Estilo para o Menu Dropdown do Perfil --- */
+
+.profile-dropdown .dropdown-menu {
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    padding: 0.5rem 0;
+    margin-top: 10px !important; /* Distância entre a foto e o menu */
+    min-width: 240px; /* Largura mínima do menu */
+}
+
+.profile-dropdown .dropdown-item {
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.profile-dropdown .dropdown-item i {
+    color: #6c757d; /* Cor dos ícones do menu */
+}
+
+/* Item "Sair" com destaque em vermelho */
+.profile-dropdown .dropdown-item-danger {
+    color: #d9534f;
+    font-weight: 500;
+}
+
+.profile-dropdown .dropdown-item-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Remove a setinha padrão do dropdown que fica do lado da foto */
+.profile-dropdown .dropdown-toggle::after {
+    display: none;
+}
+
+/* ========================================================================== */
+/* --- ESTILO CUSTOMIZADO PARA A BARRA DE ROLAGEM --- */
+/* ========================================================================== */
+
+/* Para navegadores baseados em WebKit (Chrome, Safari, Edge, etc.) */
+::-webkit-scrollbar {
+  width: 8px; /* Largura da barra de rolagem */
+  height: 8px;
+}
+
+/* A "pista" (o fundo da barra) */
+::-webkit-scrollbar-track {
+  background: #f4f7f6; /* Cor de fundo bem sutil, a mesma do seu site */
+}
+
+/* O "carrinho" (a parte que se move) */
+::-webkit-scrollbar-thumb {
+  background-color: #1e5943;  /* Cor verde principal do seu site */
+  border-radius: 20px;       /* Bordas arredondadas */
+  border: 2px solid #f4f7f6; /* Cria um pequeno espaçamento da borda */
+}
+
+/* Efeito quando passa o mouse em cima do "carrinho" */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #154231; /* Um tom de verde mais escuro */
+}
+
+
+/* Para o Firefox */
+/* A sintaxe é mais simples */
+body {
+  scrollbar-width: thin; /* Define a barra como "fina" */
+  scrollbar-color: #1e5943 #f4f7f6; /* Cor do "carrinho" e cor da "pista" */
+}
+/* ========================================================================== */
+/* --- ESTILOS PARA ABAS DA PÁGINA DE BUSCA --- */
+/* ========================================================================== */
+
+.nav-pills-custom .nav-link {
+    background: none;
+    border: 0;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.nav-pills-custom .nav-link.active,
+.nav-pills-custom .show > .nav-link {
+    color: #1e5943;
+    background-color: #e6f3eb !important; /* Verde bem clarinho */
+    border-radius: 50px;
+}
+/* ========================================================================== */
+/* --- ESTILOS PARA O UPLOAD DE IMAGEM NO FORMULÁRIO DE ESPÉCIE --- */
+/* ========================================================================== */
+
+/* Container da área de upload para garantir que se estique */
+.image-upload-area {
+    border: 1px dashed #ced4da; /* Borda tracejada */
+    border-radius: 8px;
+    padding: 15px; /* Espaçamento interno */
+    background-color: #f8f9fa; /* Fundo levemente cinza */
+    text-align: center;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    min-height: 250px; /* Altura mínima para ficar harmonioso */
+}
+
+/* Estilo para o card de preview da imagem existente */
+.image-preview-card {
+    position: relative;
+    margin-bottom: 10px; /* Espaço entre a imagem e a área de upload */
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden; /* Garante que a imagem não vaze */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.image-preview-card img {
+    max-height: 180px; /* Altura máxima para a imagem de preview */
+    object-fit: cover; /* Recorta a imagem para cobrir a área */
+    width: 100%;
+    display: block; /* Remove espaço extra abaixo da imagem */
+    border-radius: 8px; /* Borda arredondada */
+}
+
+/* Botão de remover imagem em cima do preview */
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(220, 53, 69, 0.8); /* Vermelho semi-transparente */
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.remove-image-btn:hover {
+    background-color: rgba(220, 53, 69, 1); /* Vermelho mais forte no hover */
+}
+
+
+/* Estilo para a área de "Escolher arquivo..." */
+.custom-file-upload-container {
+    display: flex; /* Garante que o label de upload se estique */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #a8d5b1; /* Borda tracejada verde */
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #e6f3eb; /* Fundo verde clarinho */
+    color: #1e5943; /* Texto verde */
+    transition: background-color 0.2s, border-color 0.2s;
+    font-weight: 500;
+}
+
+.custom-file-upload-container:hover {
+    background-color: #d1eccd; /* Verde um pouco mais forte no hover */
+    border-color: #1e5943; /* Borda mais escura no hover */
+}
+
+.custom-file-upload-container i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+/* ========================================================================== */
+/* --- ESTILOS PARA O PAINEL DE EQUIPES --- */
+/* ========================================================================== */
+
+/* Estilo para os cards de equipe */
+
+
+/* Botão de 3 pontinhos para ações */
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+}
+
+.btn-icon:hover {
+    background-color: #f0f2f5;
+    color: #343a40;
+}
+
+/* Container para os avatares empilhados */
+.team-members-stack {
+    display: flex;
+    padding-left: 10px; /* Espaço para o primeiro avatar não cortar */
+}
+
+/* Estilo para cada avatar */
+.member-avatar, .member-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-left: -15px; /* O segredo para empilhar */
+    object-fit: cover;
+    background-color: #6c757d;
+    color: white;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.team-members-stack:hover .member-avatar,
+.team-members-stack:hover .member-avatar-placeholder {
+    margin-left: -5px; /* Efeito de expandir no hover */
+    transition: margin-left 0.2s;
+}
+
+/* Esconde o placeholder se a imagem carregar */
+img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
+    display: none;
+}
+/* ========================================================================== */
+/* --- REFINAMENTO DOS CARDS DE EQUIPE --- */
+/* ========================================================================== */
+
+/* Wrapper para os ícones de estatísticas (KPIs) */
+.stat-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem; /* Tamanho do ícone */
+}
+
+/* Cores para os ícones */
+.stat-icon-wrapper.icon-primary {
+    background-color: #e6f3eb; /* Verde clarinho */
+    color: #1e5943; /* Verde principal */
+}
+
+.stat-icon-wrapper.icon-success {
+    background-color: #eaf9eb;
+    color: #28a745;
+}
+
+/* Estilo para a barra de progresso quando não há dados */
+.progress-empty-state {
+    background-color: #f8f9fa;
+    border: 1px dashed #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
