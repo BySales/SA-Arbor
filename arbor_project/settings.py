@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-tc%*k$22j0q2*3%g2jlk)8-!r2keb9n&j!&__^xzw5is#%$i!5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.loca.lt']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.loca.lt',
+    'https://*.ws.loca.lt', 
+]
 
 
 # Application definition
@@ -135,3 +139,4 @@ LOGIN_URL = 'login'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
