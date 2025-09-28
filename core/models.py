@@ -24,8 +24,6 @@ class Tag(models.Model):
     nome = models.CharField(max_length=50, unique=True, help_text="Ex: Nativa, Frutífera, Ornamental")
     cor_fundo = models.CharField(max_length=7, default="#E9ECEF", help_text="Cor de fundo da tag (formato HEX, ex: #E9ECEF)")
     cor_texto = models.CharField(max_length=7, default="#495057", help_text="Cor do texto da tag (formato HEX, ex: #495057)")
-    
-    # ADICIONE ESTA LINHA PARA CONECTAR A TAG A UMA CATEGORIA
     categoria = models.ForeignKey(TagCategory, on_delete=models.CASCADE, related_name="tags", null=True)
 
     def __str__(self):
@@ -36,21 +34,15 @@ class Tag(models.Model):
         verbose_name_plural = "Tags"
         ordering = ['categoria__nome', 'nome']
 
-
 class Especie(models.Model):
     nome_popular = models.CharField(max_length=150, unique=True)
     nome_cientifico =  models.CharField(max_length=150, blank=True, null=True)
     descricao = models.TextField(blank=True, null=True)
-    
-    # CAMPO NOVO: para a foto do card
     imagem = models.ImageField(upload_to='especies_fotos/', blank=True, null=True, help_text="Foto que aparecerá no card do catálogo.")
-    
-    # CAMPO NOVO: para as tags
     tags = models.ManyToManyField(Tag, blank=True, related_name="especies")
 
     def __str__(self):
         return self.nome_popular
-    
 
 class InstanciaArvore(models.Model):
     ESTADO_SAUDE_CHOICES = (
@@ -72,10 +64,15 @@ class InstanciaArvore(models.Model):
     data_plantio = models.DateField(
         blank=True, null=True, default=timezone.now
     )
+    # =======================================================================
+    # LINHA ADICIONADA AQUI
+    # =======================================================================
+    observacoes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.especies.nome_popular} #{self.id}'
-    
+        # Corrigindo uma pequena digitação aqui também, de 'especies' para 'especie'
+        return f'{self.especie.nome_popular} #{self.id}'
+
 class Solicitacao(models.Model):
     TIPO_CHOICES = (
         ('SUGESTAO', 'Sugestão'),
@@ -98,14 +95,14 @@ class Solicitacao(models.Model):
 
     def __str__(self):
         return f'{self.get_tipo_display()} #{self.id} - {self.status}'
-    
+
 class ImagemSolicitacao(models.Model):
     solicitacao = models.ForeignKey(Solicitacao, related_name='imagens', on_delete=models.CASCADE)
     imagem = models.ImageField(upload_to='solicitacoes/')
 
     def __str__(self):
         return f"Imagem para a Solicitação #{self.solicitacao.id}"
-    
+
 class Projeto(models.Model):
     MAPA_CHOICES = (
         ('CARTOGRAFICO', 'Cartográfico'),
@@ -124,7 +121,7 @@ class Projeto(models.Model):
 
     def __str__(self):
         return self.nome
-    
+
 class Area(models.Model):
     TIPO_AREA_CHOICES = (
         ('PUBLICA', 'Pública'),
@@ -168,5 +165,3 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
-    
-

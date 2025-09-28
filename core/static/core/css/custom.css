@@ -420,21 +420,30 @@ body {
 }
 
 .header-search {
-    position: relative;
-    width: 300px;
+ position: relative;
+ width: 550px; /* Aumentei o valor aqui de 300px pra 550px, pra ficar patrão! */
+    flex-grow: 0.5; /* BÔNUS: Isso aqui ajuda a barra a se esticar um pouco se tiver mais espaço */
 }
+
 .header-search input {
-    width: 100%;
-    padding: 8px 15px 8px 40px;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
+ width: 100%;
+ padding: 10px 15px 10px 40px; /* Aumentei um tiquinho a altura também */
+ border: 1px solid #e0e0e0;
+ border-radius: 20px;
+    transition: all 0.3s ease-in-out; /* Efeito suave quando clica */
 }
+
+.header-search input:focus {
+    border-color: #1E5943; /* Cor principal quando focado */
+    box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.2); /* Sombreado suave */
+}
+
 .header-search i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
+ position: absolute;
+ left: 15px;
+ top: 50%;
+ transform: translateY(-50%);
+ color: #999;
 }
 
 .header-actions {
@@ -872,89 +881,6 @@ textarea.form-control-custom { resize: vertical; }
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* --- ESTILOS PARA LEAFLET.DRAW (FERRAMENTAS DE DESENHO NO MAPA) --- */
-
-/* Esconde o texto padrão dos botões de desenho */
-.leaflet-draw-toolbar a {
-    text-indent: -9999px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    font-size: 0 !important; /* Garante que nenhum texto residual apareça */
-    color: transparent !important; /* Garante que a cor do texto não apareça */
-}
-
-/* Define os ícones do Bootstrap Icons para cada ferramenta */
-/* Adicionando !important para forçar a aplicação */
-.leaflet-draw-toolbar .leaflet-draw-draw-polygon:before {
-    content: "\F4E2" !important; /* bi-polygon */
-    font-family: "bootstrap-icons" !important;
-    text-indent: 0 !important;
-    display: inline-block !important;
-    font-size: 1.1rem !important; /* Tamanho do ícone */
-    color: #c70c0c !important; /* Cor dos ícones */
-}
-
-.leaflet-draw-toolbar .leaflet-draw-draw-rectangle:before {
-    content: "\F4ED" !important; /* bi-square */
-    font-family: "bootstrap-icons" !important;
-    text-indent: 0 !important;
-    display: inline-block !important;
-    font-size: 1.1rem !important;
-    color: #495057 !important;
-}
-
-.leaflet-draw-toolbar .leaflet-draw-draw-marker:before {
-    content: "\F38C" !important; /* bi-geo-alt-fill */
-    font-family: "bootstrap-icons" !important;
-    text-indent: 0 !important;
-    display: inline-block !important;
-    font-size: 1.1rem !important;
-    color: #495057 !important;
-}
-
-.leaflet-draw-toolbar .leaflet-draw-edit-edit:before {
-    content: "\F3E7" !important; /* bi-pencil-fill */
-    font-family: "bootstrap-icons" !important;
-    text-indent: 0 !important;
-    display: inline-block !important;
-    font-size: 1.1rem !important;
-    color: #495057 !important;
-}
-
-.leaflet-draw-toolbar .leaflet-draw-edit-remove:before {
-    content: "\F4EB" !important; /* bi-trash-fill */
-    font-family: "bootstrap-icons" !important;
-    text-indent: 0 !important;
-    display: inline-block !important;
-    font-size: 1.1rem !important;
-    color: #495057 !important;
-}
-
-/* Ajusta o estilo geral dos botões */
-.leaflet-draw-toolbar a {
-    width: 30px !important; /* Largura do botão */
-    height: 30px !important; /* Altura do botão */
-    line-height: 30px !important; /* Alinhamento vertical do ícone */
-    text-align: center !important;
-    border-radius: 4px !important; /* Levemente arredondado */
-    background-color: white !important; /* Garante o fundo branco */
-    border: 1px solid #ced4da !important; /* Borda leve */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; /* Sombra sutil */
-    padding: 0 !important; /* Remove qualquer padding padrão */
-}
-
-.leaflet-draw-toolbar a:hover {
-    background-color: #f0f2f5 !important; /* Fundo leve no hover */
-    color: #1e5943 !important; /* Cor principal no hover */
-    border-color: #a7d0bf !important; /* Borda no hover */
-}
-
-/* Estilo para botões ativos */
-.leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
-    background-color: #e9ecef !important; /* Fundo mais escuro quando ativo */
-    color: #1e5943 !important; /* Cor principal quando ativo */
-    border-color: #1e5943 !important; /* Borda no hover */
-}
 
 /* Oculta as dicas de ferramenta padrão do Leaflet Draw */
 .leaflet-draw-tooltip {
@@ -1496,4 +1422,152 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
     border-radius: 8px;
     padding: 10px;
     text-align: center;
+}
+/* ========================================================================== */
+/* --- ESTILOS PARA LEAFLET.DRAW (VERSÃO FINALÍSSIMA COM TEXTO) --- */
+/* ========================================================================== */
+
+/* Estilo geral da barra de ferramentas */
+.leaflet-draw-toolbar {
+    display: flex;
+    gap: 8px; 
+}
+
+/* Estilo base para TODOS os botões */
+.leaflet-draw-toolbar a {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1) !important;
+    border-radius: 50px !important;
+    width: auto !important; 
+    height: 30px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important; 
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+/* Esconde o pseudo-elemento que usávamos para ícones */
+.leaflet-draw-toolbar a:before {
+    display: none !important;
+}
+
+/* ADICIONA O TEXTO EM CADA BOTÃO USANDO O SELETOR CORRETO E UNIFICADO */
+.leaflet-draw-toolbar a.leaflet-draw-draw-polygon::after {
+    content: "Área";
+}
+
+.leaflet-draw-toolbar a.leaflet-draw-draw-rectangle::after {
+    content: "Retângulo";
+}
+
+.leaflet-draw-toolbar a.leaflet-draw-draw-marker::after {
+    content: "Ponto";
+}
+
+.leaflet-draw-toolbar a.leaflet-draw-edit-edit::after {
+    content: "Editar";
+}
+
+.leaflet-draw-toolbar a.leaflet-draw-edit-remove::after {
+    content: "Apagar";
+}
+
+/* Estilo para quando o mouse passa por cima ou o botão está ativo */
+.leaflet-draw-toolbar a:hover,
+.leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
+    background-color: #f4f4f4 !important;
+    border-color: #999 !important;
+    color: #000 !important;
+}
+
+/* ========================================================================== */
+/* --- REMOVENDO A "MOLDURA" CINZA DOS CONTROLES DE DESENHO --- */
+/* ========================================================================== */
+
+/* Isso aqui mira nas duas "caixas" (a de cima e a de baixo) 
+e deixa o fundo e a borda delas transparentes.
+*/
+.leaflet-draw-section .leaflet-draw-toolbar.leaflet-bar {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* O Leaflet também cria uma borda entre os botões. 
+Essa regra aqui de baixo remove essa linha.
+*/
+.leaflet-draw-toolbar a {
+    border-right: none !important; 
+}
+/* ========================================================================== */
+/* --- ESTILO PARA AS AÇÕES DE DESENHO (FINALIZAR, CANCELAR, ETC.) --- */
+/* ========================================================================== */
+
+/* A barra de ações é uma lista (ul), vamos deixar ela invisível */
+.leaflet-draw-actions {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-top: 8px; /* Dá um espacinho da barra de cima */
+    display: flex;
+    gap: 8px;
+}
+
+/* Oculta os pontinhos da lista */
+.leaflet-draw-actions li {
+    list-style-type: none !important;
+}
+
+/* Agora, estilizamos os links (que são os botões) para ficarem iguais aos outros */
+.leaflet-draw-actions a {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1) !important;
+    border-radius: 4px !important;
+    width: auto !important; 
+    height: 30px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important; 
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+.leaflet-draw-actions a:hover {
+    background-color: #f4f4f4 !important;
+}
+/* ========================================================================== */
+/* --- ESCONDENDO OS BOTÕES PRINCIPAIS DURANTE O DESENHO --- */
+/* ========================================================================== */
+
+/* Quando o container principal tem a classe 'drawing-active'... */
+.leaflet-draw.drawing-active .leaflet-draw-section {
+    display: none !important; /* ...a gente esconde os botões de dentro! */
+}
+/* ========================================================================== */
+/* --- ESTILO PARA OS PONTOS DE DESENHO (VÉRTICES) --- */
+/* ========================================================================== */
+
+/* Este é o seletor que mira nos quadradões brancos */
+.leaflet-editing-icon {
+    background-color: #1e5943 !important; /* Cor principal do seu sistema */
+    border: 2px solid #ffffff !important;   /* Bordinha branca pra dar contraste */
+    border-radius: 50% !important;          /* A mágica que transforma em círculo */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important; /* Sombra pra destacar do mapa */
+    width: 14px !important;                 /* Tamanho menor e mais delicado */
+    height: 14px !important;
+    margin-left: -7px !important;           /* Ajuste fino pra centralizar */
+    margin-top: -7px !important;
+    transition: transform 0.2s ease-in-out; /* Efeito suave */
+}
+
+/* Efeito quando o mouse passa por cima */
+.leaflet-editing-icon:hover {
+    transform: scale(1.3); /* Aumenta um pouquinho pra dar feedback */
 }

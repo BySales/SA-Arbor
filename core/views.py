@@ -5,8 +5,9 @@ from datetime import date, timedelta, datetime
 from django.views.generic import DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.decorators.http import require_POST
 # FIM DOS IMPORTS ADICIONADOS
-
+from django.views.decorators.http import require_http_methods
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
@@ -358,36 +359,19 @@ class AreaDeleteView(LoginRequiredMixin, DeleteView):
 def mapa_view(request):
     solicitacao_foco_id = request.GET.get('solicitacao_id')
     area_foco_id = request.GET.get('area_id')
-
     instancias_de_arvores = InstanciaArvore.objects.select_related('especie').all()
-    arvores_data = [
-        {
-            "id": instancia.id, 
-            "nome": instancia.especie.nome_popular, 
-            "nome_cientifico": instancia.especie.nome_cientifico,
-            "descricao": instancia.especie.descricao,
-            "lat": instancia.latitude, 
-            "lon": instancia.longitude,
-            "saude": instancia.get_estado_saude_display(),
-            "plantio": instancia.data_plantio.strftime('%d/%m/%Y') if instancia.data_plantio else 'N/A'
-        } 
-        for instancia in instancias_de_arvores
-    ]
-    
+    arvores_data = [{"id": instancia.id, "nome": instancia.especie.nome_popular, "nome_cientifico": instancia.especie.nome_cientifico, "descricao": instancia.especie.descricao, "lat": instancia.latitude, "lon": instancia.longitude, "saude": instancia.get_estado_saude_display(), "plantio": instancia.data_plantio.strftime('%d/%m/%Y') if instancia.data_plantio else 'N/A'} for instancia in instancias_de_arvores]
     solicitacoes_com_coords = Solicitacao.objects.filter(latitude__isnull=False, longitude__isnull=False)
-    solicitacoes_data = [
-        {"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.get_status_display(), "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude}
-        for solicitacao in solicitacoes_com_coords
-    ]
-
+    solicitacoes_data = [{"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.get_status_display(), "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude} for solicitacao in solicitacoes_com_coords]
     areas_salvas = Area.objects.filter(geom__isnull=False)
-    areas_data = [
-        {"id": area.id, "nome": area.nome, "geom": area.geom, "tipo": area.get_tipo_display(), "status": area.get_status_display()}
-        for area in areas_salvas
-    ]
-    
+    areas_data = [{"id": area.id, "nome": area.nome, "geom": area.geom, "tipo": area.get_tipo_display(), "status": area.get_status_display()} for area in areas_salvas]
     form_area = AreaForm()
-    todas_especies = Especie.objects.all()
+    
+    # =======================================================================
+    # MUDANÇA 1: Buscando a lista de espécies para o novo modal de árvore
+    # =======================================================================
+    especies_catalogo = Especie.objects.all().order_by('nome_popular')
+    
     opcoes_saude = InstanciaArvore.ESTADO_SAUDE_CHOICES
     
     context = {
@@ -395,7 +379,7 @@ def mapa_view(request):
         'solicitacoes_data': solicitacoes_data,
         'areas_data': areas_data,
         'form_area': form_area,
-        'todas_especies': todas_especies,
+        'especies_catalogo': especies_catalogo, # Enviando a lista para o template
         'opcoes_saude': opcoes_saude,
         'solicitacao_foco_id': solicitacao_foco_id,
         'area_foco_id': area_foco_id,
@@ -518,53 +502,35 @@ def area_manage_api(request, pk):
         }
         return JsonResponse(data)
 
-@csrf_exempt
 @login_required
+@require_POST # Garante que esta view só aceite requisições POST
 def instancia_arvore_create_api(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            
-            especie_id = data.get('especie_id')
-            lat = data.get('lat')
-            lon = data.get('lon')
-            estado_saude = data.get('estado_saude')
-            data_plantio_str = data.get('data_plantio')
+    try:
+        # O formulário com Select2 envia dados como 'form data', não JSON
+        especie_id = request.POST.get('especie') 
+        lat = request.POST.get('latitude')
+        lon = request.POST.get('longitude')
+        estado_saude_form = request.POST.get('saude')
+        observacoes = request.POST.get('observacoes', '')
 
-            if not all([especie_id, lat, lon]):
-                return JsonResponse({'status': 'erro', 'message': 'Dados incompletos.'}, status=400)
+        if not all([especie_id, lat, lon]):
+            return JsonResponse({'status': 'erro', 'message': 'Dados incompletos.'}, status=400)
 
-            data_plantio_obj = None
-            if data_plantio_str:
-                data_plantio_obj = datetime.strptime(data_plantio_str, '%Y-%m-%d').date()
+        especie_obj = get_object_or_404(Especie, id=especie_id)
 
-            especie = get_object_or_404(Especie, id=especie_id)
-            
-            nova_instancia = InstanciaArvore.objects.create(
-                especie=especie,
-                latitude=lat,
-                longitude=lon,
-                estado_saude=estado_saude,
-                data_plantio=data_plantio_obj
-            )
+        mapa_saude = {'BOA': 'BOA', 'MEDIA': 'REGULAR', 'RUIM': 'RUIM'}
+        estado_saude_db = mapa_saude.get(estado_saude_form, 'BOA')
 
-            nova_arvore_data = {
-                "id": nova_instancia.id,
-                "nome": nova_instancia.especie.nome_popular,
-                "nome_cientifico": nova_instancia.especie.nome_cientifico,
-                "descricao": nova_instancia.especie.descricao,
-                "lat": nova_instancia.latitude,
-                "lon": nova_instancia.longitude,
-                "saude": nova_instancia.get_estado_saude_display(),
-                "plantio": nova_instancia.data_plantio.strftime('%d/%m/%Y') if nova_instancia.data_plantio else 'N/A'
-            }
-
-            return JsonResponse({'status': 'ok', 'message': 'Árvore adicionada com sucesso!', 'nova_arvore': nova_arvore_data})
-        
-        except Exception as e:
-            return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
-    
-    return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
+        nova_instancia = InstanciaArvore.objects.create(
+            especie=especie_obj,
+            latitude=lat,
+            longitude=lon,
+            estado_saude=estado_saude_db,
+            observacoes=observacoes
+        )
+        return JsonResponse({'status': 'ok', 'message': f'Árvore "{nova_instancia.especie.nome_popular}" adicionada com sucesso!'})
+    except Exception as e:
+        return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
 
 def search_results_view(request):
     query = request.GET.get('q')
@@ -842,3 +808,20 @@ def relatorios_view(request):
     }
     
     return render(request, 'core/relatorios.html', context)
+
+@login_required
+@require_http_methods(["DELETE"]) # Só aceita o método DELETE
+def instancia_arvore_delete_api(request, pk):
+    try:
+        # Busca a árvore no banco de dados. Se não achar, dá erro 404.
+        arvore = get_object_or_404(InstanciaArvore, pk=pk)
+        
+        # O comando pra apagar
+        arvore.delete()
+        
+        # Manda a resposta de sucesso
+        return JsonResponse({'status': 'ok', 'message': f'Árvore #{pk} foi deletada com sucesso!'})
+
+    except Exception as e:
+        # Se der qualquer outro erro, manda uma mensagem de falha
+        return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)

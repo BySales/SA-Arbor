@@ -64,8 +64,76 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div class="modal fade" id="addTreeModal" tabindex="-1" aria-labelledby="addTreeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTreeModalLabel">Adicionar Nova Árvore</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-tree-form">
+                        {% csrf_token %}
+                        <input type="hidden" id="tree-lat" name="latitude">
+                        <input type="hidden" id="tree-lon" name="longitude">
+
+                        <div class="mb-3">
+                            <label for="tree-especie" class="form-label">Espécie</label>
+                            <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
+                                <option value="" selected disabled>Selecione uma espécie...</option>
+                                {% for especie in especies_catalogo %}
+                                    <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tree-saude" class="form-label">Estado de Saúde</label>
+                            <select class="form-select form-control-custom" id="tree-saude" name="saude">
+                                <option value="BOA">Boa</option>
+                                <option value="MEDIA">Média</option>
+                                <option value="RUIM">Ruim</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tree-observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control form-control-custom" id="tree-observacoes" name="observacoes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-principal-acao" id="submitNewTree"> <i class="bi bi-check-circle-fill me-1"></i>
+                        Salvar Árvore
+                    </button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Tem certeza que deseja apagar a árvore #<strong id="tree-id-placeholder"></strong> permanentemente?</p>
+                    <p class="text-danger small">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger-outline" id="confirm-delete-btn">
+                        <i class="bi bi-trash-fill me-1"></i> Sim, Apagar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
     {{ arvores_data|json_script:"arvores-data-json" }}
     {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}

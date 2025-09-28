@@ -12,7 +12,7 @@ from .views import (
     obras_view,
     analisar_area_api, recuperar_senha_view, home_view,
     AreaDeleteView,
-    relatorios_view # Adicionada aqui
+    relatorios_view, instancia_arvore_delete_api,
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -52,6 +52,7 @@ urlpatterns = [
     path('api/areas/<int:pk>/', area_manage_api, name='area_manage_api'),
     path('api/analisar-area/', analisar_area_api, name='analisar_area_api'),
     path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
+    path('api/arvores/<int:pk>/delete/', instancia_arvore_delete_api, name='instancia_arvore_delete_api'),
 
     # --- Outras URLs do App ---
     path('obras/', obras_view, name='obras_list'), 
