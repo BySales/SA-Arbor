@@ -1,4 +1,3 @@
-/* --- ESTILOS GERAIS --- */
 html, body {
     height: 100%;
 }
@@ -24,87 +23,122 @@ body {
     width: 100%;
 }
 
+/* ========================================================================== */
+/* --- AJUSTES NA COLUNA DE INFORMAÇÃO (VÍDEO) E FORMULÁRIO --- */
+/* ========================================================================== */
+
 .info-column {
-    flex: 1;
-    color: #1E5943;
-    padding: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* Gradiente da página de Login */
-.login-page .info-column {
-    background: linear-gradient(135deg, #BFF0C9 0%, #6ACF7F 100%);
-}
-
-/* Gradiente da página de Cadastro */
-.cadastro-page .info-column {
-    background: linear-gradient(135deg, #1E5943 0%, #154231 100%);
-    color: #f0f0f0;
-}
-
-.cadastro-page .info-content h1,
-.cadastro-page .info-content p,
-.cadastro-page .info-footer span {
-    color: #f0f0f0;
-}
-
-/* Gradiente da página de Recuperar Senha */
-.recuperar-senha-page .info-column {
-    background: linear-gradient(135deg, #A4A6F1 0%, #6D6BE1 100%);
-    color: #fff;
-}
-
-.recuperar-senha-page .info-content h1,
-.recuperar-senha-page .info-content p,
-.recuperar-senha-page .info-footer span {
-    color: #fff;
-}
-
-
-.info-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.info-content .logo {
-    position: absolute;
-    top: 60px;
-    left: 60px;
-}
-
-.info-content h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: #1E5943;
-}
-
-.info-content p {
-    font-size: 1rem;
-    font-weight: 400;
-    color: #1E5943;
-    max-width: 400px;
-}
-
-.info-footer {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #1E5943;
+    flex: 0 0 55%; 
+    color: #FFFFFF;
+    position: relative; 
+    overflow: hidden;
+    display: flex; /* Mantém o display flex para facilitar a centralização do slogan */
+    align-items: center; /* Alinha o slogan verticalmente */
+    justify-content: center; /* Alinha o slogan horizontalmente */
+    padding: 40px; /* Mantém o padding para o conteúdo */
 }
 
 .form-column {
-    flex: 1;
+    flex: 0 0 45%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
     background-color: #F4F7F6;
+}
+
+.info-column .logo {
+    position: absolute;
+    top: 40px;   /* Distância do topo */
+    left: 40px;  /* Distância da esquerda */
+    z-index: 2; /* Garante que fique acima do vídeo */
+}
+
+.info-content {
+    position: relative; /* Essencial para o z-index funcionar */
+    z-index: 1; /* Garante que fique acima do vídeo */
+    width: 100%;
+    max-width: 650px; /* Limita a largura do texto */
+    text-align: left; /* Alinha o texto do slogan à esquerda */
+    /* Removido display: flex, justify-content, align-items daqui para não interferir */
+}
+
+/* LOGO PREGADA NO CANTO SUPERIOR ESQUERDO */
+
+
+/* SLOGAN BRANCO COM SOMBRA */
+.info-content h1,
+.info-content p {
+    color: #FFFFFF;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.info-content h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.info-content p {
+    font-size: 1.1rem;
+    font-weight: 400;
+    max-width: 500px;
+}
+
+/* Remove o rodapé se ele não estiver sendo usado */
+.info-footer {
+   /* Se você quer o rodapé de volta, remova este display: none */
+   display: none; /* Mantendo ele escondido como no último ajuste */
+   position: absolute; /* Prega no rodapé da info-column */
+   bottom: 40px;
+   left: 40px;
+   right: 40px;
+   z-index: 1;
+   color: #FFFFFF;
+   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.info-content h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.info-content p {
+    font-size: 1.1rem;
+    font-weight: 400;
+    max-width: 500px;
+}
+
+/* O rodapé também fica branco */
+.info-footer {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* --- VÍDEO DE FUNDO --- */
+.login-video-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    filter: brightness(0.6); /* Escurece um pouco o vídeo pra legibilidade */
+}
+
+/* Remove os gradientes antigos que não são mais necessários */
+.login-page .info-column,
+.cadastro-page .info-column,
+.recuperar-senha-page .info-column {
+    background: #333; /* Uma cor de fundo sólida caso o vídeo não carregue */
 }
 
 /* --- CARD DE LOGIN/CADASTRO --- */
@@ -116,6 +150,7 @@ body {
     width: 100%;
     max-width: 450px;
 }
+
 
 .login-header h2 {
     font-weight: 600;
@@ -1571,3 +1606,14 @@ Essa regra aqui de baixo remove essa linha.
 .leaflet-editing-icon:hover {
     transform: scale(1.3); /* Aumenta um pouquinho pra dar feedback */
 }
+.social-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px; /* Cria um espacinho entre o ícone e o texto */
+}
+
+.social-btn i {
+    font-size: 1.1rem; /* Deixa o ícone um pouco maior que o texto */
+}
+  
