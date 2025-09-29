@@ -123,15 +123,13 @@ body {
 /* --- VÍDEO DE FUNDO --- */
 .login-video-bg {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ESSA É A MÁGICA! */
     z-index: 0;
-    filter: brightness(0.6); /* Escurece um pouco o vídeo pra legibilidade */
+    filter: brightness(0.6);
 }
 
 /* Remove os gradientes antigos que não são mais necessários */
@@ -144,12 +142,12 @@ body {
 /* --- CARD DE LOGIN/CADASTRO --- */
 .login-card {
     background-color: #fff;
-    padding: 40px;
+    padding: 50px; /* Mais espaço interno */
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 450px;
-}
+    max-width: 500px; /* Formulário um pouco maior */
+    }
 
 
 .login-header h2 {
