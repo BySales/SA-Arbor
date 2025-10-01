@@ -44,8 +44,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Apps de terceiros
+    'widget_tweaks',
+    'django.contrib.sites', # <--- O allauth precisa disso
+
+    # Apps do allauth (nosso kit de login social)
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google', # Módulo do Google
+    'allauth.socialaccount.providers.apple',  # Módulo da Apple
+
+    # Suas apps
     'core',
-    'widget_tweaks'
 ]
 
 MIDDLEWARE = [
@@ -56,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'arbor_project.urls'
@@ -140,3 +153,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGOUT_REDIRECT_URL = 'login'
 
+AUTHENTICATION_BACKENDS = [
+    # Usado para logar no admin com username e senha
+    'django.contrib.auth.backends.ModelBackend',
+
+    # Lógica de autenticação do allauth (email, social, etc.)
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+# ID do site. O allauth usa isso pra gerenciar múltiplos sites se precisar.
+# Pra gente, 1 é o padrão e tá de boa.
+SITE_ID = 1
+
+# --- Configurações de conta do allauth ---
+ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Define que o login será feito via e-mail
+ACCOUNT_EMAIL_REQUIRED = True           # Exige que todo usuário tenha um e-mail
+ACCOUNT_USERNAME_REQUIRED = False       # Torna o campo 'username' opcional
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1'] # CORRIGIDO: usa 'password1'
+ACCOUNT_SESSION_REMEMBER = True         # Permite que o usuário continue logado
+ACCOUNT_EMAIL_VERIFICATION = 'optional' # Não força a verificação de e-mail no começo

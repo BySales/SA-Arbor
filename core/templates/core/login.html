@@ -1,5 +1,5 @@
 {% extends 'core/base_externa.html' %}
-{% block body_class %}login-page{% endblock %}
+{% load socialaccount %}  {% block body_class %}login-page{% endblock %}
 
 {% block info_content %}
     <h1>Eficiente, Rápido e Produtivo</h1>
@@ -36,13 +36,13 @@
             </div>
 
             <div class="social-login">
-    <a href="#" class="social-btn">
-        <i class="bi bi-google me-2"></i> <span>Login com Google</span>
-    </a>
-    <a href="#" class="social-btn">
-        <i class="bi bi-apple me-2"></i> <span>Login com Apple</span>
-    </a>
-</div>
+                <a href="{% provider_login_url 'google' %}" class="social-btn">
+                    <i class="bi bi-google me-2"></i> <span>Login com Google</span>
+                </a>
+                <a href="#" class="social-btn">
+                    <i class="bi bi-apple me-2"></i> <span>Login com Apple</span>
+                </a>
+            </div>
             
             <button type="submit" class="btn-login">Login</button>
         </form>
