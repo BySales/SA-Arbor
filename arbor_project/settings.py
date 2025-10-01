@@ -25,11 +25,14 @@ SECRET_KEY = 'django-insecure-tc%*k$22j0q2*3%g2jlk)8-!r2keb9n&j!&__^xzw5is#%$i!5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.loca.lt']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.loca.lt', '.app.github.dev']
 CSRF_TRUSTED_ORIGINS = [
     'https://*.loca.lt',
-    'https://*.ws.loca.lt', 
+    'https://*.ws.loca.lt', 'https://*.github.dev'
 ]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -81,12 +84,7 @@ WSGI_APPLICATION = 'arbor_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'arbor_db',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '3306',
-
+        'NAME': BASE_DIR / 'db.sqlite3', 
     }
 }
 

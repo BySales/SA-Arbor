@@ -1,89 +1,90 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
 }
 
 .login-container {
-    display: flex;
-    width: 100%;
-    min-height: 100vh; 
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* --- COLUNA DA ESQUERDA (VÍDEO) --- */
 .info-column {
-    flex: 55%; /* Ocupa 55% da largura */
-    position: relative; /* ESSENCIAL: É a referência para o vídeo e os textos */
-    overflow: hidden;   /* Esconde qualquer parte do vídeo que vaze */
-    
-    /* Usa flexbox para centralizar o texto verticalmente e horizontalmente */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
+  flex: 55%; /* Ocupa 55% da largura */
+  position: relative; /* ESSENCIAL: É a referência para o vídeo e os textos */
+  overflow: hidden; /* Esconde qualquer parte do vídeo que vaze */
+
+  /* Usa flexbox para centralizar o texto verticalmente e horizontalmente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
 }
 
 .video-background {
-    position: absolute;   /* Fica "solto" dentro da info-column */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;    /* A MÁGICA: Cobre tudo sem distorcer */
-    z-index: 1;           /* Fica na primeira camada (fundo) */
-    filter: brightness(0.6); /* Deixa o vídeo mais escuro */
+  position: absolute; /* Fica "solto" dentro da info-column */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* A MÁGICA: Cobre tudo sem distorcer */
+  z-index: 1; /* Fica na primeira camada (fundo) */
+  filter: brightness(0.6); /* Deixa o vídeo mais escuro */
 }
 
 /* --- CONTEÚDO SOBRE O VÍDEO --- */
 .logo-overlay {
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    z-index: 2; /* Fica na camada 2, acima do vídeo */
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  z-index: 2; /* Fica na camada 2, acima do vídeo */
 }
 
 .logo-overlay img {
-    width: 80px;
-    height: auto;
+  width: 80px;
+  height: auto;
 }
 
 .text-overlay {
-    position: relative; /* Necessário para o z-index funcionar aqui */
-    z-index: 2;         /* Fica na camada 2, acima do vídeo */
-    color: #FFFFFF;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
-    max-width: 600px; /* Limita a largura do texto */
+  position: relative; /* Necessário para o z-index funcionar aqui */
+  z-index: 2; /* Fica na camada 2, acima do vídeo */
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+  max-width: 600px; /* Limita a largura do texto */
 }
 
 .text-overlay h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
+  font-size: 2.8rem;
+  font-weight: 700;
 }
 
 .text-overlay p {
-    font-size: 1.1rem;
+  font-size: 1.1rem;
 }
 
-
 body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: #f4f7f6;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f4f7f6;
 }
 
 /* Esconde a rolagem nas páginas de autenticação */
-.login-page, .cadastro-page, .recuperar-senha-page {
-    overflow: hidden;
+.login-page,
+.cadastro-page,
+.recuperar-senha-page {
+  overflow: hidden;
 }
-
 
 /* --- ESTRUTURA DAS PÁGINAS DE LOGIN/CADASTRO --- */
 .login-container {
-    display: flex;
-    min-height: 100vh;
-    width: 100%;
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
 }
 
 /* ========================================================================== */
@@ -91,596 +92,663 @@ body {
 /* ========================================================================== */
 
 .info-column {
-    flex: 0 0 55%; 
-    color: #FFFFFF;
-    position: relative; 
-    overflow: hidden;
-    display: flex; /* Mantém o display flex para facilitar a centralização do slogan */
-    align-items: center; /* Alinha o slogan verticalmente */
-    justify-content: center; /* Alinha o slogan horizontalmente */
-    padding: 40px; /* Mantém o padding para o conteúdo */
+  flex: 0 0 55%;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  display: flex; /* Mantém o display flex para facilitar a centralização do slogan */
+  align-items: center; /* Alinha o slogan verticalmente */
+  justify-content: center; /* Alinha o slogan horizontalmente */
+  padding: 40px; /* Mantém o padding para o conteúdo */
 }
 
 .form-column {
-    flex: 0 0 45%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: #F4F7F6;
+  flex: 0 0 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f4f7f6;
 }
 
 .info-column .logo {
-    position: absolute;
-    top: 40px;   /* Distância do topo */
-    left: 40px;  /* Distância da esquerda */
-    z-index: 2; /* Garante que fique acima do vídeo */
+  position: absolute;
+  top: 40px; /* Distância do topo */
+  left: 40px; /* Distância da esquerda */
+  z-index: 2; /* Garante que fique acima do vídeo */
 }
 
 .info-content {
-    position: relative; /* Essencial para o z-index funcionar */
-    z-index: 1; /* Garante que fique acima do vídeo */
-    width: 100%;
-    max-width: 650px; /* Limita a largura do texto */
-    text-align: left; /* Alinha o texto do slogan à esquerda */
-    /* Removido display: flex, justify-content, align-items daqui para não interferir */
+  position: relative; /* Essencial para o z-index funcionar */
+  z-index: 1; /* Garante que fique acima do vídeo */
+  width: 100%;
+  max-width: 650px; /* Limita a largura do texto */
+  text-align: left; /* Alinha o texto do slogan à esquerda */
+  /* Removido display: flex, justify-content, align-items daqui para não interferir */
 }
 
 /* LOGO PREGADA NO CANTO SUPERIOR ESQUERDO */
 
-
 /* SLOGAN BRANCO COM SOMBRA */
 .info-content h1,
 .info-content p {
-    color: #FFFFFF;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .info-content h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
 }
 
 .info-content p {
-    font-size: 1.1rem;
-    font-weight: 400;
-    max-width: 500px;
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 500px;
 }
 
 /* Remove o rodapé se ele não estiver sendo usado */
 .info-footer {
-   /* Se você quer o rodapé de volta, remova este display: none */
-   display: none; /* Mantendo ele escondido como no último ajuste */
-   position: absolute; /* Prega no rodapé da info-column */
-   bottom: 40px;
-   left: 40px;
-   right: 40px;
-   z-index: 1;
-   color: #FFFFFF;
-   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  /* Se você quer o rodapé de volta, remova este display: none */
+  display: none; /* Mantendo ele escondido como no último ajuste */
+  position: absolute; /* Prega no rodapé da info-column */
+  bottom: 40px;
+  left: 40px;
+  right: 40px;
+  z-index: 1;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .info-content h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
 }
 
 .info-content p {
-    font-size: 1.1rem;
-    font-weight: 400;
-    max-width: 500px;
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 500px;
 }
 
 /* O rodapé também fica branco */
 .info-footer {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #FFFFFF;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* --- VÍDEO DE FUNDO --- */
 .login-video-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* ESSA É A MÁGICA! */
-    z-index: 0;
-    filter: brightness(0.6);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ESSA É A MÁGICA! */
+  z-index: 0;
+  filter: brightness(0.6);
 }
 
 /* Remove os gradientes antigos que não são mais necessários */
 .login-page .info-column,
 .cadastro-page .info-column,
 .recuperar-senha-page .info-column {
-    background: #333; /* Uma cor de fundo sólida caso o vídeo não carregue */
+  background: #333; /* Uma cor de fundo sólida caso o vídeo não carregue */
 }
 
 /* --- CARD DE LOGIN/CADASTRO --- */
 .login-card {
-    background-color: #fff;
-    padding: 50px; /* Mais espaço interno */
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    width: 100%;
-    max-width: 500px; /* Formulário um pouco maior */
-    }
-
+  background-color: #fff;
+  padding: 50px; /* Mais espaço interno */
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 500px; /* Formulário um pouco maior */
+}
 
 .login-header h2 {
-    font-weight: 600;
-    font-size: 1.8rem;
-    color: #333;
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: #333;
 }
 
 .login-header p {
-    color: #888;
-    margin-bottom: 30px;
+  color: #888;
+  margin-bottom: 30px;
 }
 
 /* --- FORMULÁRIO --- */
 .login-form .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .login-form label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 0.9rem;
 }
 
 .login-form p {
-    margin: 0;
+  margin: 0;
 }
 .login-form input[type="text"],
 .login-form input[type="password"],
 .login-form input[type="email"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    transition: border-color 0.3s;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s;
 }
 
 .login-form input[type="text"]:focus,
 .login-form input[type="password"]:focus,
 .login-form input[type="email"]:focus {
-    outline: none;
-    border-color: #6ACF7F;
+  outline: none;
+  border-color: #6acf7f;
 }
 
 .forgot-password {
-    display: block;
-    text-align: right;
-    font-size: 0.85rem;
-    color: #1E5943;
-    text-decoration: none;
-    margin-top: -10px;
-    margin-bottom: 20px;
+  display: block;
+  text-align: right;
+  font-size: 0.85rem;
+  color: #1e5943;
+  text-decoration: none;
+  margin-top: -10px;
+  margin-bottom: 20px;
 }
 
 .divider {
-    text-align: center;
-    color: #aaa;
-    margin: 25px 0;
-    position: relative;
+  text-align: center;
+  color: #aaa;
+  margin: 25px 0;
+  position: relative;
 }
 .divider span {
-    background-color: #fff;
-    padding: 0 10px;
-    position: relative;
-    z-index: 1;
+  background-color: #fff;
+  padding: 0 10px;
+  position: relative;
+  z-index: 1;
 }
 .divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: #ddd;
-    z-index: 0;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #ddd;
+  z-index: 0;
 }
 
 .social-login {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
 .social-btn {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-align: center;
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    transition: background-color 0.3s, border-color 0.3s;
-    font-size: 0.9rem;
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: background-color 0.3s, border-color 0.3s;
+  font-size: 0.9rem;
 }
 .social-btn:hover {
-    background-color: #f0f0f0;
-    border-color: #c0c0c0;
+  background-color: #f0f0f0;
+  border-color: #c0c0c0;
 }
 
 .btn-login {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    background-color: #1E5943;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e5943;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 .btn-login:hover {
-    background-color: #154231;
+  background-color: #154231;
 }
 
 .signup-link {
-    text-align: center;
-    margin-top: 25px;
-    color: #888;
+  text-align: center;
+  margin-top: 25px;
+  color: #888;
 }
 
 .signup-link a {
-    color: #1E5943;
-    font-weight: 600;
-    text-decoration: none;
+  color: #1e5943;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .password-input-wrapper {
-    position: relative;
+  position: relative;
 }
 
 .password-input-wrapper input {
-    padding-right: 40px;
+  padding-right: 40px;
 }
 
-#togglePassword, #togglePassword2 {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #999;
-    font-size: 1.15rem;
+#togglePassword,
+#togglePassword2 {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+  font-size: 1.15rem;
 }
 
 .recuperar-senha-page .login-header {
-    text-align: center;
+  text-align: center;
 }
 .email-info {
-    font-size: 0.9rem;
-    color: #555;
+  font-size: 0.9rem;
+  color: #555;
 }
 .email-masked {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
 }
 .no-access-link {
-    font-size: 0.8rem;
-    color: #666;
+  font-size: 0.8rem;
+  color: #666;
 }
 .code-inputs {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 .code-inputs input {
-    width: 45px;
-    height: 50px;
-    text-align: center;
-    font-size: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+  width: 45px;
+  height: 50px;
+  text-align: center;
+  font-size: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 .code-inputs span {
-    font-size: 1.5rem;
-    color: #ddd;
+  font-size: 1.5rem;
+  color: #ddd;
 }
 .action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
 }
 
 .btn-primary-custom:hover {
-    background-color: #5857c3;
-    border-color: #5857c3;
+  background-color: #5857c3;
+  border-color: #5857c3;
 }
 
 .btn-secondary-custom:hover {
-    background-color: #f8f8f8;
-    border-color: #ccc;
+  background-color: #f8f8f8;
+  border-color: #ccc;
 }
 .resend-code-link {
-    display: block;
-    text-align: center;
-    margin-top: 25px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #1E5943;
-    text-decoration: none;
+  display: block;
+  text-align: center;
+  margin-top: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e5943;
+  text-decoration: none;
 }
 
 /* --- ESTRUTURA PRINCIPAL DO APP (LAYOUT FIXO) --- */
 .app-container {
-    display: flex;
+  display: flex;
 }
 
 /* --- BARRA LATERAL (SIDEBAR) (LAYOUT FIXO) --- */
 .sidebar {
-    width: 270px; /* Largura fixa da sidebar */
-    background-color: #fff;
-    height: 100vh; /* Ocupa a altura inteira da tela */
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-right: 1px solid #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    flex-shrink: 0; /* Impede a sidebar de ser "esmagada" */
-    position: sticky; /* Deixa ela fixa no lugar enquanto rola a página */
-    top: 0;
+  width: 270px; /* Largura fixa da sidebar */
+  background-color: #fff;
+  height: 100vh; /* Ocupa a altura inteira da tela */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0; /* Impede a sidebar de ser "esmagada" */
+  position: sticky; /* Deixa ela fixa no lugar enquanto rola a página */
+  top: 0;
 }
 
 .sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
 }
 
 .sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .sidebar-logo span {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1E5943;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e5943;
 }
 .sidebar-logo img {
-    width: 32px;
+  width: 32px;
 }
 
 .sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .sidebar-menu .menu-header {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #999;
-    text-transform: uppercase;
-    margin-top: 20px;
-    margin-bottom: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .sidebar-menu li a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 15px;
-    text-decoration: none;
-    color: #555;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s;
 }
 .sidebar-menu li a:hover {
-    background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 .sidebar-menu li a.active {
-    background-color: #1E5943;
-    color: #fff;
+  background-color: #1e5943;
+  color: #fff;
 }
 .sidebar-menu li a i {
-    font-size: 1.2rem;
+  font-size: 1.2rem;
 }
 
 /* --- CONTEÚDO PRINCIPAL (LAYOUT FIXO) --- */
 .main-content {
-    flex-grow: 1; /* Faz o conteúdo ocupar todo o resto do espaço */
-    padding: 20px;
+  flex-grow: 1; /* Faz o conteúdo ocupar todo o resto do espaço */
+  padding: 20px;
 }
 
 .main-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: sticky; /* A mágica acontece aqui! */
+  top: 0; /* Pra ele colar no topo certinho, sem espaço */
+  z-index: 1000; /* Garante que ele fique na frente de tudo */
+  background-color: #f8f9fa; /* Ou a cor do seu body, pra não ficar transparente */
+  padding-top: 15px; /* Adiciona um respiro em cima */
+  padding-bottom: 15px; /* Adiciona um respiro embaixo */
 }
 
 .header-greeting h4 {
-    margin: 0;
-    font-weight: 600;
+  margin: 0;
+  font-weight: 600;
 }
 
 .header-search {
- position: relative;
- width: 550px; /* Aumentei o valor aqui de 300px pra 550px, pra ficar patrão! */
-    flex-grow: 0.5; /* BÔNUS: Isso aqui ajuda a barra a se esticar um pouco se tiver mais espaço */
+  position: relative;
+  width: 550px; /* Aumentei o valor aqui de 300px pra 550px, pra ficar patrão! */
+  flex-grow: 0.5; /* BÔNUS: Isso aqui ajuda a barra a se esticar um pouco se tiver mais espaço */
 }
 
 .header-search input {
- width: 100%;
- padding: 10px 15px 10px 40px; /* Aumentei um tiquinho a altura também */
- border: 1px solid #e0e0e0;
- border-radius: 20px;
-    transition: all 0.3s ease-in-out; /* Efeito suave quando clica */
+  width: 100%;
+  padding: 10px 15px 10px 40px; /* Aumentei um tiquinho a altura também */
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  transition: all 0.3s ease-in-out; /* Efeito suave quando clica */
 }
 
 .header-search input:focus {
-    border-color: #1E5943; /* Cor principal quando focado */
-    box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.2); /* Sombreado suave */
+  border-color: #1e5943; /* Cor principal quando focado */
+  box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.2); /* Sombreado suave */
 }
 
 .header-search i {
- position: absolute;
- left: 15px;
- top: 50%;
- transform: translateY(-50%);
- color: #999;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
 }
 
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 .header-actions > a {
-    font-size: 1.3rem;
-    color: #555;
+  font-size: 1.3rem;
+  color: #555;
 }
 
 .header-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .header-profile img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .profile-info {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 .profile-info strong {
-    font-weight: 600;
+  font-weight: 600;
 }
 .profile-info small {
-    color: #888;
+  color: #888;
 }
-
 
 /* ========================================================================== */
 /* --- INÍCIO DAS NOVAS CUSTOMIZAÇÕES E MELHORIAS DE ESTILO --- */
 /* ========================================================================== */
 
-
 /* --- ESTILO "LER MAIS" --- */
 .descricao-container {
-    position: relative;
-    max-height: 4.5em;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
+  position: relative;
+  max-height: 4.5em;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
 }
 .descricao-container.expandida {
-    max-height: 1000px;
-    transition: max-height 0.5s ease-in;
+  max-height: 1000px;
+  transition: max-height 0.5s ease-in;
 }
 .descricao-container::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 1.5em;
-    background: linear-gradient(to bottom, transparent, white);
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 1.5em;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
 }
 .descricao-container.expandida::after {
-    display: none;
+  display: none;
 }
 .ler-mais-btn {
-    color: #6c757d;
-    font-weight: bold;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 .ler-mais-btn:hover {
-    color: #1e5943;
-    text-decoration: underline;
+  color: #1e5943;
+  text-decoration: underline;
 }
 
 /* --- ESTILOS DOS CARDS DO PAINEL DE CONTROLE (BASEADO NO FIGMA) --- */
 .card {
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .card-icon {
-    font-size: 1.3rem;
-    margin-bottom: 12px;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.card-icon.primary { background-color: #E6F3EB; color: #1E5943; }
-.card-icon.danger { background-color: #F8EAEA; color: #DC3545; }
-.card-icon.info { background-color: #EAF4F9; color: #17A2B8; }
-.card-icon.success { background-color: #EBF8EE; color: #28A745; }
-.card-icon.warning-soft { background-color: #FFF8E1; color: #d69d00; }
-.card-icon.dark-soft { background-color: #E9ECEF; color: #343A40; }
-
+.card-icon.primary {
+  background-color: #e6f3eb;
+  color: #1e5943;
+}
+.card-icon.danger {
+  background-color: #f8eaea;
+  color: #dc3545;
+}
+.card-icon.info {
+  background-color: #eaf4f9;
+  color: #17a2b8;
+}
+.card-icon.success {
+  background-color: #ebf8ee;
+  color: #28a745;
+}
+.card-icon.warning-soft {
+  background-color: #fff8e1;
+  color: #d69d00;
+}
+.card-icon.dark-soft {
+  background-color: #e9ecef;
+  color: #343a40;
+}
 
 .card-title-dashboard {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #6c757d;
-    margin-bottom: 5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 5px;
 }
 
 .card-number {
-    font-size: 1.8rem;
-    font-weight: 600;
-    color: #343a40;
-    line-height: 1;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #343a40;
+  line-height: 1;
 }
 
 /* EFEITOS DE HOVER E ATIVO PARA CARDS DE STATUS */
-.card-status-hover { transition: all 0.3s ease-in-out; }
-.card-status-hover:hover { transform: translateY(-5px); border-color: #ccc; }
+.card-status-hover {
+  transition: all 0.3s ease-in-out;
+}
+.card-status-hover:hover {
+  transform: translateY(-5px);
+  border-color: #ccc;
+}
 
-.card[class*="card-status-active-"] { color: #fff !important; }
+.card[class*="card-status-active-"] {
+  color: #fff !important;
+}
 .card[class*="card-status-active-"] .card-title-dashboard,
-.card[class*="card-status-active-"] .card-number { color: #fff !important; }
-.card[class*="card-status-active-"] .card-icon { background-color: rgba(255, 255, 255, 0.2) !important; color: #fff !important; }
+.card[class*="card-status-active-"] .card-number {
+  color: #fff !important;
+}
+.card[class*="card-status-active-"] .card-icon {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
 
-.card-status-active-danger { background-color: #dc3545; border-color: #c82333; }
-.card-status-active-warning { background-color: #ffc107; border-color: #e0a800; }
+.card-status-active-danger {
+  background-color: #dc3545;
+  border-color: #c82333;
+}
+.card-status-active-warning {
+  background-color: #ffc107;
+  border-color: #e0a800;
+}
 .card-status-active-warning .card-title-dashboard,
 .card-status-active-warning .card-number,
-.card-status-active-warning .card-icon { color: #212529 !important; }
-.card-status-active-success { background-color: #198754; border-color: #157347; }
-.card-status-active-dark { background-color: #343a40; border-color: #212529; }
-
+.card-status-active-warning .card-icon {
+  color: #212529 !important;
+}
+.card-status-active-success {
+  background-color: #198754;
+  border-color: #157347;
+}
+.card-status-active-dark {
+  background-color: #343a40;
+  border-color: #212529;
+}
 
 /* FILTRO DE PERÍODO ESTILO PÍLULA */
-.filter-pills { display: flex; background-color: #f0f2f5; border-radius: 50px; padding: 5px; gap: 5px; }
-.filter-pills a { padding: 6px 16px; text-decoration: none; font-size: 0.9rem; font-weight: 500; color: #6c757d; border-radius: 50px; transition: all 0.3s ease; border: none; }
-.filter-pills a:not(.active):hover { background-color: #e9ecef; color: #343a40; }
-.filter-pills a.active { background-color: #1e5943; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); font-weight: 600; }
-
+.filter-pills {
+  display: flex;
+  background-color: #f0f2f5;
+  border-radius: 50px;
+  padding: 5px;
+  gap: 5px;
+}
+.filter-pills a {
+  padding: 6px 16px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c757d;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  border: none;
+}
+.filter-pills a:not(.active):hover {
+  background-color: #e9ecef;
+  color: #343a40;
+}
+.filter-pills a.active {
+  background-color: #1e5943;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
 
 /* BOTÃO DE AÇÃO PRINCIPAL (EX: NOVA SOLICITAÇÃO) */
 .btn-principal-acao {
@@ -702,285 +770,517 @@ body {
 }
 
 /* SELETOR DE ORDENAÇÃO CUSTOMIZADO */
-.custom-select-wrapper { position: relative; }
-.form-select-custom { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 50px; padding: 8px 36px 8px 16px; font-weight: 500; color: #343a40; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; }
-.form-select-custom:hover { border-color: #adb5bd; background-color: #f8f9fa; }
-.form-select-custom:focus { outline: none; border-color: #1e5943; box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25); }
-.custom-select-wrapper::after { content: '\f282'; font-family: "bootstrap-icons"; font-size: 0.9rem; font-weight: bold; color: #6c757d; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-
+.custom-select-wrapper {
+  position: relative;
+}
+.form-select-custom {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 50px;
+  padding: 8px 36px 8px 16px;
+  font-weight: 500;
+  color: #343a40;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+.form-select-custom:hover {
+  border-color: #adb5bd;
+  background-color: #f8f9fa;
+}
+.form-select-custom:focus {
+  outline: none;
+  border-color: #1e5943;
+  box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25);
+}
+.custom-select-wrapper::after {
+  content: "\f282";
+  font-family: "bootstrap-icons";
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #6c757d;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
 
 /* ESTILO REFINADO PARA O CARD DE SOLICITAÇÃO */
-.card-denuncia { border-left: 5px solid #FFADAD; }
-.card-sugestao { border-left: 5px solid #A0C4A4; }
+.card-denuncia {
+  border-left: 5px solid #ffadad;
+}
+.card-sugestao {
+  border-left: 5px solid #a0c4a4;
+}
 
-.card-solicitacao { border: 1px solid #e9ecef; transition: all 0.2s ease-in-out; border-radius: 12px; background-color: #fff; overflow: hidden; }
-.card-solicitacao:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); border-color: #dee2e6; }
-.card-solicitacao .card-header { background-color: #fff; border-bottom: 1px solid #f0f2f5; padding: 1rem 1.25rem; }
-.card-solicitacao .card-header h6 { font-weight: 600; color: #343a40; }
-.card-solicitacao .card-header small { font-weight: 500; }
-.card-solicitacao .card-body { padding: 1.25rem; }
-.card-metadata { font-size: 0.9rem; color: #6c757d; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f2f5; }
-.card-metadata i { color: #1E5943; margin-right: 4px; }
-.img-thumbnail-solicitacao { height: 80px !important; width: 80px !important; object-fit: cover; border: 2px solid #e9ecef; padding: 3px; transition: transform 0.2s; border-radius: 8px; }
-.img-thumbnail-solicitacao:hover { transform: scale(1.05); border-color: #1E5943; }
-.card-solicitacao .card-footer { background-color: #f8f9fa; border-top: 1px solid #f0f2f5; gap: 8px; padding: 0.75rem 1.25rem; }
-.card-solicitacao .card-footer .btn { border-radius: 50px !important; font-weight: 600 !important; padding: 6px 16px !important; display: inline-flex !important; align-items: center !important; gap: 5px; transition: all 0.2s ease-out; }
-.card-solicitacao .card-footer .btn-outline-info { border-color: #1e5943 !important; color: #1e5943 !important; }
-.card-solicitacao .card-footer .btn-outline-info:hover { background-color: #1e5943 !important; color: #fff !important; }
-.card-solicitacao .card-footer .btn-primary { background-color: #1e5943 !important; border-color: #1e5943 !important; box-shadow: 0 4px 12px rgba(30, 89, 67, 0.2); }
-.card-solicitacao .card-footer .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(30, 89, 67, 0.3); }
+.card-solicitacao {
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease-in-out;
+  border-radius: 12px;
+  background-color: #fff;
+  overflow: hidden;
+}
+.card-solicitacao:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-color: #dee2e6;
+}
+.card-solicitacao .card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f2f5;
+  padding: 1rem 1.25rem;
+}
+.card-solicitacao .card-header h6 {
+  font-weight: 600;
+  color: #343a40;
+}
+.card-solicitacao .card-header small {
+  font-weight: 500;
+}
+.card-solicitacao .card-body {
+  padding: 1.25rem;
+}
+.card-metadata {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f2f5;
+}
+.card-metadata i {
+  color: #1e5943;
+  margin-right: 4px;
+}
+.img-thumbnail-solicitacao {
+  height: 80px !important;
+  width: 80px !important;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+  padding: 3px;
+  transition: transform 0.2s;
+  border-radius: 8px;
+}
+.img-thumbnail-solicitacao:hover {
+  transform: scale(1.05);
+  border-color: #1e5943;
+}
+.card-solicitacao .card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #f0f2f5;
+  gap: 8px;
+  padding: 0.75rem 1.25rem;
+}
+.card-solicitacao .card-footer .btn {
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  padding: 6px 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px;
+  transition: all 0.2s ease-out;
+}
+.card-solicitacao .card-footer .btn-outline-info {
+  border-color: #1e5943 !important;
+  color: #1e5943 !important;
+}
+.card-solicitacao .card-footer .btn-outline-info:hover {
+  background-color: #1e5943 !important;
+  color: #fff !important;
+}
+.card-solicitacao .card-footer .btn-primary {
+  background-color: #1e5943 !important;
+  border-color: #1e5943 !important;
+  box-shadow: 0 4px 12px rgba(30, 89, 67, 0.2);
+}
+.card-solicitacao .card-footer .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 89, 67, 0.3);
+}
 
-.status-badge { padding: 0.4em 0.8em; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; border-radius: 20px; letter-spacing: 0.5px; }
-
+.status-badge {
+  padding: 0.4em 0.8em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
 
 /* ESTILO GLOBAL PARA FORMULÁRIOS MODERNOS */
-.page-header { border-bottom: 1px solid #e9ecef; padding-bottom: 1rem; }
-.form-control-custom { border-radius: 8px !important; border: 1px solid #ced4da !important; padding: 0.75rem 1rem !important; transition: all 0.2s ease-in-out; }
-.form-control-custom:focus { outline: none !important; border-color: #1e5943 !important; box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important; }
-textarea.form-control-custom { resize: vertical; }
-.form-section { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #f0f2f5; }
-.form-section-title { font-size: 1.1rem; font-weight: 600; color: #343a40; margin-bottom: 1.5rem; }
-.map-container-form { border-radius: 12px; border: 1px solid #dee2e6; width: 100%; }
-.btn-secondary-custom { border-radius: 50px !important; font-weight: 500 !important; padding: 8px 16px !important; background-color: #f0f2f5; border: 1px solid #f0f2f5; color: #343a40; display: inline-flex; align-items: center; }
-.btn-secondary-custom:hover { background-color: #e2e6ea; border-color: #e2e6ea; }
-.btn-danger-outline { border-radius: 50px !important; font-weight: 600 !important; padding: 8px 20px !important; background-color: transparent !important; border: 2px solid #dc3545 !important; color: #dc3545 !important; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease-out; }
-.btn-danger-outline:hover { background-color: #dc3545 !important; color: #fff !important; }
+.page-header {
+    padding-bottom: 0;
+}
+.form-control-custom {
+  border-radius: 8px !important;
+  border: 1px solid #ced4da !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.2s ease-in-out;
+}
+.form-control-custom:focus {
+  outline: none !important;
+  border-color: #1e5943 !important;
+  box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important;
+}
+textarea.form-control-custom {
+  resize: vertical;
+}
+.form-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #f0f2f5;
+}
+.form-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 1.5rem;
+}
+.map-container-form {
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  width: 100%;
+}
+.btn-secondary-custom {
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  background-color: #f0f2f5;
+  border: 1px solid #f0f2f5;
+  color: #343a40;
+  display: inline-flex;
+  align-items: center;
+}
+.btn-secondary-custom:hover {
+  background-color: #e2e6ea;
+  border-color: #e2e6ea;
+}
+.btn-danger-outline {
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  background-color: transparent !important;
+  border: 2px solid #dc3545 !important;
+  color: #dc3545 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease-out;
+}
+.btn-danger-outline:hover {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}
 
 /* UPLOAD DE IMAGEM CUSTOMIZADO */
-.custom-file-upload { border: 2px dashed #dee2e6; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; position: relative; transition: all 0.2s ease-in-out; }
-.custom-file-upload:hover { border-color: #1e5943; background-color: #f8f9fa; }
-.custom-file-upload i { font-size: 2rem; color: #1e5943; display: block; margin-bottom: 0.5rem; }
-.custom-file-upload span { color: #6c757d; font-weight: 500; }
-.custom-file-upload input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.custom-file-upload {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+.custom-file-upload:hover {
+  border-color: #1e5943;
+  background-color: #f8f9fa;
+}
+.custom-file-upload i {
+  font-size: 2rem;
+  color: #1e5943;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.custom-file-upload span {
+  color: #6c757d;
+  font-weight: 500;
+}
+.custom-file-upload input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
 /* GALERIA DE IMAGENS EXISTENTES */
-.image-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; }
-.gallery-item { position: relative; overflow: hidden; border-radius: 8px; border: 1px solid #e9ecef; }
-.gallery-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
-.gallery-item .view-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0; transition: opacity 0.2s ease-in-out; }
-.gallery-item:hover .view-icon { opacity: 1; }
+.image-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+.gallery-item .view-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+.gallery-item:hover .view-icon {
+  opacity: 1;
+}
 
 /* AJUSTES DE COMPACIDADE PARA REDUZIR ROLAGEM */
-.page-header { padding-bottom: 0.75rem; margin-bottom: 1.5rem !important; }
-.form-section-title { margin-bottom: 1.25rem; }
-.card .mb-3 { margin-bottom: 0.9rem !important; }
-.map-container-form { height: 380px; }
-.custom-file-upload { padding: 1.5rem; }
-.custom-file-upload i { font-size: 1.8rem; }
-.image-gallery-grid { gap: 0.75rem; }
+
+.form-section-title {
+  margin-bottom: 1.25rem;
+}
+.card .mb-3 {
+  margin-bottom: 0.9rem !important;
+}
+.map-container-form {
+  height: 380px;
+}
+.custom-file-upload {
+  padding: 1.5rem;
+}
+.custom-file-upload i {
+  font-size: 1.8rem;
+}
+.image-gallery-grid {
+  gap: 0.75rem;
+}
 
 /* --- CORES PARA OS BADGES DE STATUS DA TABELA --- */
 
 .status-em_aberto {
-    background-color: #F8EAEA !important;
-    color: #DC3545 !important;
+  background-color: #f8eaea !important;
+  color: #dc3545 !important;
 }
 
 .status-em_andamento {
-    background-color: #FFF8E1 !important;
-    color: #d69d00 !important;
+  background-color: #fff8e1 !important;
+  color: #d69d00 !important;
 }
 
 .status-finalizado {
-    background-color: #EBF8EE !important;
-    color: #28A745 !important;
+  background-color: #ebf8ee !important;
+  color: #28a745 !important;
 }
 
 .status-recusado {
-    background-color: #E9ECEF !important;
-    color: #343A40 !important;
+  background-color: #e9ecef !important;
+  color: #343a40 !important;
 }
 
 /* --- ESTILOS PARA O PAINEL DE OBRAS (ACCORDION) --- */
 
 .accordion-item {
-    border: 1px solid #e9ecef !important;
-    border-radius: 12px !important;
-    margin-bottom: 1rem;
-    background-color: #fff;
+  border: 1px solid #e9ecef !important;
+  border-radius: 12px !important;
+  margin-bottom: 1rem;
+  background-color: #fff;
 }
 
 .accordion-header {
-    border-radius: 12px !important;
+  border-radius: 12px !important;
 }
 
 .accordion-button {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #343a40;
-    background-color: #f8f9fa !important;
-    border-radius: 12px !important;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #343a40;
+  background-color: #f8f9fa !important;
+  border-radius: 12px !important;
 }
 
 .accordion-button:not(.collapsed) {
-    box-shadow: none !important;
-    color: #1e5943;
+  box-shadow: none !important;
+  color: #1e5943;
 }
 
 .accordion-button:focus {
-    box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important;
-    border-color: transparent !important;
+  box-shadow: 0 0 0 3px rgba(30, 89, 67, 0.25) !important;
+  border-color: transparent !important;
 }
 
 .accordion-button::after {
-    /* Customiza a seta do accordion */
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  /* Customiza a seta do accordion */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
 
 .accordion-body {
-    background-color: #fdfdfd;
-    padding: 1.5rem;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 /* --- ESTILO PARA OS CARDS DE TAREFAS (OBRAS) --- */
 
 .card-obra {
-    position: relative;
-    border: 1px solid #e9ecef;
-    border-left-width: 5px; /* Borda lateral mais grossa */
-    transition: all 0.2s ease-in-out;
+  position: relative;
+  border: 1px solid #e9ecef;
+  border-left-width: 5px; /* Borda lateral mais grossa */
+  transition: all 0.2s ease-in-out;
 }
 
 .card-obra:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-color: #ccc;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-color: #ccc;
 }
 
 /* Cor da borda para Áreas */
 .card-obra-area {
-    border-left-color: #6f42c1; /* Roxo */
+  border-left-color: #6f42c1; /* Roxo */
 }
 
 /* Cor da borda para Solicitações */
 .card-obra-solicitacao {
-    border-left-color: #fd7e14; /* Laranja */
+  border-left-color: #fd7e14; /* Laranja */
 }
 
 .card-obra .card-body {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .card-obra .card-title {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .card-obra .card-footer-text {
-    font-size: 0.8rem;
-    color: #6c757d;
+  font-size: 0.8rem;
+  color: #6c757d;
 }
 
 /* --- ESTILOS PARA LISTAS DE ITENS (EX: CATÁLOGO) --- */
 /* SUBSTITUA O SEU BLOCO ANTIGO POR ESTE AQUI */
 
 .card-list-item {
-    border: 1px solid #e9ecef;
-    border-left: 4px solid #e9ecef; /* Borda inicial neutra */
-    transition: all 0.2s ease-in-out;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid #e9ecef; /* Borda inicial neutra */
+  transition: all 0.2s ease-in-out;
 }
 
 .card-list-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border-left-color: #1e5943; /* Borda fica verde no hover */
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-left-color: #1e5943; /* Borda fica verde no hover */
 }
 
 .card-list-item .card-body {
-    padding: 1.25rem;
+  padding: 1.25rem;
 }
 
 .card-list-item h5 {
-    font-weight: 600;
-    color: #343a40;
+  font-weight: 600;
+  color: #343a40;
 }
 
 .card-list-item .card-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-shrink: 0; /* Impede que os botões quebrem a linha */
-    align-items: center; /* Alinha os botões verticalmente com o texto */
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0; /* Impede que os botões quebrem a linha */
+  align-items: center; /* Alinha os botões verticalmente com o texto */
 }
 
 /* AQUI ESTÁ A MUDANÇA: removemos a altura e largura fixas */
 .card-list-item .card-actions .btn.btn-sm {
-    padding: 6px 12px !important; /* Padding ajustado para botões pequenos */
-    font-size: 0.8rem !important; /* Fonte menor para botões de ação */
+  padding: 6px 12px !important; /* Padding ajustado para botões pequenos */
+  font-size: 0.8rem !important; /* Fonte menor para botões de ação */
 }
 
 /* --- ESTILOS PARA A PÁGINA DO MAPA INTERATIVO --- */
 
 .map-card-container {
-    position: relative;
-    overflow: hidden; /* Garante que o mapa respeite as bordas arredondadas */
-    padding: 0 !important;
+  position: relative;
+  overflow: hidden; /* Garante que o mapa respeite as bordas arredondadas */
+  padding: 0 !important;
 }
 
 #map {
-    height: 75vh; /* Altura do mapa - 75% da altura da tela */
-    width: 100%;
-    z-index: 1;
+  height: 73vh; /* Altura do mapa - 75% da altura da tela */
+  width: 100%;
+  z-index: 1;
 }
 
 /* Base para os painéis flutuantes no mapa */
 .map-overlay-panel {
-    position: absolute;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(5px);
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    border: 1px solid #e9ecef;
-    padding: 10px 15px;
-    width: 280px;
-    max-height: 80%;
-    overflow-y: auto;
+  position: absolute;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e9ecef;
+  padding: 10px 15px;
+  width: 280px;
+  max-height: 80%;
+  overflow-y: auto;
 }
 
 #details-panel {
-    top: 20px;
-    left: 20px;
+  top: 20px;
+  left: 20px;
 }
 
 /* Estilo do controle de camadas padrão do Leaflet */
 .leaflet-control-layers {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(5px);
-    border-radius: 8px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
-    border: 1px solid #e9ecef !important;
-    padding: 10px;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(5px);
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid #e9ecef !important;
+  padding: 10px;
 }
-.leaflet-control-layers-base label, .leaflet-control-layers-overlays label {
-    display: flex;
-    align-items: center;
-    font-weight: 500;
+.leaflet-control-layers-base label,
+.leaflet-control-layers-overlays label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
 }
 .layer-name {
-    margin-left: 8px;
+  margin-left: 8px;
 }
 
 /* Estilo do exibidor de coordenadas */
 .map-coords-display {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-family: monospace;
-    font-size: 0.8rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-family: monospace;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 
 /* Oculta as dicas de ferramenta padrão do Leaflet Draw */
 .leaflet-draw-tooltip {
-    display: none !important;
+  display: none !important;
 }
 
 /* ========================================================================== */
@@ -989,42 +1289,42 @@ textarea.form-control-custom { resize: vertical; }
 
 /* Bloco principal dos cards de gráfico */
 .card-grafico {
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease-in-out;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
 }
 
 .card-grafico:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border-color: #dee2e6;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-color: #dee2e6;
 }
 
 .card-grafico .card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #f0f2f5;
-    padding: 1rem 1.25rem;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f2f5;
+  padding: 1rem 1.25rem;
 }
 
 /* Deixa a cor do texto do cabeçalho do gráfico igual a cor principal */
 .card-grafico .card-header h6 {
-    color: #1e5943 !important;
+  color: #1e5943 !important;
 }
 
 /* Garante que o gráfico ocupe o espaço direitinho */
 .chart-container {
-    position: relative;
-    height: 300px; /* Altura padrão para os gráficos */
-    width: 100%;
+  position: relative;
+  height: 300px; /* Altura padrão para os gráficos */
+  width: 100%;
 }
 
 /* Ajusta o card de KPI pra não ter borda extra e ter a transição de hover */
 .card-kpi-report {
-    border: 1px solid #e9ecef;
+  border: 1px solid #e9ecef;
 }
 .card-kpi-report:hover {
-    border-color: #ccc;
+  border-color: #ccc;
 }
 
 /* ========================================================================== */
@@ -1033,58 +1333,65 @@ textarea.form-control-custom { resize: vertical; }
 
 /* Base do novo card KPI */
 .card-kpi {
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
-    background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
 }
 
 /* Título do card (ex: "Em Aberto", "Total de Árvores") */
 .card-title-report {
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
 /* Número grande em destaque */
 .card-number-report {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #343a40;
-    line-height: 1;
-    margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #343a40;
+  line-height: 1;
+  margin: 0;
 }
 
 /* Ajusta as cores do texto do título para combinar com o ícone */
 /* Bootstrap já faz isso, mas garantimos aqui */
-.card-title-report.text-primary { color: #1E5943 !important; }
-.card-title-report.text-danger { color: #DC3545 !important; }
-.card-title-report.text-info { color: #17A2B8 !important; }
-.card-title-report.text-success { color: #28A745 !important; }
-
+.card-title-report.text-primary {
+  color: #1e5943 !important;
+}
+.card-title-report.text-danger {
+  color: #dc3545 !important;
+}
+.card-title-report.text-info {
+  color: #17a2b8 !important;
+}
+.card-title-report.text-success {
+  color: #28a745 !important;
+}
 
 .card-configuracoes {
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
-    background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
 }
 
 .card-configuracoes .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    padding: 1rem 1.25rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 1.25rem;
 }
 
 .profile-picture-lg {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* ========================================================================== */
@@ -1093,50 +1400,50 @@ textarea.form-control-custom { resize: vertical; }
 
 /* Tamanho médio para a imagem de perfil */
 .profile-picture-md {
-    width: 80px; /* Diminui a largura */
-    height: 80px; /* Diminui a altura */
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #f0f2f5; /* Borda mais suave */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0; /* Impede que a imagem encolha */
+  width: 80px; /* Diminui a largura */
+  height: 80px; /* Diminui a altura */
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #f0f2f5; /* Borda mais suave */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0; /* Impede que a imagem encolha */
 }
 
 /* Esconde o input de arquivo real (já feito no HTML com d-none) */
 .custom-file-upload-wrapper input[type="file"] {
-    display: none;
+  display: none;
 }
 
 /* Estilo para o botão que "dispara" o upload */
 .custom-file-upload-wrapper .btn.btn-secondary-custom {
-    padding: 6px 14px !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    border-radius: 50px !important;
-    background-color: #e9ecef;
-    color: #343a40;
-    border-color: #e9ecef;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s ease;
+  padding: 6px 14px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  background-color: #e9ecef;
+  color: #343a40;
+  border-color: #e9ecef;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
 }
 
 .custom-file-upload-wrapper .btn.btn-secondary-custom:hover {
-    background-color: #dee2e6;
-    border-color: #dee2e6;
-    transform: translateY(-1px);
+  background-color: #dee2e6;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
 }
 
 /* Estilo para o texto que mostra o nome do arquivo */
 #file-name-display {
-    font-size: 0.9rem;
-    color: #6c757d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
-    max-width: 200px; /* Limita a largura para o ellipsis funcionar */
-    vertical-align: middle; /* Alinha verticalmente com o botão */
+  font-size: 0.9rem;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
+  max-width: 200px; /* Limita a largura para o ellipsis funcionar */
+  vertical-align: middle; /* Alinha verticalmente com o botão */
 }
 
 /* ========================================================================== */
@@ -1144,85 +1451,89 @@ textarea.form-control-custom { resize: vertical; }
 /* ========================================================================== */
 
 .card-especie-horizontal {
-    display: flex;
-    flex-direction: row;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    transition: all 0.3s ease-in-out;
-    overflow: hidden;
-    background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  background-color: #fff;
 }
 
 .card-especie-horizontal:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-color: #ccc;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #ccc;
 }
 
 /* Coluna do conteúdo (texto, tags, botões) */
 .card-especie-horizontal .card-body-content {
-    flex: 1; /* Faz esta coluna ocupar o espaço restante */
-    padding: 1.25rem;
+  flex: 1; /* Faz esta coluna ocupar o espaço restante */
+  padding: 1.25rem;
 }
 
 /* Coluna da imagem */
 .card-especie-horizontal .card-body-img {
-    flex: 0 0 130px; /* Largura fixa para a imagem, ajuste se quiser */
-    position: relative;
+  flex: 0 0 130px; /* Largura fixa para a imagem, ajuste se quiser */
+  position: relative;
 }
 
 .card-especie-horizontal .card-body-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* ESSENCIAL para a imagem não distorcer */
-    transition: transform 0.3s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ESSENCIAL para a imagem não distorcer */
+  transition: transform 0.3s ease;
 }
 
 .card-especie-horizontal:hover .card-body-img img {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 /* Overlay (gradiente sobre a imagem) */
 .card-especie-horizontal .card-body-img .img-overlay {
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.9) 0%,   /* começa semi-transparente */
-        rgba(255, 255, 255, 0.6) 20%, /* esfumado */
-        rgba(255, 255, 255, 0) 80%    /* termina invisível */
-    );
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9) 0%,
+    /* começa semi-transparente */ rgba(255, 255, 255, 0.6) 20%,
+    /* esfumado */ rgba(255, 255, 255, 0) 80% /* termina invisível */
+  );
 }
 
 /* Se você manteve a regra de hover para o overlay, ajuste-a também: */
 .card-especie-horizontal:hover .card-body-img .img-overlay {
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 80%); /* Ajuste também para 75% */
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 80%
+  ); /* Ajuste também para 75% */
 }
 
 /* Estilo do container das Tags */
 .tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* Estilo individual de cada Tag */
 .tag {
-    padding: 4px 10px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .tag-more {
-    background-color: #e9ecef !important; /* Fundo cinza claro */
-    color: #495057 !important;       /* Texto cinza escuro */
+  background-color: #e9ecef !important; /* Fundo cinza claro */
+  color: #495057 !important; /* Texto cinza escuro */
 }
 .custom-file-upload.h-100 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ========================================================================== */
@@ -1231,70 +1542,69 @@ textarea.form-control-custom { resize: vertical; }
 
 /* Ajusta o alinhamento de todos os itens no header */
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Espaçamento entre os ícones e o perfil */
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Espaçamento entre os ícones e o perfil */
 }
 
 /* Estilo base para os botões de ícone (sino e carta) */
 .header-icon-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    background-color: #f0f2f5; /* Fundo cinza claro sutil */
-    border-radius: 50%; /* Deixa o botão redondo */
-    color: #555;
-    font-size: 1.1rem; /* Tamanho do ícone */
-    text-decoration: none;
-    transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background-color: #f0f2f5; /* Fundo cinza claro sutil */
+  border-radius: 50%; /* Deixa o botão redondo */
+  color: #555;
+  font-size: 1.1rem; /* Tamanho do ícone */
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
 }
 
 /* Efeito ao passar o mouse por cima */
 .header-icon-btn:hover {
-    background-color: #e2e6ea;
-    color: #1E5943; /* Cor principal do sistema */
-    transform: translateY(-2px); /* Efeito de "saltar" */
+  background-color: #e2e6ea;
+  color: #1e5943; /* Cor principal do sistema */
+  transform: translateY(-2px); /* Efeito de "saltar" */
 }
-
 
 /* --- Estilo para o Menu Dropdown do Perfil --- */
 
 .profile-dropdown .dropdown-menu {
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-    padding: 0.5rem 0;
-    margin-top: 10px !important; /* Distância entre a foto e o menu */
-    min-width: 240px; /* Largura mínima do menu */
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.5rem 0;
+  margin-top: 10px !important; /* Distância entre a foto e o menu */
+  min-width: 240px; /* Largura mínima do menu */
 }
 
 .profile-dropdown .dropdown-item {
-    font-weight: 500;
-    padding: 0.6rem 1.2rem;
-    display: flex;
-    align-items: center;
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  display: flex;
+  align-items: center;
 }
 
 .profile-dropdown .dropdown-item i {
-    color: #6c757d; /* Cor dos ícones do menu */
+  color: #6c757d; /* Cor dos ícones do menu */
 }
 
 /* Item "Sair" com destaque em vermelho */
 .profile-dropdown .dropdown-item-danger {
-    color: #d9534f;
-    font-weight: 500;
+  color: #d9534f;
+  font-weight: 500;
 }
 
 .profile-dropdown .dropdown-item-danger:hover {
-    background-color: #f8d7da;
-    color: #721c24;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* Remove a setinha padrão do dropdown que fica do lado da foto */
 .profile-dropdown .dropdown-toggle::after {
-    display: none;
+  display: none;
 }
 
 /* ========================================================================== */
@@ -1314,8 +1624,8 @@ textarea.form-control-custom { resize: vertical; }
 
 /* O "carrinho" (a parte que se move) */
 ::-webkit-scrollbar-thumb {
-  background-color: #1e5943;  /* Cor verde principal do seu site */
-  border-radius: 20px;       /* Bordas arredondadas */
+  background-color: #1e5943; /* Cor verde principal do seu site */
+  border-radius: 20px; /* Bordas arredondadas */
   border: 2px solid #f4f7f6; /* Cria um pequeno espaçamento da borda */
 }
 
@@ -1323,7 +1633,6 @@ textarea.form-control-custom { resize: vertical; }
 ::-webkit-scrollbar-thumb:hover {
   background-color: #154231; /* Um tom de verde mais escuro */
 }
-
 
 /* Para o Firefox */
 /* A sintaxe é mais simples */
@@ -1336,17 +1645,17 @@ body {
 /* ========================================================================== */
 
 .nav-pills-custom .nav-link {
-    background: none;
-    border: 0;
-    color: #6c757d;
-    font-weight: 600;
+  background: none;
+  border: 0;
+  color: #6c757d;
+  font-weight: 600;
 }
 
 .nav-pills-custom .nav-link.active,
 .nav-pills-custom .show > .nav-link {
-    color: #1e5943;
-    background-color: #e6f3eb !important; /* Verde bem clarinho */
-    border-radius: 50px;
+  color: #1e5943;
+  background-color: #e6f3eb !important; /* Verde bem clarinho */
+  border-radius: 50px;
 }
 /* ========================================================================== */
 /* --- ESTILOS PARA O UPLOAD DE IMAGEM NO FORMULÁRIO DE ESPÉCIE --- */
@@ -1354,83 +1663,82 @@ body {
 
 /* Container da área de upload para garantir que se estique */
 .image-upload-area {
-    border: 1px dashed #ced4da; /* Borda tracejada */
-    border-radius: 8px;
-    padding: 15px; /* Espaçamento interno */
-    background-color: #f8f9fa; /* Fundo levemente cinza */
-    text-align: center;
-    position: relative;
-    transition: all 0.2s ease-in-out;
-    min-height: 250px; /* Altura mínima para ficar harmonioso */
+  border: 1px dashed #ced4da; /* Borda tracejada */
+  border-radius: 8px;
+  padding: 15px; /* Espaçamento interno */
+  background-color: #f8f9fa; /* Fundo levemente cinza */
+  text-align: center;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  min-height: 250px; /* Altura mínima para ficar harmonioso */
 }
 
 /* Estilo para o card de preview da imagem existente */
 .image-preview-card {
-    position: relative;
-    margin-bottom: 10px; /* Espaço entre a imagem e a área de upload */
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    overflow: hidden; /* Garante que a imagem não vaze */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: relative;
+  margin-bottom: 10px; /* Espaço entre a imagem e a área de upload */
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden; /* Garante que a imagem não vaze */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .image-preview-card img {
-    max-height: 180px; /* Altura máxima para a imagem de preview */
-    object-fit: cover; /* Recorta a imagem para cobrir a área */
-    width: 100%;
-    display: block; /* Remove espaço extra abaixo da imagem */
-    border-radius: 8px; /* Borda arredondada */
+  max-height: 180px; /* Altura máxima para a imagem de preview */
+  object-fit: cover; /* Recorta a imagem para cobrir a área */
+  width: 100%;
+  display: block; /* Remove espaço extra abaixo da imagem */
+  border-radius: 8px; /* Borda arredondada */
 }
 
 /* Botão de remover imagem em cima do preview */
 .remove-image-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: rgba(220, 53, 69, 0.8); /* Vermelho semi-transparente */
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(220, 53, 69, 0.8); /* Vermelho semi-transparente */
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .remove-image-btn:hover {
-    background-color: rgba(220, 53, 69, 1); /* Vermelho mais forte no hover */
+  background-color: rgba(220, 53, 69, 1); /* Vermelho mais forte no hover */
 }
-
 
 /* Estilo para a área de "Escolher arquivo..." */
 .custom-file-upload-container {
-    display: flex; /* Garante que o label de upload se estique */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border: 2px dashed #a8d5b1; /* Borda tracejada verde */
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    background-color: #e6f3eb; /* Fundo verde clarinho */
-    color: #1e5943; /* Texto verde */
-    transition: background-color 0.2s, border-color 0.2s;
-    font-weight: 500;
+  display: flex; /* Garante que o label de upload se estique */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #a8d5b1; /* Borda tracejada verde */
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  background-color: #e6f3eb; /* Fundo verde clarinho */
+  color: #1e5943; /* Texto verde */
+  transition: background-color 0.2s, border-color 0.2s;
+  font-weight: 500;
 }
 
 .custom-file-upload-container:hover {
-    background-color: #d1eccd; /* Verde um pouco mais forte no hover */
-    border-color: #1e5943; /* Borda mais escura no hover */
+  background-color: #d1eccd; /* Verde um pouco mais forte no hover */
+  border-color: #1e5943; /* Borda mais escura no hover */
 }
 
 .custom-file-upload-container i {
-    font-size: 2rem;
-    margin-bottom: 5px;
+  font-size: 2rem;
+  margin-bottom: 5px;
 }
 /* ========================================================================== */
 /* --- ESTILOS PARA O PAINEL DE EQUIPES --- */
@@ -1438,52 +1746,52 @@ body {
 
 /* Estilo para os cards de equipe */
 
-
 /* Botão de 3 pontinhos para ações */
 .btn-icon {
-    background: transparent;
-    border: none;
-    color: #6c757d;
+  background: transparent;
+  border: none;
+  color: #6c757d;
 }
 
 .btn-icon:hover {
-    background-color: #f0f2f5;
-    color: #343a40;
+  background-color: #f0f2f5;
+  color: #343a40;
 }
 
 /* Container para os avatares empilhados */
 .team-members-stack {
-    display: flex;
-    padding-left: 10px; /* Espaço para o primeiro avatar não cortar */
+  display: flex;
+  padding-left: 10px; /* Espaço para o primeiro avatar não cortar */
 }
 
 /* Estilo para cada avatar */
-.member-avatar, .member-avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid white;
-    margin-left: -15px; /* O segredo para empilhar */
-    object-fit: cover;
-    background-color: #6c757d;
-    color: white;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 0.9rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+.member-avatar,
+.member-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -15px; /* O segredo para empilhar */
+  object-fit: cover;
+  background-color: #6c757d;
+  color: white;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .team-members-stack:hover .member-avatar,
 .team-members-stack:hover .member-avatar-placeholder {
-    margin-left: -5px; /* Efeito de expandir no hover */
-    transition: margin-left 0.2s;
+  margin-left: -5px; /* Efeito de expandir no hover */
+  transition: margin-left 0.2s;
 }
 
 /* Esconde o placeholder se a imagem carregar */
 img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
-    display: none;
+  display: none;
 }
 /* ========================================================================== */
 /* --- REFINAMENTO DOS CARDS DE EQUIPE --- */
@@ -1491,33 +1799,33 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
 
 /* Wrapper para os ícones de estatísticas (KPIs) */
 .stat-icon-wrapper {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem; /* Tamanho do ícone */
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem; /* Tamanho do ícone */
 }
 
 /* Cores para os ícones */
 .stat-icon-wrapper.icon-primary {
-    background-color: #e6f3eb; /* Verde clarinho */
-    color: #1e5943; /* Verde principal */
+  background-color: #e6f3eb; /* Verde clarinho */
+  color: #1e5943; /* Verde principal */
 }
 
 .stat-icon-wrapper.icon-success {
-    background-color: #eaf9eb;
-    color: #28a745;
+  background-color: #eaf9eb;
+  color: #28a745;
 }
 
 /* Estilo para a barra de progresso quando não há dados */
 .progress-empty-state {
-    background-color: #f8f9fa;
-    border: 1px dashed #e0e0e0;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
+  background-color: #f8f9fa;
+  border: 1px dashed #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
 }
 /* ========================================================================== */
 /* --- ESTILOS PARA LEAFLET.DRAW (VERSÃO FINALÍSSIMA COM TEXTO) --- */
@@ -1525,59 +1833,59 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
 
 /* Estilo geral da barra de ferramentas */
 .leaflet-draw-toolbar {
-    display: flex;
-    gap: 8px; 
+  display: flex;
+  gap: 8px;
 }
 
 /* Estilo base para TODOS os botões */
 .leaflet-draw-toolbar a {
-    background: #fff !important;
-    border: 1px solid #ccc !important;
-    color: #333 !important;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.1) !important;
-    border-radius: 50px !important;
-    width: auto !important; 
-    height: 30px !important;
-    line-height: 28px !important;
-    padding: 0 10px !important; 
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    white-space: nowrap;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  color: #333 !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50px !important;
+  width: auto !important;
+  height: 30px !important;
+  line-height: 28px !important;
+  padding: 0 10px !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
 }
 
 /* Esconde o pseudo-elemento que usávamos para ícones */
 .leaflet-draw-toolbar a:before {
-    display: none !important;
+  display: none !important;
 }
 
 /* ADICIONA O TEXTO EM CADA BOTÃO USANDO O SELETOR CORRETO E UNIFICADO */
 .leaflet-draw-toolbar a.leaflet-draw-draw-polygon::after {
-    content: "Área";
+  content: "Área";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-draw-rectangle::after {
-    content: "Retângulo";
+  content: "Retângulo";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-draw-marker::after {
-    content: "Ponto";
+  content: "Ponto";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-edit-edit::after {
-    content: "Editar";
+  content: "Editar";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-edit-remove::after {
-    content: "Apagar";
+  content: "Apagar";
 }
 
 /* Estilo para quando o mouse passa por cima ou o botão está ativo */
 .leaflet-draw-toolbar a:hover,
 .leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
-    background-color: #f4f4f4 !important;
-    border-color: #999 !important;
-    color: #000 !important;
+  background-color: #f4f4f4 !important;
+  border-color: #999 !important;
+  color: #000 !important;
 }
 
 /* ========================================================================== */
@@ -1588,16 +1896,16 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
 e deixa o fundo e a borda delas transparentes.
 */
 .leaflet-draw-section .leaflet-draw-toolbar.leaflet-bar {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* O Leaflet também cria uma borda entre os botões. 
 Essa regra aqui de baixo remove essa linha.
 */
 .leaflet-draw-toolbar a {
-    border-right: none !important; 
+  border-right: none !important;
 }
 /* ========================================================================== */
 /* --- ESTILO PARA AS AÇÕES DE DESENHO (FINALIZAR, CANCELAR, ETC.) --- */
@@ -1605,38 +1913,38 @@ Essa regra aqui de baixo remove essa linha.
 
 /* A barra de ações é uma lista (ul), vamos deixar ela invisível */
 .leaflet-draw-actions {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding-top: 8px; /* Dá um espacinho da barra de cima */
-    display: flex;
-    gap: 8px;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-top: 8px; /* Dá um espacinho da barra de cima */
+  display: flex;
+  gap: 8px;
 }
 
 /* Oculta os pontinhos da lista */
 .leaflet-draw-actions li {
-    list-style-type: none !important;
+  list-style-type: none !important;
 }
 
 /* Agora, estilizamos os links (que são os botões) para ficarem iguais aos outros */
 .leaflet-draw-actions a {
-    background: #fff !important;
-    border: 1px solid #ccc !important;
-    color: #333 !important;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.1) !important;
-    border-radius: 4px !important;
-    width: auto !important; 
-    height: 30px !important;
-    line-height: 28px !important;
-    padding: 0 10px !important; 
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    white-space: nowrap;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  color: #333 !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 4px !important;
+  width: auto !important;
+  height: 30px !important;
+  line-height: 28px !important;
+  padding: 0 10px !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
 }
 
 .leaflet-draw-actions a:hover {
-    background-color: #f4f4f4 !important;
+  background-color: #f4f4f4 !important;
 }
 /* ========================================================================== */
 /* --- ESCONDENDO OS BOTÕES PRINCIPAIS DURANTE O DESENHO --- */
@@ -1644,7 +1952,7 @@ Essa regra aqui de baixo remove essa linha.
 
 /* Quando o container principal tem a classe 'drawing-active'... */
 .leaflet-draw.drawing-active .leaflet-draw-section {
-    display: none !important; /* ...a gente esconde os botões de dentro! */
+  display: none !important; /* ...a gente esconde os botões de dentro! */
 }
 /* ========================================================================== */
 /* --- ESTILO PARA OS PONTOS DE DESENHO (VÉRTICES) --- */
@@ -1652,29 +1960,28 @@ Essa regra aqui de baixo remove essa linha.
 
 /* Este é o seletor que mira nos quadradões brancos */
 .leaflet-editing-icon {
-    background-color: #1e5943 !important; /* Cor principal do seu sistema */
-    border: 2px solid #ffffff !important;   /* Bordinha branca pra dar contraste */
-    border-radius: 50% !important;          /* A mágica que transforma em círculo */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important; /* Sombra pra destacar do mapa */
-    width: 14px !important;                 /* Tamanho menor e mais delicado */
-    height: 14px !important;
-    margin-left: -7px !important;           /* Ajuste fino pra centralizar */
-    margin-top: -7px !important;
-    transition: transform 0.2s ease-in-out; /* Efeito suave */
+  background-color: #1e5943 !important; /* Cor principal do seu sistema */
+  border: 2px solid #ffffff !important; /* Bordinha branca pra dar contraste */
+  border-radius: 50% !important; /* A mágica que transforma em círculo */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important; /* Sombra pra destacar do mapa */
+  width: 14px !important; /* Tamanho menor e mais delicado */
+  height: 14px !important;
+  margin-left: -7px !important; /* Ajuste fino pra centralizar */
+  margin-top: -7px !important;
+  transition: transform 0.2s ease-in-out; /* Efeito suave */
 }
 
 /* Efeito quando o mouse passa por cima */
 .leaflet-editing-icon:hover {
-    transform: scale(1.3); /* Aumenta um pouquinho pra dar feedback */
+  transform: scale(1.3); /* Aumenta um pouquinho pra dar feedback */
 }
 .social-btn {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 5px; /* Cria um espacinho entre o ícone e o texto */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px; /* Cria um espacinho entre o ícone e o texto */
 }
 
 .social-btn i {
-    font-size: 1.1rem; /* Deixa o ícone um pouco maior que o texto */
+  font-size: 1.1rem; /* Deixa o ícone um pouco maior que o texto */
 }
-  
