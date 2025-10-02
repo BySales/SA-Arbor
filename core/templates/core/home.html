@@ -7,7 +7,8 @@
     </div>
 
     <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <a href="{% url 'mapa' %}" class="card-link">
             <div class="card shadow h-100">
                 <div class="card-body">
                     <div class="card-icon primary">
@@ -17,9 +18,11 @@
                     <div class="card-number">{{ instancias_count }}</div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <a href="{% url 'solicitacao_list' %}" class="card-link">
             <div class="card shadow h-100">
                 <div class="card-body">
                     <div class="card-icon danger">
@@ -29,9 +32,11 @@
                     <div class="card-number">{{ solicitacoes_abertas_count }}</div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <a href="{% url 'equipe_list' %}" class="card-link">
             <div class="card shadow h-100">
                 <div class="card-body">
                     <div class="card-icon info">
@@ -41,9 +46,11 @@
                     <div class="card-number">{{ equipes_count }}</div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <a href="{% url 'especie_list' %}" class="card-link">
             <div class="card shadow h-100">
                 <div class="card-body">
                     <div class="card-icon success">
@@ -53,8 +60,9 @@
                     <div class="card-number">{{ especies_count }}</div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
+</div>
 
     <div class="row">
         <div class="col-12">

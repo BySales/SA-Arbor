@@ -2,6 +2,7 @@ import json
 from datetime import date, timedelta, datetime
 
 # IMPORTS ADICIONADOS AQUI
+from django.urls import reverse
 from django.views.generic import DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -130,24 +131,34 @@ def solicitacao_list(request):
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST, request.FILES)
-        imagens = request.FILES.getlist('imagens')
-
-        if len(imagens) > 10:
-            messages.error(request, 'Você só pode enviar no máximo 10 imagens por solicitação.')
-            return render(request, 'core/solicitacao_form.html', {'form': form})
+        form = SolicitacaoForm(request.POST) # Não pegamos request.FILES aqui ainda
+        
+        # A validação agora é feita no JS, mas mantemos uma segurança aqui
+        if len(request.FILES.getlist('imagens')) > 10:
+            return JsonResponse({'success': False, 'errors': {'imagens': ['Você só pode enviar no máximo 10 imagens.']}}, status=400)
 
         if form.is_valid():
             solicitacao = form.save(commit=False)
             solicitacao.cidadao = request.user
             solicitacao.save()
-            for imagem in imagens:
-                ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
+            
+            # Pega as imagens da "nossa pasta" que o JS mandou
+            imagens = request.FILES.getlist('imagens')
+            for imagem_file in imagens:
+                ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
+            
             messages.success(request, 'Solicitação criada com sucesso!')
-            return redirect('solicitacao_list')
+            # Retorna o recibo de sucesso para o JavaScript
+            return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
+        else:
+            # Retorna o recibo de erro com os detalhes
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+    
+    # Se for um GET, a lógica continua a mesma
     else:
         form = SolicitacaoForm()
     return render(request, 'core/solicitacao_form.html', {'form': form})
+
 
 @login_required
 def solicitacao_detail(request, pk):
@@ -164,21 +175,29 @@ def solicitacao_detail(request, pk):
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao)
-        imagens = request.FILES.getlist('imagens')
-        
-        # Soma as imagens existentes com as novas
-        total_imagens = solicitacao.imagens.count() + len(imagens)
-        if total_imagens > 10:
-            messages.error(request, f'Você não pode ter mais de 10 imagens. Esta solicitação já tem {solicitacao.imagens.count()} e você está tentando adicionar mais {len(imagens)}.')
-            return render(request, 'core/solicitacao_form.html', {'form': form, 'solicitacao': solicitacao})
+        form = SolicitacaoForm(request.POST, instance=solicitacao) # Não pegamos request.FILES
+
+        # Lógica de validação de contagem de imagens
+        imagens_novas = request.FILES.getlist('imagens')
+        imagens_atuais_count = solicitacao.imagens.count()
+        if (imagens_atuais_count + len(imagens_novas)) > 10:
+            error_msg = f'Você não pode ter mais de 10 imagens. Esta solicitação já tem {imagens_atuais_count} e você está tentando adicionar mais {len(imagens_novas)}.'
+            return JsonResponse({'success': False, 'errors': {'imagens': [error_msg]}}, status=400)
 
         if form.is_valid():
-            form.save()
-            for imagem in imagens:
-                ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem)
+            form.save() # Salva os dados do formulário (tipo, descrição, etc)
+            
+            for imagem_file in imagens_novas:
+                ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
+            
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
-            return redirect('solicitacao_list')
+            # Retorna o recibo de sucesso
+            return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
+        else:
+            # Retorna o recibo de erro
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            
+    # Se for um GET, a lógica continua a mesma
     else:
         form = SolicitacaoForm(instance=solicitacao)
     context = {

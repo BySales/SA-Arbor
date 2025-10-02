@@ -15,152 +15,364 @@
     </a>
 </div>
 
-<form method="POST" enctype="multipart/form-data" id="solicitacao-form">
+<form method="POST" enctype="multipart/form-data" id="solicitacao-form" action="{% if form.instance.pk %}{% url 'solicitacao_update' form.instance.pk %}{% else %}{% url 'solicitacao_create' %}{% endif %}">
     {% csrf_token %}
     
-    {{ form.latitude }}
-    {{ form.longitude }}
+    <input type="hidden" name="latitude" id="id_latitude" value="{{ form.latitude.value|default:'' }}">
+    <input type="hidden" name="longitude" id="id_longitude" value="{{ form.longitude.value|default:'' }}">
 
     <div class="card">
         <div class="card-body p-4">
-            <div class="row">
-                <div class="col-lg-6">
-                    <h5 class="form-section-title">Detalhes da Solicitação</h5>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.tipo.label }}</label>
-                        {{ form.tipo }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.descricao.label }}</label>
-                        {{ form.descricao }}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.imagens.label }}</label>
-                        <div class="custom-file-upload">
-                            <i class="bi bi-cloud-arrow-up-fill"></i>
-                            <span>Clique para selecionar ou arraste as imagens aqui</span>
-                            {{ form.imagens }}
-                        </div>
-                        <div class="form-text">Você pode adicionar até 10 imagens.</div>
-                         <div id="image-count-warning" class="form-text text-danger d-none">
-                            Atenção: Você só pode selecionar no máximo 10 imagens.
-                        </div>
-                    </div>
 
-                    {% if solicitacao.imagens.all %}
-                    <div class="mb-3">
-                        <label class="form-label">Imagens atuais ({{ solicitacao.imagens.count }})</label>
-                        <div class="image-gallery-grid">
-                            {% for imagem_obj in solicitacao.imagens.all %}
-                                <div class="gallery-item">
-                                    <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação">
-                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="view-icon" title="Ver imagem"><i class="bi bi-eye-fill"></i></a>
+            <div class="progress-bar-container">
+                <div class="progress-line"><div class="progress-line-fill" id="progress-line-fill"></div></div>
+                <div class="progress-step active" data-step="1"><div class="step-circle">1</div><div class="step-label">Detalhes</div></div>
+                <div class="progress-step" data-step="2"><div class="step-circle">2</div><div class="step-label">Local e Mídia</div></div>
+                {% if user.is_staff or user.is_superuser %}<div class="progress-step" data-step="3"><div class="step-circle">3</div><div class="step-label">Gestão</div></div>{% endif %}
+            </div>
+            
+            <div class="form-step active" id="step-1">
+                <div class="row">
+                    <div class="col-lg-10 col-xl-8">
+                        <h5 class="form-section-title">Detalhes da Solicitação</h5>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_tipo">{{ form.tipo.label }}</label>
+                                    {{ form.tipo }}
                                 </div>
-                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="id_descricao">{{ form.descricao.label }}</label>
+                            {{ form.descricao }}
+                            <div id="char-counter" class="form-text text-end mt-1">0 / 1000</div>
                         </div>
                     </div>
-                    {% endif %}
-                </div>
-
-                <div class="col-lg-6">
-                    <h5 class="form-section-title">Localização</h5>
-                    <div id="map-picker" class="map-container-form"></div>
-                    <div class="form-text mt-2">Clique no mapa para marcar a localização exata.</div>
                 </div>
             </div>
 
-            {% if user.is_staff or user.is_superuser %}
-            <div class="form-section">
-                <h5 class="form-section-title">Gestão da Solicitação (Admin)</h5>
+            <div class="form-step" id="step-2">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">{{ form.status.label }}</label>
-                        {{ form.status }}
+                    <div class="col-lg-6">
+                        <h5 class="form-section-title">Anexar Imagens</h5>
+                        <div class="custom-file-upload">
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                            <span id="upload-box-text">Clique para selecionar ou arraste as imagens aqui</span>
+                            <input type="file" name="imagens" multiple id="id_imagens" class="d-none">
+                        </div>
+                        <div class="form-text">Você pode adicionar até 10 imagens.</div>
+                        <div id="image-carousel-preview" class="carousel slide mt-3 d-none" data-bs-interval="false">
+                            <div class="carousel-indicators"></div>
+                            <div class="carousel-inner"></div>
+                            <button class="carousel-control-prev" type="button" id="carousel-prev-btn">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" id="carousel-next-btn">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;">
-                        <label class="form-label">{{ form.equipe_delegada.label }}</label>
-                        {{ form.equipe_delegada }}
+                    <div class="col-lg-6">
+                        <h5 class="form-section-title">Marcar Localização</h5>
+                        <div id="map-picker" class="map-container-form"></div>
+                        <div id="coords-display-text" class="form-text mt-2">Clique no mapa para marcar a localização exata.</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.is_staff or user.is_superuser %}
+            <div class="form-step" id="step-3">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 col-xl-8">
+                        <h5 class="form-section-title">Gestão da Solicitação (Admin)</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ form.status.label }}</label>
+                                {{ form.status }}
+                            </div>
+                            <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;">
+                                <label class="form-label">{{ form.equipe_delegada.label }}</label>
+                                {{ form.equipe_delegada }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             {% endif %}
         </div>
         
-        <div class="card-footer text-end">
-            {% if form.instance.pk %}
-                <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger-outline me-2">
-                    <i class="bi bi-trash-fill me-1"></i>
-                    Deletar
-                </a>
-            {% endif %}
-            <button type="submit" class="btn btn-principal-acao">
-                <i class="bi bi-check-circle-fill me-1"></i>
-                Salvar Solicitação
-            </button>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div>
+                {% if form.instance.pk %}<a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger-outline"><i class="bi bi-trash-fill me-1"></i> Deletar</a>{% endif %}
+            </div>
+            <div>
+                <button type="button" class="btn btn-secondary-custom d-none" id="prev-btn"><i class="bi bi-arrow-left me-1"></i> Anterior</button>
+                <button type="button" class="btn btn-principal-acao" id="next-btn">Próximo <i class="bi bi-arrow-right ms-1"></i></button>
+                <button type="submit" class="btn btn-principal-acao d-none" id="submit-button"><i class="bi bi-check-circle-fill me-1"></i><span>Salvar Solicitação</span></button>
+            </div>
         </div>
     </div>
 </form>
     
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const latInput = document.getElementById('id_latitude');
-        const lonInput = document.getElementById('id_longitude');
-
-        const initialLat = latInput.value ? parseFloat(latInput.value) : -24.0965;
-        const initialLon = lonInput.value ? parseFloat(lonInput.value) : -46.6212;
-        const initialZoom = latInput.value ? 18 : 13;
-
-        const map = L.map('map-picker').setView([initialLat, initialLon], initialZoom);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-        let marker = null;
-
-        if (latInput.value && lonInput.value) {
-            marker = L.marker([initialLat, initialLon]).addTo(map);
-        }
-
-        map.on('click', function(e) {
-            const { lat, lng } = e.latlng;
-            
-            latInput.value = lat.toFixed(6);
-            lonInput.value = lng.toFixed(6);
-
-            if (marker === null) {
-                marker = L.marker(e.latlng).addTo(map);
-            } else {
-                marker.setLatLng(e.latlng);
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- LÓGICA DO WIZARD (PASSO A PASSO) ---
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-button');
+    const formSteps = document.querySelectorAll('.form-step');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const progressLineFill = document.getElementById('progress-line-fill');
+    let currentStep = 1;
+    const totalSteps = formSteps.length;
+    
+    function updateFormSteps() {
+        formSteps.forEach(step => {
+            step.classList.toggle('active', parseInt(step.id.replace('step-', '')) === currentStep);
         });
+        progressSteps.forEach((step, index) => {
+            step.classList.toggle('active', (index + 1) <= currentStep);
+        });
+        const progressPercentage = totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1)) * 100 : 0;
+        progressLineFill.style.width = `${progressPercentage}%`;
+        prevBtn.classList.toggle('d-none', currentStep === 1);
+        nextBtn.classList.toggle('d-none', currentStep === totalSteps);
+        submitBtn.classList.toggle('d-none', currentStep !== totalSteps);
+    }
 
-        {% if user.is_staff or user.is_superuser %}
-            const statusSelect = document.getElementById('id_status');
-            const equipeWrapper = document.getElementById('equipe-wrapper');
+    function validateStep(step) {
+        if (step === 1) {
+            const descTextarea = document.getElementById('id_descricao');
+            if (descTextarea.value.trim() === '') {
+                alert('Por favor, preencha a descrição da solicitação.');
+                descTextarea.focus();
+                return false;
+            }
+        }
+        if (step === 2) {
+            const latInput = document.getElementById('id_latitude');
+            if (latInput.value.trim() === '') {
+                alert('Por favor, marque a localização no mapa.');
+                return false;
+            }
+        }
+        return true;
+    }
 
-            function toggleEquipeField() {
-                if (statusSelect.value === 'EM_ANDAMENTO') {
-                    equipeWrapper.style.display = 'block';
-                } else {
-                    equipeWrapper.style.display = 'none';
+    nextBtn.addEventListener('click', () => {
+        if (validateStep(currentStep)) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateFormSteps();
+                if (currentStep === 2) {
+                    setTimeout(() => { map.invalidateSize(); }, 100);
                 }
             }
-            toggleEquipeField();
-            statusSelect.addEventListener('change', toggleEquipeField);
-        {% endif %}
+        }
+    });
 
-        const imageInput = document.querySelector('input[name="imagens"]');
-        const warningDiv = document.getElementById('image-count-warning');
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            updateFormSteps();
+        }
+    });
 
-        imageInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            if (files.length > 10) {
-                warningDiv.classList.remove('d-none');
-                alert('Você selecionou ' + files.length + ' imagens. O máximo permitido é 10. Por favor, selecione novamente.');
-                event.target.value = '';
+    // --- LÓGICA DO MAPA ---
+    const latInput = document.getElementById('id_latitude');
+    const lonInput = document.getElementById('id_longitude');
+    const coordsDisplayText = document.getElementById('coords-display-text');
+    const map = L.map('map-picker', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    let marker = null;
+    
+    function updateCoordsDisplay(lat, lon) {
+        coordsDisplayText.innerHTML = `<strong>Localização Marcada:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+    }
+
+    if (latInput.value && lonInput.value) {
+        let initialLatLng = [parseFloat(latInput.value), parseFloat(lonInput.value)];
+        map.setView(initialLatLng, 18);
+        marker = L.marker(initialLatLng).addTo(map);
+        updateCoordsDisplay(initialLatLng[0], initialLatLng[1]);
+    }
+    
+    map.on('click', function(e) {
+        const { lat, lng } = e.latlng;
+        latInput.value = lat.toFixed(6);
+        lonInput.value = lng.toFixed(6);
+        if (marker === null) {
+            marker = L.marker(e.latlng).addTo(map);
+        } else {
+            marker.setLatLng(e.latlng);
+        }
+        updateCoordsDisplay(lat, lng);
+    });
+
+    // --- CONTADOR DE CARACTERES ---
+    const descTextarea = document.getElementById('id_descricao');
+    const charCounter = document.getElementById('char-counter');
+    const maxLength = 1000;
+    
+    charCounter.innerHTML = `${descTextarea.value.length} / ${maxLength}`;
+    descTextarea.addEventListener('input', () => {
+        const currentLength = descTextarea.value.length;
+        charCounter.innerHTML = `${currentLength} / ${maxLength}`;
+        if (currentLength > maxLength) {
+            charCounter.classList.add('text-danger', 'fw-bold');
+        } else {
+            charCounter.classList.remove('text-danger', 'fw-bold');
+        }
+    });
+
+    // --- LÓGICA DO ADMIN ---
+    {% if user.is_staff or user.is_superuser %}
+    const statusSelect = document.getElementById('id_status');
+    const equipeWrapper = document.getElementById('equipe-wrapper');
+    function toggleEquipeField() {
+        if (statusSelect.value === 'EM_ANDAMENTO') {
+            equipeWrapper.style.display = 'block';
+        } else {
+            equipeWrapper.style.display = 'none';
+        }
+    }
+    toggleEquipeField();
+    statusSelect.addEventListener('change', toggleEquipeField);
+    {% endif %}
+
+    // --- LÓGICA DE UPLOAD DE IMAGEM ---
+    const solicitacaoForm = document.getElementById('solicitacao-form');
+    const imageInput = document.getElementById('id_imagens');
+    const uploadBox = imageInput.closest('.custom-file-upload');
+    const carousel = document.getElementById('image-carousel-preview');
+    const carouselInner = carousel.querySelector('.carousel-inner');
+    const carouselIndicators = carousel.querySelector('.carousel-indicators');
+    const uploadBoxText = document.getElementById('upload-box-text');
+    const prevCarouselBtn = document.getElementById('carousel-prev-btn');
+    const nextCarouselBtn = document.getElementById('carousel-next-btn');
+
+    let fileList = []; 
+
+    if (uploadBox) {
+        uploadBox.addEventListener('click', () => imageInput.click());
+    }
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function updateCarousel() {
+        if (fileList.length === 0) {
+            carousel.classList.add('d-none');
+            uploadBoxText.innerHTML = 'Clique para selecionar ou arraste as imagens aqui';
+        } else {
+            carousel.classList.remove('d-none');
+            const plural = fileList.length > 1 ? 's' : '';
+            uploadBoxText.innerHTML = `<strong>${fileList.length} imagem${plural} selecionada${plural}</strong><br><small>Clique ou arraste para adicionar mais</small>`;
+        }
+        const previews = await Promise.all(fileList.map(readFileAsDataURL));
+        let innerHTML = '';
+        let indicatorsHTML = '';
+        previews.forEach((previewSrc, index) => {
+            const file = fileList[index];
+            innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${previewSrc}" class="d-block w-100" alt="Prévia da imagem"><button type="button" class="delete-image-btn" data-file-id="${file.uniqueId}"><i class="bi bi-trash-fill"></i></button></div>`;
+            indicatorsHTML += `<button type="button" data-bs-target="#image-carousel-preview" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="true"></button>`;
+        });
+        carouselInner.innerHTML = innerHTML;
+        carouselIndicators.innerHTML = indicatorsHTML;
+    }
+    
+    imageInput.addEventListener('change', function(event) {
+        const newFiles = Array.from(event.target.files);
+        const totalFiles = fileList.length + newFiles.length;
+        if (totalFiles > 10) {
+            alert(`Você só pode ter no máximo 10 imagens. Você já tem ${fileList.length} e tentou adicionar mais ${newFiles.length}.`);
+            event.target.value = '';
+            return;
+        }
+        newFiles.forEach(file => { file.uniqueId = Date.now() + Math.random(); fileList.push(file); });
+        event.target.value = '';
+        updateCarousel();
+    });
+
+    carousel.addEventListener('click', function(event){
+        const deleteBtn = event.target.closest('.delete-image-btn');
+        if(deleteBtn){
+            const fileIdToRemove = parseFloat(deleteBtn.dataset.fileId);
+            fileList = fileList.filter(file => file.uniqueId !== fileIdToRemove);
+            updateCarousel();
+        }
+    });
+
+    prevCarouselBtn.addEventListener('click', function() {
+        if (carouselInner.querySelector('.carousel-item')) {
+            const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; // 15px de margem
+            carouselInner.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+        }
+    });
+
+    nextCarouselBtn.addEventListener('click', function() {
+        if (carouselInner.querySelector('.carousel-item')) {
+            const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; // 15px de margem
+            carouselInner.scrollBy({ left: itemWidth, behavior: 'smooth' });
+        }
+    });
+    
+    // --- LÓGICA DO BOTÃO SALVAR ---
+    const submitButton = document.getElementById('submit-button');
+    const submitIcon = submitButton.querySelector('.bi');
+    const submitText = submitButton.querySelector('span');
+
+    solicitacaoForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        submitButton.disabled = true;
+        submitIcon.classList.remove('bi-check-circle-fill');
+        submitIcon.classList.add('bi-arrow-repeat', 'spinner-icon');
+        submitText.textContent = 'Salvando...';
+
+        const formData = new FormData(solicitacaoForm);
+        formData.delete('imagens'); 
+        fileList.forEach(file => { formData.append('imagens', file); });
+
+        fetch(solicitacaoForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': formData.get('csrfmiddlewaretoken')}
+        })
+        .then(response => {
+            if (!response.ok) { return response.json().then(err => { throw err; }); }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
             } else {
-                warningDiv.classList.add('d-none');
+                const errorMessages = Object.entries(data.errors).map(([field, errors]) => `${field}: ${errors.join(', ')}`).join('\n');
+                alert('Ocorreu um erro ao salvar:\n' + errorMessages);
             }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro de conexão ou validação. Verifique o console para mais detalhes.');
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitIcon.classList.add('bi-check-circle-fill');
+            submitIcon.classList.remove('bi-arrow-repeat', 'spinner-icon');
+            submitText.textContent = 'Salvar Solicitação';
         });
     });
+
+    // --- INICIALIZA O WIZARD ---
+    updateFormSteps();
+});
 </script>
 {% endblock %}

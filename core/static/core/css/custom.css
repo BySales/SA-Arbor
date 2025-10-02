@@ -511,7 +511,7 @@ body {
   position: sticky; /* A mágica acontece aqui! */
   top: 0; /* Pra ele colar no topo certinho, sem espaço */
   z-index: 1000; /* Garante que ele fique na frente de tudo */
-  background-color: #f8f9fa; /* Ou a cor do seu body, pra não ficar transparente */
+  background-color: #f4f7f6; /* Ou a cor do seu body, pra não ficar transparente */
   padding-top: 15px; /* Adiciona um respiro em cima */
   padding-bottom: 15px; /* Adiciona um respiro embaixo */
 }
@@ -1984,4 +1984,193 @@ Essa regra aqui de baixo remove essa linha.
 
 .social-btn i {
   font-size: 1.1rem; /* Deixa o ícone um pouco maior que o texto */
+}
+
+/* --- EFEITO PARA CARDS CLICÁVEIS DO DASHBOARD --- */
+
+/* Remove o sublinhado padrão dos links */
+.card-link {
+    text-decoration: none;
+}
+
+/* Efeito ao passar o mouse por cima do card */
+.card-link .card {
+    transition: all 0.2s ease-in-out; /* Animação suave */
+}
+
+.card-link .card:hover {
+    transform: translateY(-5px); /* Faz o card "levantar" um pouquinho */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12); /* Aumenta a sombra pra dar destaque */
+    border: 1px solid #b3b3b3; /* Adiciona uma borda na sua cor principal */
+}
+/* --- ESTILO PARA O CARROSSEL DE PRÉVIA DE IMAGENS (VERSÃO MULTI-ITEM) --- */
+
+/* O pulo do gato para mostrar vários itens começa aqui */
+.carousel-inner {
+    display: flex; /* Faz os itens ficarem lado a lado */
+}
+
+.carousel-item {
+    position: relative;
+    display: block; /* Garante que todos os itens apareçam, não só o 'ativo' */
+    margin-right: 15px; /* Cria um espacinho entre as imagens */
+    
+    /* Em telas de celular, cada item ocupa 100% da largura */
+    flex: 0 0 100%;
+}
+
+/* Quando a tela for maior (tablet pra cima), a gente começa a mostrar mais de um */
+@media (min-width: 768px) {
+    .carousel-item {
+        /* Mostra 2 imagens por vez */
+        flex: 0 0 calc(50% - 15px);
+    }
+}
+@media (min-width: 768px) {
+    .carousel-indicators {
+        display: none;
+    }
+}
+.carousel-control-prev, .carousel-control-next {
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+}
+
+/* Em telas grandes (desktop), a gente mostra 4 */
+@media (min-width: 992px) {
+    .carousel-item {
+        /* Mostra 4 imagens por vez */
+        flex: 0 0 calc(25% - 15px);
+    }
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100px; 
+    object-fit: cover;      /* <<< MODO 'COBRIR/CORTAR' ATIVADO */
+    background-color: #f8f9fa;
+    border-radius: 8px;     /* <<< CANTOS ARREDONDADOS */
+}
+
+
+/* O CSS da lixeira que a gente já tinha, sem alterações */
+.delete-image-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.carousel-item:hover .delete-image-btn,
+.delete-image-btn:hover {
+    opacity: 1;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #1E5943; /* Sua cor principal */
+    box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.25);
+}
+
+/* --- ANIMAÇÃO PARA O SPINNER DO BOTÃO SALVAR --- */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinner-icon {
+    animation: spin 1s linear infinite;
+}
+/* --- ESTILO PARA O FORMULÁRIO PASSO A PASSO (WIZARD) --- */
+
+/* A barra de progresso */
+.progress-bar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+.progress-step {
+    text-align: center;
+    z-index: 1;
+}
+.progress-step .step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    color: #6c757d;
+    border: 3px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+.progress-step .step-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+/* Estilo do passo ativo */
+.progress-step.active .step-circle {
+    background-color: #fff;
+    border-color: #1E5943;
+    color: #1E5943;
+}
+.progress-step.active .step-label {
+    color: #1E5943;
+    font-weight: bold;
+}
+
+/* A linha de progresso */
+.progress-line {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #e9ecef;
+    z-index: 0;
+}
+.progress-line-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #1E5943;
+    width: 0%; /* Começa com 0 */
+    transition: width 0.3s ease;
+}
+
+/* Lógica para mostrar/esconder os passos do formulário */
+.form-step {
+    display: none; /* Todos os passos ficam escondidos por padrão */
+}
+.form-step.active {
+    display: block; /* O passo ativo aparece */
+}
+.map-container-form {
+    height: 290px; /* <<< Tenta esse valor. Se ainda ficar grande, pode diminuir para 300px */
+    width: 100%;
+    border-radius: 8px;
+    z-index: 1; /* Garante que o mapa fique na camada correta */
 }
