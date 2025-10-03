@@ -869,8 +869,8 @@ body {
   border-color: #1e5943;
 }
 .card-solicitacao .card-footer {
-  background-color: #f8f9fa;
-  border-top: 1px solid #f0f2f5;
+  background-color: #ffffff;
+  border-top: 1px solid #ffffff;
   gap: 8px;
   padding: 0.75rem 1.25rem;
 }
@@ -2169,8 +2169,11 @@ Essa regra aqui de baixo remove essa linha.
     display: block; /* O passo ativo aparece */
 }
 .map-container-form {
-    height: 290px; /* <<< Tenta esse valor. Se ainda ficar grande, pode diminuir para 300px */
+    height: 250px; /* <<< Tenta esse valor. Se ainda ficar grande, pode diminuir para 300px */
     width: 100%;
     border-radius: 8px;
     z-index: 1; /* Garante que o mapa fique na camada correta */
+}
+.force-hide {
+    display: none !important;
 }

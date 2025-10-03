@@ -1,23 +1,38 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
+<style>
+    /* --- ESTILOS PARA O FORMULÁRIO PASSO A PASSO (WIZARD) --- */
+    .progress-bar-container{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;position:relative}.progress-step{text-align:center;z-index:1}.progress-step .step-circle{width:30px;height:30px;border-radius:50%;background-color:#e9ecef;color:#6c757d;border:3px solid #e9ecef;display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-weight:700;transition:all .3s ease}.progress-step .step-label{font-size:.85rem;color:#6c757d;transition:all .3s ease}.progress-step.active .step-circle{background-color:#fff;border-color:#1E5943;color:#1E5943}.progress-step.active .step-label{color:#1E5943;font-weight:700}.progress-line{position:absolute;top:15px;left:0;width:100%;height:3px;background-color:#e9ecef;z-index:0}.progress-line-fill{position:absolute;top:0;left:0;height:100%;background-color:#1E5943;width:0%;transition:width .3s ease}.form-step{display:none}.form-step.active{display:block}
+    
+    /* --- AJUSTES PARA DEIXAR O PASSO 2 MAIS ENXUTO --- */
+    .map-container-form {
+        height: 275px; /* Diminuímos a altura do mapa */
+        width: 100%;
+        border-radius: 8px;
+        z-index: 1;
+    }
+    #image-carousel-preview .carousel-item img {
+        height: 140px; /* Diminuímos um pouco a altura das imagens do carrossel */
+    }
+
+    /* A NOSSA REGRA DEFINITIVA PARA VENCER A BRIGA DE ESTILOS.
+       POR ESTAR NO FINAL, ELA SEMPRE VENCE QUANDO EMPATA COM OUTRA REGRA '!important'.
+    */
+    .force-hide {
+        display: none !important;
+    }
+</style>
+
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">
-        {% if form.instance.pk %}
-            Editar Solicitação #{{ form.instance.id }}
-        {% else %}
-            Criar Nova Solicitação
-        {% endif %}
+        {% if form.instance.pk %}Editar Solicitação #{{ form.instance.id }}{% else %}Criar Nova Solicitação{% endif %}
     </h2>
-    <a href="{% url 'solicitacao_list' %}" class="btn btn-secondary-custom">
-        <i class="bi bi-arrow-left me-1"></i>
-        Voltar para a Lista
-    </a>
+    <a href="{% url 'solicitacao_list' %}" class="btn btn-secondary-custom"><i class="bi bi-arrow-left me-1"></i> Voltar para a Lista</a>
 </div>
 
 <form method="POST" enctype="multipart/form-data" id="solicitacao-form" action="{% if form.instance.pk %}{% url 'solicitacao_update' form.instance.pk %}{% else %}{% url 'solicitacao_create' %}{% endif %}">
     {% csrf_token %}
-    
     <input type="hidden" name="latitude" id="id_latitude" value="{{ form.latitude.value|default:'' }}">
     <input type="hidden" name="longitude" id="id_longitude" value="{{ form.longitude.value|default:'' }}">
 
@@ -62,15 +77,10 @@
                             <input type="file" name="imagens" multiple id="id_imagens" class="d-none">
                         </div>
                         <div class="form-text">Você pode adicionar até 10 imagens.</div>
-                        <div id="image-carousel-preview" class="carousel slide mt-3 d-none" data-bs-interval="false">
-                            <div class="carousel-indicators"></div>
-                            <div class="carousel-inner"></div>
-                            <button class="carousel-control-prev" type="button" id="carousel-prev-btn">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" id="carousel-next-btn">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>
-                            </button>
+                        <div id="image-carousel-preview" class="carousel slide mt-3" data-bs-interval="false">
+                            <div class="carousel-indicators"></div><div class="carousel-inner"></div>
+                            <button class="carousel-control-prev" type="button" id="carousel-prev-btn"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span></button>
+                            <button class="carousel-control-next" type="button" id="carousel-next-btn"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span></button>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -83,18 +93,12 @@
             
             {% if user.is_staff or user.is_superuser %}
             <div class="form-step" id="step-3">
-                <div class="row justify-content-center">
+                <div class="row">
                     <div class="col-lg-10 col-xl-8">
                         <h5 class="form-section-title">Gestão da Solicitação (Admin)</h5>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ form.status.label }}</label>
-                                {{ form.status }}
-                            </div>
-                            <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;">
-                                <label class="form-label">{{ form.equipe_delegada.label }}</label>
-                                {{ form.equipe_delegada }}
-                            </div>
+                            <div class="col-md-6 mb-3"><label class="form-label">{{ form.status.label }}</label>{{ form.status }}</div>
+                            <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;"><label class="form-label">{{ form.equipe_delegada.label }}</label>{{ form.equipe_delegada }}</div>
                         </div>
                     </div>
                 </div>
@@ -102,14 +106,14 @@
             {% endif %}
         </div>
         
-        <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="card-footer d-flex justify-content-between align-items-center border-top-0 pt-4">
             <div>
                 {% if form.instance.pk %}<a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger-outline"><i class="bi bi-trash-fill me-1"></i> Deletar</a>{% endif %}
             </div>
             <div>
-                <button type="button" class="btn btn-secondary-custom d-none" id="prev-btn"><i class="bi bi-arrow-left me-1"></i> Anterior</button>
+                <button type="button" class="btn btn-secondary-custom" id="prev-btn"><i class="bi bi-arrow-left me-1"></i> Anterior</button>
                 <button type="button" class="btn btn-principal-acao" id="next-btn">Próximo <i class="bi bi-arrow-right ms-1"></i></button>
-                <button type="submit" class="btn btn-principal-acao d-none" id="submit-button"><i class="bi bi-check-circle-fill me-1"></i><span>Salvar Solicitação</span></button>
+                <button type="submit" class="btn btn-principal-acao" id="submit-button"><i class="bi bi-check-circle-fill me-1"></i><span>Salvar Solicitação</span></button>
             </div>
         </div>
     </div>
@@ -118,33 +122,58 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- LÓGICA DO WIZARD (PASSO A PASSO) ---
+    // --- DEFINIÇÃO DE TODOS OS ELEMENTOS (CONSTANTES) ---
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-button');
     const formSteps = document.querySelectorAll('.form-step');
     const progressSteps = document.querySelectorAll('.progress-step');
     const progressLineFill = document.getElementById('progress-line-fill');
-    let currentStep = 1;
-    const totalSteps = formSteps.length;
     
+    const solicitacaoForm = document.getElementById('solicitacao-form');
+    const imageInput = document.getElementById('id_imagens');
+    const uploadBox = imageInput.closest('.custom-file-upload');
+    const carousel = document.getElementById('image-carousel-preview');
+    const carouselInner = carousel.querySelector('.carousel-inner');
+    const carouselIndicators = carousel.querySelector('.carousel-indicators');
+    const uploadBoxText = document.getElementById('upload-box-text');
+    const prevCarouselBtn = document.getElementById('carousel-prev-btn');
+    const nextCarouselBtn = document.getElementById('carousel-next-btn');
+
+    const latInput = document.getElementById('id_latitude');
+    const lonInput = document.getElementById('id_longitude');
+    const coordsDisplayText = document.getElementById('coords-display-text');
+    const descTextarea = document.getElementById('id_descricao');
+    const charCounter = document.getElementById('char-counter');
+    
+    const submitButton = document.getElementById('submit-button');
+    const submitIcon = submitButton.querySelector('.bi');
+    const submitText = submitButton.querySelector('span');
+
+    let currentStep = 1;
+    let fileList = []; 
+    const totalSteps = {% if user.is_staff or user.is_superuser %}3{% else %}2{% endif %};
+    const maxLength = 1000;
+
+    // --- LÓGICA DO WIZARD (PASSO A PASSO) ---
     function updateFormSteps() {
         formSteps.forEach(step => {
-            step.classList.toggle('active', parseInt(step.id.replace('step-', '')) === currentStep);
+            const stepNumber = parseInt(step.id.replace('step-', ''));
+            step.classList.toggle('active', stepNumber === currentStep);
         });
         progressSteps.forEach((step, index) => {
             step.classList.toggle('active', (index + 1) <= currentStep);
         });
         const progressPercentage = totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1)) * 100 : 0;
         progressLineFill.style.width = `${progressPercentage}%`;
-        prevBtn.classList.toggle('d-none', currentStep === 1);
-        nextBtn.classList.toggle('d-none', currentStep === totalSteps);
-        submitBtn.classList.toggle('d-none', currentStep !== totalSteps);
+        
+        prevBtn.classList.toggle('force-hide', currentStep === 1);
+        nextBtn.classList.toggle('force-hide', currentStep === totalSteps);
+        submitBtn.classList.toggle('force-hide', currentStep !== totalSteps);
     }
 
     function validateStep(step) {
         if (step === 1) {
-            const descTextarea = document.getElementById('id_descricao');
             if (descTextarea.value.trim() === '') {
                 alert('Por favor, preencha a descrição da solicitação.');
                 descTextarea.focus();
@@ -152,7 +181,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         if (step === 2) {
-            const latInput = document.getElementById('id_latitude');
             if (latInput.value.trim() === '') {
                 alert('Por favor, marque a localização no mapa.');
                 return false;
@@ -167,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentStep++;
                 updateFormSteps();
                 if (currentStep === 2) {
-                    setTimeout(() => { map.invalidateSize(); }, 100);
+                    setTimeout(() => { if(typeof map !== 'undefined') map.invalidateSize(); }, 100);
                 }
             }
         }
@@ -180,189 +208,123 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- LÓGICA DO MAPA ---
-    const latInput = document.getElementById('id_latitude');
-    const lonInput = document.getElementById('id_longitude');
-    const coordsDisplayText = document.getElementById('coords-display-text');
+    // --- LÓGICA DE UPLOAD DE IMAGEM ---
+    async function updateCarousel() {
+        // --- DEBUGGING ---
+        console.log('--- Rodando updateCarousel ---');
+        console.log('Total de imagens na lista:', fileList.length);
+
+        const showButtons = fileList.length > 1;
+        console.log('Devo mostrar os botões de seta?', showButtons);
+
+        carousel.classList.toggle('d-none', fileList.length === 0);
+
+        // --- A SOLUÇÃO "NUCLEAR" ---
+        // Usando o método mais forte do JavaScript para garantir que eles obedeçam
+        if (showButtons) {
+            console.log('Ação: MOSTRAR botões de seta.');
+            prevCarouselBtn.style.display = 'flex'; // Botões do carrossel do Bootstrap usam 'flex'
+            nextCarouselBtn.style.display = 'flex';
+        } else {
+            console.log('Ação: ESCONDER botões de seta.');
+            // .setProperty permite adicionar o '!important' via JS
+            prevCarouselBtn.style.setProperty('display', 'none', 'important');
+            nextCarouselBtn.style.setProperty('display', 'none', 'important');
+        }
+
+        if (fileList.length === 0) { 
+            uploadBoxText.innerHTML = 'Clique para selecionar ou arraste as imagens aqui'; 
+        } else { 
+            const plural = fileList.length > 1 ? 's' : ''; 
+            uploadBoxText.innerHTML = `<strong>${fileList.length} imagem${plural} selecionada${plural}</strong><br><small>Clique ou arraste para adicionar mais</small>`; 
+        }
+        
+        const previews = await Promise.all(fileList.map(readFileAsDataURL)); 
+        let innerHTML = ''; 
+        let indicatorsHTML = ''; 
+        previews.forEach((previewSrc, index) => { 
+            const file = fileList[index]; 
+            innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${previewSrc}" class="d-block w-100" alt="Prévia da imagem"><button type="button" class="delete-image-btn" data-file-id="${file.uniqueId}"><i class="bi bi-trash-fill"></i></button></div>`; 
+            indicatorsHTML += `<button type="button" data-bs-target="#image-carousel-preview" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="true"></button>`; 
+        }); 
+        carouselInner.innerHTML = innerHTML; 
+        carouselIndicators.innerHTML = indicatorsHTML; 
+    }
+
+    if (uploadBox) { uploadBox.addEventListener('click', () => imageInput.click()); }
+    function readFileAsDataURL(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); }); }
+    
+    imageInput.addEventListener('change', function(event) { 
+        const newFiles = Array.from(event.target.files); 
+        const totalFiles = fileList.length + newFiles.length; 
+        if (totalFiles > 10) { 
+            alert(`Você só pode ter no máximo 10 imagens. Você já tem ${fileList.length} e tentou adicionar mais ${newFiles.length}.`); 
+            event.target.value = ''; 
+            return; 
+        } 
+        newFiles.forEach(file => { file.uniqueId = Date.now() + Math.random(); fileList.push(file); }); 
+        event.target.value = ''; 
+        updateCarousel(); 
+    });
+
+    carousel.addEventListener('click', function(event){ 
+        const deleteBtn = event.target.closest('.delete-image-btn'); 
+        if(deleteBtn){ 
+            const fileIdToRemove = parseFloat(deleteBtn.dataset.fileId); 
+            fileList = fileList.filter(file => file.uniqueId !== fileIdToRemove); 
+            updateCarousel(); 
+        } 
+    });
+    prevCarouselBtn.addEventListener('click', function() {
+    if (carouselInner.querySelector('.carousel-item')) {
+        // Pega a largura do item + o espaço entre eles
+        const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; 
+        // Rola o carrossel pra esquerda
+        carouselInner.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+    }
+});
+
+nextCarouselBtn.addEventListener('click', function() {
+    if (carouselInner.querySelector('.carousel-item')) {
+        // Pega a largura do item + o espaço entre eles
+        const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15;
+        // Rola o carrossel pra direita
+        carouselInner.scrollBy({ left: itemWidth, behavior: 'smooth' });
+    }
+});
+
+    // --- LÓGICA DO MAPA, CONTADOR, ADMIN, ETC. ---
     const map = L.map('map-picker', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     let marker = null;
-    
-    function updateCoordsDisplay(lat, lon) {
-        coordsDisplayText.innerHTML = `<strong>Localização Marcada:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-    }
-
-    if (latInput.value && lonInput.value) {
-        let initialLatLng = [parseFloat(latInput.value), parseFloat(lonInput.value)];
-        map.setView(initialLatLng, 18);
-        marker = L.marker(initialLatLng).addTo(map);
-        updateCoordsDisplay(initialLatLng[0], initialLatLng[1]);
-    }
-    
-    map.on('click', function(e) {
-        const { lat, lng } = e.latlng;
-        latInput.value = lat.toFixed(6);
-        lonInput.value = lng.toFixed(6);
-        if (marker === null) {
-            marker = L.marker(e.latlng).addTo(map);
-        } else {
-            marker.setLatLng(e.latlng);
-        }
-        updateCoordsDisplay(lat, lng);
-    });
-
-    // --- CONTADOR DE CARACTERES ---
-    const descTextarea = document.getElementById('id_descricao');
-    const charCounter = document.getElementById('char-counter');
-    const maxLength = 1000;
+    function updateCoordsDisplay(lat, lon) { coordsDisplayText.innerHTML = `<strong>Localização Marcada:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`; }
+    if (latInput.value && lonInput.value) { let initialLatLng = [parseFloat(latInput.value), parseFloat(lonInput.value)]; map.setView(initialLatLng, 18); marker = L.marker(initialLatLng).addTo(map); updateCoordsDisplay(initialLatLng[0], initialLatLng[1]); }
+    map.on('click', function(e) { const { lat, lng } = e.latlng; latInput.value = lat.toFixed(6); lonInput.value = lng.toFixed(6); if (marker === null) { marker = L.marker(e.latlng).addTo(map); } else { marker.setLatLng(e.latlng); } updateCoordsDisplay(lat, lng); });
     
     charCounter.innerHTML = `${descTextarea.value.length} / ${maxLength}`;
-    descTextarea.addEventListener('input', () => {
-        const currentLength = descTextarea.value.length;
-        charCounter.innerHTML = `${currentLength} / ${maxLength}`;
-        if (currentLength > maxLength) {
-            charCounter.classList.add('text-danger', 'fw-bold');
-        } else {
-            charCounter.classList.remove('text-danger', 'fw-bold');
-        }
-    });
-
-    // --- LÓGICA DO ADMIN ---
+    descTextarea.addEventListener('input', () => { const currentLength = descTextarea.value.length; charCounter.innerHTML = `${currentLength} / ${maxLength}`; if (currentLength > maxLength) { charCounter.classList.add('text-danger', 'fw-bold'); } else { charCounter.classList.remove('text-danger', 'fw-bold'); } });
+    
     {% if user.is_staff or user.is_superuser %}
     const statusSelect = document.getElementById('id_status');
     const equipeWrapper = document.getElementById('equipe-wrapper');
-    function toggleEquipeField() {
-        if (statusSelect.value === 'EM_ANDAMENTO') {
-            equipeWrapper.style.display = 'block';
-        } else {
-            equipeWrapper.style.display = 'none';
-        }
-    }
+    function toggleEquipeField() { if (statusSelect.value === 'EM_ANDAMENTO') { equipeWrapper.style.display = 'block'; } else { equipeWrapper.style.display = 'none'; } }
     toggleEquipeField();
     statusSelect.addEventListener('change', toggleEquipeField);
     {% endif %}
-
-    // --- LÓGICA DE UPLOAD DE IMAGEM ---
-    const solicitacaoForm = document.getElementById('solicitacao-form');
-    const imageInput = document.getElementById('id_imagens');
-    const uploadBox = imageInput.closest('.custom-file-upload');
-    const carousel = document.getElementById('image-carousel-preview');
-    const carouselInner = carousel.querySelector('.carousel-inner');
-    const carouselIndicators = carousel.querySelector('.carousel-indicators');
-    const uploadBoxText = document.getElementById('upload-box-text');
-    const prevCarouselBtn = document.getElementById('carousel-prev-btn');
-    const nextCarouselBtn = document.getElementById('carousel-next-btn');
-
-    let fileList = []; 
-
-    if (uploadBox) {
-        uploadBox.addEventListener('click', () => imageInput.click());
-    }
-
-    function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function updateCarousel() {
-        if (fileList.length === 0) {
-            carousel.classList.add('d-none');
-            uploadBoxText.innerHTML = 'Clique para selecionar ou arraste as imagens aqui';
-        } else {
-            carousel.classList.remove('d-none');
-            const plural = fileList.length > 1 ? 's' : '';
-            uploadBoxText.innerHTML = `<strong>${fileList.length} imagem${plural} selecionada${plural}</strong><br><small>Clique ou arraste para adicionar mais</small>`;
-        }
-        const previews = await Promise.all(fileList.map(readFileAsDataURL));
-        let innerHTML = '';
-        let indicatorsHTML = '';
-        previews.forEach((previewSrc, index) => {
-            const file = fileList[index];
-            innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${previewSrc}" class="d-block w-100" alt="Prévia da imagem"><button type="button" class="delete-image-btn" data-file-id="${file.uniqueId}"><i class="bi bi-trash-fill"></i></button></div>`;
-            indicatorsHTML += `<button type="button" data-bs-target="#image-carousel-preview" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="true"></button>`;
-        });
-        carouselInner.innerHTML = innerHTML;
-        carouselIndicators.innerHTML = indicatorsHTML;
-    }
     
-    imageInput.addEventListener('change', function(event) {
-        const newFiles = Array.from(event.target.files);
-        const totalFiles = fileList.length + newFiles.length;
-        if (totalFiles > 10) {
-            alert(`Você só pode ter no máximo 10 imagens. Você já tem ${fileList.length} e tentou adicionar mais ${newFiles.length}.`);
-            event.target.value = '';
-            return;
-        }
-        newFiles.forEach(file => { file.uniqueId = Date.now() + Math.random(); fileList.push(file); });
-        event.target.value = '';
-        updateCarousel();
-    });
-
-    carousel.addEventListener('click', function(event){
-        const deleteBtn = event.target.closest('.delete-image-btn');
-        if(deleteBtn){
-            const fileIdToRemove = parseFloat(deleteBtn.dataset.fileId);
-            fileList = fileList.filter(file => file.uniqueId !== fileIdToRemove);
-            updateCarousel();
-        }
-    });
-
-    prevCarouselBtn.addEventListener('click', function() {
-        if (carouselInner.querySelector('.carousel-item')) {
-            const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; // 15px de margem
-            carouselInner.scrollBy({ left: -itemWidth, behavior: 'smooth' });
-        }
-    });
-
-    nextCarouselBtn.addEventListener('click', function() {
-        if (carouselInner.querySelector('.carousel-item')) {
-            const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; // 15px de margem
-            carouselInner.scrollBy({ left: itemWidth, behavior: 'smooth' });
-        }
-    });
-    
-    // --- LÓGICA DO BOTÃO SALVAR ---
-    const submitButton = document.getElementById('submit-button');
-    const submitIcon = submitButton.querySelector('.bi');
-    const submitText = submitButton.querySelector('span');
-
     solicitacaoForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        
         submitButton.disabled = true;
         submitIcon.classList.remove('bi-check-circle-fill');
         submitIcon.classList.add('bi-arrow-repeat', 'spinner-icon');
         submitText.textContent = 'Salvando...';
-
         const formData = new FormData(solicitacaoForm);
         formData.delete('imagens'); 
         fileList.forEach(file => { formData.append('imagens', file); });
-
-        fetch(solicitacaoForm.action, {
-            method: 'POST',
-            body: formData,
-            headers: {'X-CSRFToken': formData.get('csrfmiddlewaretoken')}
-        })
-        .then(response => {
-            if (!response.ok) { return response.json().then(err => { throw err; }); }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url;
-            } else {
-                const errorMessages = Object.entries(data.errors).map(([field, errors]) => `${field}: ${errors.join(', ')}`).join('\n');
-                alert('Ocorreu um erro ao salvar:\n' + errorMessages);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Ocorreu um erro de conexão ou validação. Verifique o console para mais detalhes.');
-        })
+        fetch(solicitacaoForm.action, { method: 'POST', body: formData, headers: {'X-CSRFToken': formData.get('csrfmiddlewaretoken')} })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => { if (ok && data.success) { window.location.href = data.redirect_url; } else { const errorMessages = Object.entries(data.errors || {}).map(([field, errors]) => `${field}: ${errors.join(', ')}`).join('\n'); alert('Ocorreu um erro ao salvar:\n' + (errorMessages || 'Erro desconhecido.')); } })
+        .catch(error => { console.error('Erro:', error); alert('Ocorreu um erro de conexão ou validação.'); })
         .finally(() => {
             submitButton.disabled = false;
             submitIcon.classList.add('bi-check-circle-fill');
@@ -371,8 +333,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- INICIALIZA O WIZARD ---
+    // --- INICIALIZAÇÃO ---
     updateFormSteps();
+    updateCarousel(); // Chama pra garantir o estado inicial correto do carrossel
 });
 </script>
 {% endblock %}
