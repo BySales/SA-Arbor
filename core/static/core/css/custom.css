@@ -2177,3 +2177,28 @@ Essa regra aqui de baixo remove essa linha.
 .force-hide {
     display: none !important;
 }
+.tag {
+    padding: 2px 8px;
+    border-radius: 12px; /* Deixa bem arredondado */
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tag-denuncia {
+    color: #842029;
+    background-color: #f8d7da; /* Fundo vermelho bem claro */
+}
+
+.tag-sugestao {
+    color: #055160;
+    background-color: #cff4fc; /* Fundo azul bem claro */
+}
+.card-header {
+    background-color: transparent;
+    border-bottom: none;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: 1.25rem;
+}
