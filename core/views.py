@@ -24,6 +24,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
+from .models import Profile
 
 
 
@@ -843,4 +844,40 @@ def instancia_arvore_delete_api(request, pk):
 
     except Exception as e:
         # Se der qualquer outro erro, manda uma mensagem de falha
+        return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
+
+@login_required
+def api_cidades_permitidas(request):
+    """
+    API que retorna a lista de cidades permitidas para o usuário logado.
+    A cidade principal sempre virá primeiro na lista.
+    """
+    try:
+        # Pega o perfil do maluco que tá logado
+        profile = request.user.profile
+        
+        # Cria uma lista vazia pra gente colocar os nomes das cidades
+        lista_cidades = []
+
+        # 1. Primeiro, a cidade principal, que é a mais importante
+        if profile.cidade_principal:
+            lista_cidades.append(profile.cidade_principal.nome)
+
+        # 2. Agora, pega as cidades secundárias
+        # O .all() pega todos os objetos CidadePermitida que estão ligados a esse perfil
+        cidades_secundarias = profile.cidades_secundarias.all()
+
+        for cidade in cidades_secundarias:
+            # Adiciona na lista só se o nome ainda não estiver lá (evita duplicar)
+            if cidade.nome not in lista_cidades:
+                lista_cidades.append(cidade.nome)
+        
+        # Devolve o "recibo" (JSON) com a lista de cidades que a gente montou
+        return JsonResponse({'cidades': lista_cidades})
+
+    except Profile.DoesNotExist:
+        # Se por algum motivo o usuário não tiver um perfil, devolve uma lista vazia
+        return JsonResponse({'cidades': []})
+    except Exception as e:
+        # Se der qualquer outro B.O., informa o erro
         return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)

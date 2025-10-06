@@ -1,6 +1,7 @@
 # Arquivo: core/urls.py
 
 from django.urls import path
+from . import views
 from django.contrib.auth import views as auth_views
 from .views import (
     # Lista de todas as suas views
@@ -12,7 +13,7 @@ from .views import (
     obras_view,
     analisar_area_api, recuperar_senha_view, home_view,
     AreaDeleteView,
-    relatorios_view, instancia_arvore_delete_api,
+    relatorios_view, instancia_arvore_delete_api, 
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -53,6 +54,7 @@ urlpatterns = [
     path('api/analisar-area/', analisar_area_api, name='analisar_area_api'),
     path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
     path('api/arvores/<int:pk>/delete/', instancia_arvore_delete_api, name='instancia_arvore_delete_api'),
+    path('api/minhas-cidades/', views.api_cidades_permitidas, name='api_cidades_usuario'),
 
     # --- Outras URLs do App ---
     path('obras/', obras_view, name='obras_list'), 

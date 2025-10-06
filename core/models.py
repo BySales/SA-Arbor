@@ -158,10 +158,37 @@ class Area(models.Model):
 
     def __str__(self):
         return f'{self.nome} ({self.projeto.nome})'
+    
+class CidadePermitida(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+    
+    def __str__(self):
+        return self.nome
+    
+    class Meta:
+        verbose_name = "Cidade Permitida"
+        verbose_name_plural = "Cidades Permitidas"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     imagem = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
+    
+    # LINHA PRINCIPAL - A cidade onde o cara mora
+    cidade_principal = models.ForeignKey(
+        CidadePermitida, 
+        on_delete=models.SET_NULL, # Se a cidade for apagada, não apaga o perfil
+        null=True, 
+        blank=True,
+        related_name="usuarios_residentes"
+    )
+
+    # LINHAS EXTRAS - As outras cidades que ele pode ver
+    cidades_secundarias = models.ManyToManyField(
+        CidadePermitida,
+        blank=True,
+        related_name="usuarios_visitantes"
+    )
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
+    

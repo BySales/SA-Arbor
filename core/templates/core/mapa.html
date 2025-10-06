@@ -3,13 +3,28 @@
 
 {% block content %}
     <div class="page-header">
-        <h2 class="mb-0">(Beta)Mapa Interativo</h2>
+        <h2 class="mb-0">(Beta) Mapa Interativo</h2>
         <p class="text-muted">Visualize, gerencie e planeje as áreas verdes da cidade.</p>
     </div>
 
     <div class="card map-card-container">
+        <!-- Onde o mapa em si aparece -->
         <div id="map" data-analisar-url="{% url 'analisar_area_api' %}"></div>
 
+        <!-- ======================================================================= -->
+        <!-- AQUI O NOSSO PALCO: O PAINEL DE CIDADES -->
+        <!-- O JS vai procurar essa div pra montar o menu aqui dentro. -->
+        <!-- ======================================================================= -->
+        <div id="city-selector-panel" class="map-overlay-panel d-none">
+            <label for="city-select" class="form-label small mb-1">Visualizando cidade:</label>
+            <div id="city-select-container">
+                <!-- O JavaScript vai criar o menu <select> aqui dentro -->
+            </div>
+            <div id="map-status" class="small text-muted mt-1" style="font-style: italic;"></div>
+        </div>
+        <!-- ======================================================================= -->
+
+        <!-- Painel de Detalhes que você já tinha -->
         <div id="details-panel" class="map-overlay-panel d-none">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 id="details-title" class="mb-0 text-truncate">Detalhes</h6>
@@ -19,11 +34,20 @@
             <div id="details-content"></div>
         </div>
         
+        <!-- Display de Coordenadas que você já tinha -->
         <div id="coords-display" class="map-coords-display">
             Lat: -- | Lon: --
         </div>
     </div>
 
+    <!-- 
+    =================================================
+    DAQUI PRA BAIXO, NADA MUDA.
+    Todos os seus Modals (Janelas Pop-up) continuam aqui.
+    =================================================
+    -->
+
+    <!-- Modal para Formulário de Área -->
     <div class="modal fade" id="areaFormModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -64,6 +88,7 @@
         </div>
     </div>
 
+    <!-- Modal para Adicionar Árvore -->
     <div class="modal fade" id="addTreeModal" tabindex="-1" aria-labelledby="addTreeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -112,6 +137,7 @@
         </div>
     </div>
 
+    <!-- Modal para Confirmar Deleção -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -133,8 +159,10 @@
         </div>
     </div>
 
+    <!-- Container para os Toasts (notificações) -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
+    <!-- Passando os dados do Django para o JavaScript -->
     {{ arvores_data|json_script:"arvores-data-json" }}
     {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
     {{ areas_data|json_script:"areas-data-json" }}
@@ -144,5 +172,6 @@
 {% endblock %}
 
 {% block scripts %}
+    <!-- Carregando o nosso JavaScript mágico -->
     <script src="{% static 'core/js/mapa.js' %}"></script>
 {% endblock %}

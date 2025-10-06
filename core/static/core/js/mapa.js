@@ -1,4 +1,4 @@
-// Arquivo: static/core/js/mapa.js (VERSÃO FINAL COM MODAL DE CONFIRMAÇÃO)
+// Arquivo: static/core/js/mapa.js (CÓDIGO COMPLETO E UNIFICADO)
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -70,6 +70,78 @@ document.addEventListener('DOMContentLoaded', function() {
     areaModalEl.addEventListener('shown.bs.modal', function () {
         $('.select2-multiple').select2({ placeholder: "Selecione as espécies", allowClear: true, dropdownParent: $('#areaFormModal') });
     });
+
+    // =======================================================================
+    // LÓGICA DE CONTROLE DE CIDADES
+    // =======================================================================
+    let camadaLimiteCidade = null;
+    const painelSeletor = document.getElementById('city-selector-panel');
+    const containerDoMenu = document.getElementById('city-select-container');
+    const statusMapa = document.getElementById('map-status');
+
+    async function mudarMapaParaCidade(nomeCidade) {
+        if (!nomeCidade) return;
+        statusMapa.textContent = `Buscando o contorno de ${nomeCidade}...`;
+        if (camadaLimiteCidade) {
+            map.removeLayer(camadaLimiteCidade);
+        }
+        const urlApiNominatim = `https://nominatim.openstreetmap.org/search?q=${nomeCidade}&format=json&polygon_geojson=1&limit=1`;
+        try {
+            const response = await fetch(urlApiNominatim);
+            const data = await response.json();
+            if (data.length > 0 && data[0].geojson) {
+                const geojsonDaCidade = data[0].geojson;
+                camadaLimiteCidade = L.geoJSON(geojsonDaCidade, {
+                    style: { color: "#0d6efd", weight: 2, fillOpacity: 0.05, interactive: false }
+                }).addTo(map);
+                const limitesExatos = camadaLimiteCidade.getBounds();
+                map.fitBounds(limitesExatos);
+                map.setMaxBounds(limitesExatos);
+                map.options.minZoom = map.getBoundsZoom(limitesExatos);
+                statusMapa.textContent = `Visualizando ${nomeCidade}.`;
+            } else {
+                statusMapa.textContent = `Não foi possível achar o contorno de ${nomeCidade}.`;
+                map.setMaxBounds(null);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar dados da cidade:", error);
+            statusMapa.textContent = "Erro de conexão ao buscar cidade.";
+        }
+    }
+
+    async function iniciarControleDeCidades() {
+        try {
+            const response = await fetch("/api/minhas-cidades/");
+            const data = await response.json();
+            const listaDeCidades = data.cidades;
+
+            if (listaDeCidades && listaDeCidades.length > 0) {
+                painelSeletor.classList.remove('d-none');
+                const select = document.createElement('select');
+                select.className = 'form-select form-select-sm';
+                select.id = 'city-select';
+                listaDeCidades.forEach(cidade => {
+                    const option = document.createElement('option');
+                    option.value = cidade;
+                    option.textContent = cidade;
+                    select.appendChild(option);
+                });
+                containerDoMenu.innerHTML = '';
+                containerDoMenu.appendChild(select);
+                select.addEventListener('change', function() {
+                    mudarMapaParaCidade(this.value);
+                });
+                mudarMapaParaCidade(listaDeCidades[0]);
+            } else {
+                painelSeletor.classList.remove('d-none');
+                statusMapa.textContent = "Mapa livre. Adicione cidades no seu perfil para limitar a visualização.";
+            }
+        } catch (error) {
+            console.error("Erro ao buscar cidades do usuário:", error);
+            painelSeletor.classList.remove('d-none');
+            statusMapa.textContent = "Não foi possível carregar as cidades do seu perfil.";
+        }
+    }
 
     // --- ÍCONES, CAMADAS, DADOS, PAINÉIS ---
     const treeIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
@@ -244,4 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordsDisplay = document.getElementById('coords-display');
     map.on('mousemove', e => { coordsDisplay.innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lon: ${e.latlng.lng.toFixed(5)}`; });
     map.on('mouseout', () => { coordsDisplay.innerHTML = 'Lat: -- | Lon: --'; });
+
+    // --- INICIA A LÓGICA DE CIDADES ---
+    iniciarControleDeCidades();
 });
