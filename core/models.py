@@ -92,9 +92,14 @@ class Solicitacao(models.Model):
     equipe_delegada = models.ForeignKey(Equipe, on_delete=models.SET_NULL, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    cidade = models.ForeignKey(
+        'CidadePermitida', on_delete=models.PROTECT, related_name='solicitacoes', null=True, blank=False
+    )
 
     def __str__(self):
-        return f'{self.get_tipo_display()} #{self.id} - {self.status}'
+        # Atualizamos o __str__ para mostrar a cidade, ajuda a gente
+        cidade_nome = self.cidade.nome if self.cidade else "Sem Cidade"
+        return f'{self.get_tipo_display()} #{self.id} em {cidade_nome} - {self.status}'
 
 class ImagemSolicitacao(models.Model):
     solicitacao = models.ForeignKey(Solicitacao, related_name='imagens', on_delete=models.CASCADE)

@@ -51,7 +51,13 @@
                     <div class="col-lg-10 col-xl-8">
                         <h5 class="form-section-title">Detalhes da Solicitação</h5>
                         <div class="row">
-                            <div class="col-md-7">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_cidade">{{ form.cidade.label }}</label>
+                                    {{ form.cidade }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label" for="id_tipo">{{ form.tipo.label }}</label>
                                     {{ form.tipo }}

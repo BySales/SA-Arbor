@@ -3,20 +3,14 @@
 {% block content %}
     
     {% if user.is_staff or user.is_superuser %}
-        {% comment %} 
-        ============================================================
-        INÍCIO DA VISÃO DO ADMINISTRADOR (VERSÃO FINAL)
-        ============================================================
-        {% endcomment %}
+        {# VISÃO DO ADMINISTRADOR #}
 
-        {% comment %} PAINEL DE CONTROLE SUPERIOR {% endcomment %}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="mb-0">Painel de Controle</h2>
                 <p class="text-muted mb-0">Uma rápida olhada no que está acontecendo.</p>
             </div>
              <div class="d-flex align-items-center">
-                {% comment %} BOTÃO NOVA SOLICITAÇÃO MOVIDO PARA CÁ {% endcomment %}
                 <a href="{% url 'solicitacao_create' %}" class="btn btn-primary btn-principal-acao me-3">
                     <i class="bi bi-plus-circle-fill me-1"></i>
                     <span>Nova Solicitação</span>
@@ -31,75 +25,34 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3">
-                <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none">
-                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ABERTO' %}card-status-active-danger{% endif %}">
-                        <div class="card-body">
-                            <div class="card-icon danger mb-2"><i class="bi bi-exclamation-octagon"></i></div>
-                            <div class="card-title-dashboard text-danger">Solicitações em Aberto</div>
-                            <div class="card-number">{{ abertas_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none">
-                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ANDAMENTO' %}card-status-active-warning{% endif %}">
-                        <div class="card-body">
-                             <div class="card-icon warning-soft mb-2"><i class="bi bi-hourglass-split"></i></div>
-                            <div class="card-title-dashboard text-warning">Em Andamento</div>
-                            <div class="card-number">{{ andamento_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none">
-                    <div class="card h-100 card-status-hover {% if status_selecionado == 'FINALIZADO' %}card-status-active-success{% endif %}">
-                        <div class="card-body">
-                            <div class="card-icon success mb-2"><i class="bi bi-check2-circle"></i></div>
-                            <div class="card-title-dashboard text-success">Finalizadas</div>
-                            <div class="card-number">{{ finalizadas_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none">
-                    <div class="card h-100 card-status-hover {% if status_selecionado == 'RECUSADO' %}card-status-active-dark{% endif %}">
-                        <div class="card-body">
-                            <div class="card-icon dark-soft mb-2"><i class="bi bi-slash-circle"></i></div>
-                            <div class="card-title-dashboard text-dark">Recusadas</div>
-                            <div class="card-number">{{ recusadas_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ABERTO' %}card-status-active-danger{% endif %}"><div class="card-body"><div class="card-icon danger mb-2"><i class="bi bi-exclamation-octagon"></i></div><div class="card-title-dashboard text-danger">Solicitações em Aberto</div><div class="card-number">{{ abertas_count }}</div></div></div></a></div>
+            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ANDAMENTO' %}card-status-active-warning{% endif %}"><div class="card-body"><div class="card-icon warning-soft mb-2"><i class="bi bi-hourglass-split"></i></div><div class="card-title-dashboard text-warning">Em Andamento</div><div class="card-number">{{ andamento_count }}</div></div></div></a></div>
+            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'FINALIZADO' %}card-status-active-success{% endif %}"><div class="card-body"><div class="card-icon success mb-2"><i class="bi bi-check2-circle"></i></div><div class="card-title-dashboard text-success">Finalizadas</div><div class="card-number">{{ finalizadas_count }}</div></div></div></a></div>
+            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'RECUSADO' %}card-status-active-dark{% endif %}"><div class="card-body"><div class="card-icon dark-soft mb-2"><i class="bi bi-slash-circle"></i></div><div class="card-title-dashboard text-dark">Recusadas</div><div class="card-number">{{ recusadas_count }}</div></div></div></a></div>
         </div>
 
-        {% comment %} ÁREA DA LISTA DE SOLICITAÇÕES E GRÁFICOS {% endcomment %}
         <div class="row mt-4">
             <div class="col-lg-8">
-                {% comment %} CABEÇALHO DA LISTA {% endcomment %}
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h4 class="mb-0">
-                            {% if status_selecionado %}
-                                Detalhes: {{ status_selecionado|cut:"EM_"|cut:"_"|title }}
-                            {% else %}
-                                Todas as Solicitações
-                            {% endif %}
+                            {% if status_selecionado %}Detalhes: {{ status_selecionado|cut:"EM_"|cut:"_"|title }}{% else %}Todas as Solicitações{% endif %}
                         </h4>
-                        <p class="text-muted mb-0">
-                            Exibindo {{ solicitacoes.start_index }}–{{ solicitacoes.end_index }} de {{ solicitacoes.paginator.count }} resultados.
-                        </p>
+                        <p class="text-muted mb-0">Exibindo {{ solicitacoes.start_index }}–{{ solicitacoes.end_index }} de {{ solicitacoes.paginator.count }} resultados.</p>
                     </div>
-                    <form method="GET">
+                    <form method="GET" class="d-flex">
                         <input type="hidden" name="periodo" value="{{ periodo_selecionado }}">
-                        {% if status_selecionado %}
-                            <input type="hidden" name="status" value="{{ status_selecionado }}">
-                        {% endif %}
+                        {% if status_selecionado %}<input type="hidden" name="status" value="{{ status_selecionado }}">{% endif %}
                         
+                        <div class="custom-select-wrapper me-2">
+                            <select name="cidade" class="form-select-custom" onchange="this.form.submit()">
+                                <option value="">Todas as Cidades</option>
+                                {% for cidade in cidades_para_filtro %}
+                                    <option value="{{ cidade.id }}" {% if cidade.id|stringformat:"s" == cidade_selecionada %}selected{% endif %}>{{ cidade.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
                         <div class="custom-select-wrapper">
                             <select name="ordenar" class="form-select-custom" onchange="this.form.submit()">
                                 <option value="">Ordenar por...</option>
@@ -111,15 +64,12 @@
                     </form>
                 </div>
                 
-                {% comment %} LISTA DE SOLICITAÇÕES COM O CARD MODERNO {% endcomment %}
                 {% for solicitacao in solicitacoes %}
                     <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}
-                                </small>
+                                <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
                             </div>
                             <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
                         </div>
@@ -127,6 +77,9 @@
                             <p class="card-metadata">
                                 <i class="bi bi-person"></i> 
                                 <strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}
+                                <span class="mx-2 text-muted">|</span>
+                                <i class="bi bi-geo-alt"></i>
+                                <strong>Cidade:</strong> {{ solicitacao.cidade.nome|default:"N/A" }}
                             </p>
                             
                             <p class="mb-2"><strong>Descrição:</strong></p>
@@ -139,88 +92,45 @@
                                 <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
                                 <div class="d-flex flex-wrap">
                                     {% for imagem_obj in solicitacao.imagens.all %}
-                                        <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
-                                            <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao">
-                                        </a>
+                                        <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2"><img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao"></a>
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
                         <div class="card-footer bg-white d-flex justify-content-end align-items-center">
-    {% if solicitacao.latitude and solicitacao.longitude %}
-        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
-            <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
-        </a>
-    {% endif %}
-    {% comment %} MUDANÇA PRINCIPAL AQUI {% endcomment %}
-    <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-eye-fill"></i> Ver Detalhes
-    </a>
-</div>
+                            {% if solicitacao.latitude and solicitacao.longitude %}<a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2"><i class="bi bi-geo-alt-fill"></i> Ver no Mapa</a>{% endif %}
+                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i> Ver Detalhes</a>
+                        </div>
                     </div>
                 {% empty %}
-                    <div class="alert alert-warning">
-                        Nenhuma solicitação encontrada para o período e status selecionados.
-                    </div>
+                    <div class="alert alert-warning">Nenhuma solicitação encontrada para os filtros selecionados.</div>
                 {% endfor %}
 
-                {% comment %} PAGINAÇÃO COM A CORREÇÃO DOS FILTROS {% endcomment %}
                 <nav aria-label="Navegação das solicitações" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if solicitacoes.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">&laquo; Primeira</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.previous_page_number }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Anterior</a>
-                            </li>
+                            <li class="page-item"><a class="page-link" href="?page=1&{{ request.GET.urlencode | cut:'page=' }}">&laquo; Primeira</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Anterior</a></li>
                         {% endif %}
-
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1" aria-disabled="True">
-                                Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}
-                            </a>
-                        </li>
-
+                        <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="True">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
                         {% if solicitacoes.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.next_page_number }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Próxima</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}{% if periodo_selecionado %}&periodo={{ periodo_selecionado }}{% endif %}{% if status_selecionado %}&status={{ status_selecionado }}{% endif %}{% if ordenar_selecionado %}&ordenar={{ ordenar_selecionado }}{% endif %}">Última &raquo;</a>
-                            </li>
+                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Próxima</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}&{{ request.GET.urlencode | cut:'page=' }}">Última &raquo;</a></li>
                         {% endif %}
                     </ul>
                 </nav>
             </div>
 
-            {% comment %} GRÁFICOS NA LATERAL {% endcomment %}
             <div class="col-lg-4">
-                <div class="card mb-3">
-                    <div class="card-header">Status das Solicitações</div>
-                    <div class="card-body"><canvas id="statusChart"></canvas></div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-header">Tipos de Solicitação</div>
-                    <div class="card-body"><canvas id="tiposChart"></canvas></div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-header">Atividade na Última Semana</div>
-                    <div class="card-body"><canvas id="recenteChart"></canvas></div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-header">Carga de Trabalho por Equipe</div>
-                    <div class="card-body"><canvas id="equipesChart"></canvas></div>
-                </div>
+                <div class="card mb-3"><div class="card-header">Status das Solicitações</div><div class="card-body"><canvas id="statusChart"></canvas></div></div>
+                <div class="card mb-3"><div class="card-header">Tipos de Solicitação</div><div class="card-body"><canvas id="tiposChart"></canvas></div></div>
+                <div class="card mb-3"><div class="card-header">Atividade na Última Semana</div><div class="card-body"><canvas id="recenteChart"></canvas></div></div>
+                <div class="card mb-3"><div class="card-header">Carga de Trabalho por Equipe</div><div class="card-body"><canvas id="equipesChart"></canvas></div></div>
             </div>
         </div>
 
     {% else %}
-        {% comment %} 
-        ============================================================
-        INÍCIO DA VISÃO DO USUÁRIO COMUM (Layout não muda)
-        ============================================================
-        {% endcomment %}
+        {# VISÃO DO USUÁRIO COMUM #}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Minhas Solicitações</h2>
             <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
@@ -231,61 +141,45 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
-                        <small class="text-muted">
-                            <i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}
-                        </small>
+                        <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
                     </div>
                     <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
                 </div>
                 <div class="card-body">
+                    <p class="card-metadata">
+                        <i class="bi bi-geo-alt"></i>
+                        <strong>Cidade:</strong> {{ solicitacao.cidade.nome|default:"N/A" }}
+                    </p>
                     <p class="mb-2"><strong>Descrição:</strong></p>
                     <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
                         <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
                     </div>
                     <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
-
                     {% if solicitacao.imagens.all %}
                         <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
                         <div class="d-flex flex-wrap">
-                            {% for imagem_obj in solicitacao.imagens.all %}
-                                <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
-                                    <img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao">
-                                </a>
-                            {% endfor %}
+                            {% for imagem_obj in solicitacao.imagens.all %}<a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2"><img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao"></a>{% endfor %}
                         </div>
                     {% endif %}
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-end align-items-center">
-                    {% if solicitacao.latitude and solicitacao.longitude %}
-                        <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2">
-                            <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
-                        </a>
-                    {% endif %}
-                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-pencil-square"></i> Editar
-                    </a>
+                    {% if solicitacao.latitude and solicitacao.longitude %}<a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2"><i class="bi bi-geo-alt-fill"></i> Ver no Mapa</a>{% endif %}
+                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i> Editar</a>
                 </div>
             </div>
         {% empty %}
-            <div class="alert alert-warning">
-                Você ainda não criou nenhuma solicitação.
-            </div>
+            <div class="alert alert-warning">Você ainda não criou nenhuma solicitação.</div>
         {% endfor %}
 
         <nav aria-label="Navegação das solicitações" class="mt-4">
             <ul class="pagination justify-content-center">
-                {% if solicitacoes.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a></li>
-                {% endif %}
+                {% if solicitacoes.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a></li>{% endif %}
                 <li class="page-item disabled"><a class="page-link" href="#">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
-                {% if solicitacoes.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a></li>
-                {% endif %}
+                {% if solicitacoes.has_next %}<li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a></li>{% endif %}
             </ul>
         </nav>
     {% endif %}
 
-    {% comment %} SCRIPTS (permanecem os mesmos) {% endcomment %}
     <script>
         function toggleDescricao(solicitacaoId) {
             const container = document.getElementById('desc-container-' + solicitacaoId);

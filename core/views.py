@@ -16,7 +16,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao,TagCategory, Tag
+from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao,TagCategory, Tag, CidadePermitida
 from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -35,12 +35,25 @@ def solicitacao_list(request):
     periodo = request.GET.get('periodo', 'total')
     status = request.GET.get('status')
     ordenar = request.GET.get('ordenar')
+    # ======================================================
+    # 1. PEGA O NOVO FILTRO DE CIDADE DA URL
+    cidade_id = request.GET.get('cidade')
+    # ======================================================
 
     # --- Lógica de Filtros ---
-    solicitacoes_base = Solicitacao.objects.all()
+    # Otimizamos a busca já incluindo a cidade e o cidadão
+    solicitacoes_base = Solicitacao.objects.select_related('cidade', 'cidadao').all()
+
     if status:
         solicitacoes_base = solicitacoes_base.filter(status=status)
 
+    # ======================================================
+    # 2. APLICA O FILTRO DE CIDADE NA BUSCA PRINCIPAL
+    if cidade_id:
+        solicitacoes_base = solicitacoes_base.filter(cidade__id=cidade_id)
+    # ======================================================
+
+    # O resto da lógica de filtro de período e dashboard continua a mesma...
     dashboard_qs = Solicitacao.objects.all()
     if periodo == 'hoje':
         dashboard_qs = dashboard_qs.filter(data_criacao__date=date.today())
@@ -61,7 +74,6 @@ def solicitacao_list(request):
         um_mes_atras = date.today() - timedelta(days=30)
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
 
-    # --- CORREÇÃO AQUI: Garantindo que 'solicitacoes' seja definida ---
     if request.user.is_superuser or request.user.is_staff:
         solicitacoes_query = solicitacoes_filtradas
     else:
@@ -74,41 +86,36 @@ def solicitacao_list(request):
     else:
         solicitacoes_ordenadas = solicitacoes_query.order_by('-data_criacao')
 
-    # --- Paginação ---
     paginator = Paginator(solicitacoes_ordenadas, 5) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
-    # --- Cálculos para o Dashboard ---
+    
+    # ... (Cálculos do Dashboard continuam iguais) ...
     abertas_count = dashboard_qs.filter(status='EM_ABERTO').count()
     andamento_count = dashboard_qs.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = dashboard_qs.filter(status='FINALIZADO').count()
     recusadas_count = dashboard_qs.filter(status='RECUSADO').count()
-    
     denuncias_count = dashboard_qs.filter(tipo='DENUNCIA').count()
     sugestoes_count = dashboard_qs.filter(tipo='SUGESTAO').count()
-
     ultimos_7_dias = [date.today() - timedelta(days=i) for i in range(6, -1, -1)]
-    solicitacoes_por_dia = (
-        Solicitacao.objects.filter(data_criacao__date__in=ultimos_7_dias)
-        .annotate(dia=TruncDate('data_criacao'))
-        .values('dia')
-        .annotate(total=Count('id'))
-        .order_by('dia')
-    )
+    solicitacoes_por_dia = (Solicitacao.objects.filter(data_criacao__date__in=ultimos_7_dias).annotate(dia=TruncDate('data_criacao')).values('dia').annotate(total=Count('id')).order_by('dia'))
     dados_recente = {dia_obj['dia']: dia_obj['total'] for dia_obj in solicitacoes_por_dia}
     datas_recente_labels = [dia.strftime('%d/%m') for dia in ultimos_7_dias]
     contagem_recente_data = [dados_recente.get(dia, 0) for dia in ultimos_7_dias]
-
     solicitacoes_em_andamento = Solicitacao.objects.filter(status='EM_ANDAMENTO')
-    equipes_data = (
-        solicitacoes_em_andamento.exclude(equipe_delegada__isnull=True)
-        .values('equipe_delegada__nome')
-        .annotate(total=Count('id'))
-        .order_by('-total')
-    )
+    equipes_data = (solicitacoes_em_andamento.exclude(equipe_delegada__isnull=True).values('equipe_delegada__nome').annotate(total=Count('id')).order_by('-total'))
     equipes_labels = [item['equipe_delegada__nome'] for item in equipes_data]
     equipes_contagem = [item['total'] for item in equipes_data]
+
+    # ======================================================
+    # 3. BUSCA AS CIDADES PERMITIDAS PARA MONTAR O MENU DO FILTRO
+    profile = request.user.profile
+    cidades_ids = []
+    if profile.cidade_principal:
+        cidades_ids.append(profile.cidade_principal.id)
+    cidades_ids.extend(profile.cidades_secundarias.all().values_list('id', flat=True))
+    cidades_para_filtro = CidadePermitida.objects.filter(id__in=set(cidades_ids)).order_by('nome')
+    # ======================================================
 
     context = {
         'solicitacoes': page_obj,
@@ -119,6 +126,11 @@ def solicitacao_list(request):
         'periodo_selecionado': periodo,
         'status_selecionado': status,
         'ordenar_selecionado': ordenar,
+        # ======================================================
+        # 4. MANDA AS NOVAS INFORMAÇÕES PARA O TEMPLATE
+        'cidades_para_filtro': cidades_para_filtro,
+        'cidade_selecionada': cidade_id,
+        # ======================================================
         'denuncias_count': denuncias_count,
         'sugestoes_count': sugestoes_count,
         'datas_recente_labels': json.dumps(datas_recente_labels),
@@ -132,9 +144,9 @@ def solicitacao_list(request):
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST) # Não pegamos request.FILES aqui ainda
+        # Passamos o `user` para o formulário saber quais cidades mostrar
+        form = SolicitacaoForm(request.POST, request.FILES, user=request.user)
         
-        # A validação agora é feita no JS, mas mantemos uma segurança aqui
         if len(request.FILES.getlist('imagens')) > 10:
             return JsonResponse({'success': False, 'errors': {'imagens': ['Você só pode enviar no máximo 10 imagens.']}}, status=400)
 
@@ -143,22 +155,20 @@ def solicitacao_create(request):
             solicitacao.cidadao = request.user
             solicitacao.save()
             
-            # Pega as imagens da "nossa pasta" que o JS mandou
             imagens = request.FILES.getlist('imagens')
             for imagem_file in imagens:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
             
             messages.success(request, 'Solicitação criada com sucesso!')
-            # Retorna o recibo de sucesso para o JavaScript
             return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
         else:
-            # Retorna o recibo de erro com os detalhes
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     
-    # Se for um GET, a lógica continua a mesma
-    else:
-        form = SolicitacaoForm()
+    else: # GET
+        # Passamos o `user` para o formulário saber quais cidades mostrar
+        form = SolicitacaoForm(user=request.user)
     return render(request, 'core/solicitacao_form.html', {'form': form})
+
 
 
 @login_required
@@ -176,9 +186,9 @@ def solicitacao_detail(request, pk):
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
-        form = SolicitacaoForm(request.POST, instance=solicitacao) # Não pegamos request.FILES
+        # Passamos o `user` também na atualização
+        form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao, user=request.user)
 
-        # Lógica de validação de contagem de imagens
         imagens_novas = request.FILES.getlist('imagens')
         imagens_atuais_count = solicitacao.imagens.count()
         if (imagens_atuais_count + len(imagens_novas)) > 10:
@@ -186,21 +196,19 @@ def solicitacao_update(request, pk):
             return JsonResponse({'success': False, 'errors': {'imagens': [error_msg]}}, status=400)
 
         if form.is_valid():
-            form.save() # Salva os dados do formulário (tipo, descrição, etc)
+            form.save()
             
             for imagem_file in imagens_novas:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
             
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
-            # Retorna o recibo de sucesso
             return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
         else:
-            # Retorna o recibo de erro
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             
-    # Se for um GET, a lógica continua a mesma
-    else:
-        form = SolicitacaoForm(instance=solicitacao)
+    else: # GET
+        # E aqui também na hora de exibir o formulário preenchido
+        form = SolicitacaoForm(instance=solicitacao, user=request.user)
     context = {
         'form': form,
         'solicitacao': solicitacao 
