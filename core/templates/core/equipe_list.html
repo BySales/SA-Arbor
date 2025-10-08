@@ -10,59 +10,52 @@
     </div>
 
     {% if agentes_livres %}
-    <div class="accordion mb-4" id="accordionAgentesLivres">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                    <i class="bi bi-person-plus-fill me-2"></i>
-                    <strong>Agentes Livres ({{ agentes_livres|length }} usuários sem equipe)</strong>
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionAgentesLivres">
-                <div class="accordion-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for agente in agentes_livres %}
-                            <span class="badge bg-secondary-subtle text-dark-emphasis rounded-pill">{{ agente.username }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-person-plus-fill me-2"></i>Banco de Reservas ({{ agentes_livres|length }} Agentes Livres)</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Usuários que são parte da equipe técnica mas ainda não foram alocados em uma equipe de campo.</p>
+            <div class="d-flex flex-wrap gap-2">
+                {% for agente in agentes_livres %}
+                    <span class="badge bg-secondary-subtle text-dark-emphasis rounded-pill p-2">{{ agente.get_full_name|default:agente.username }}</span>
+                {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
 
     <div class="row">
-        {% for item in equipes_com_stats %}
-            {# MUDANÇA PRINCIPAL AQUI: de col-lg-6 para col-lg-4 col-md-6 #}
-            <div class="col-lg-4 col-md-6 mb-4">
+        {% for equipe in equipes_com_stats %}
+            <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card h-100 shadow-sm card-team">
                     <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                        <h5 class="mb-0">{{ item.equipe.nome }}</h5>
+                        <h5 class="mb-0">{{ equipe.nome }}</h5>
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-icon" type="button" id="dropdownMenuButton-{{ item.equipe.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-{{ item.equipe.pk }}">
-                                <li><a class="dropdown-item" href="{% url 'equipe_update' pk=item.equipe.pk %}"><i class="bi bi-pencil-fill me-2"></i>Editar</a></li>
-                                <li><a class="dropdown-item text-danger" href="{% url 'equipe_delete' pk=item.equipe.pk %}"><i class="bi bi-trash-fill me-2"></i>Deletar</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'equipe_update' pk=equipe.pk %}"><i class="bi bi-pencil-fill me-2"></i>Editar</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'equipe_delete' pk=equipe.pk %}"><i class="bi bi-trash-fill me-2"></i>Deletar</a></li>
                             </ul>
                         </div>
                     </div>
                     <div class="card-body pb-0">
                         <h6 class="card-title text-muted small text-uppercase">Membros</h6>
-                        {% if item.equipe.membros.all %}
+                        {% if equipe.membros.all %}
                             <div class="team-members-stack">
-                                {% for membro in item.equipe.membros.all %}
+                                {% for membro in equipe.membros.all %}
                                     <img src="{{ membro.profile.imagem.url }}" 
                                          class="member-avatar"
                                          data-bs-toggle="tooltip" 
                                          data-bs-placement="top" 
-                                         title="{{ membro.username }}"
+                                         title="{{ membro.get_full_name|default:membro.username }}"
                                          onerror="this.style.display='none'">
                                     <div class="member-avatar-placeholder" 
                                          data-bs-toggle="tooltip" 
                                          data-bs-placement="top" 
-                                         title="{{ membro.username }}"
+                                         title="{{ membro.get_full_name|default:membro.username }}"
                                          data-initials="{{ membro.username|slice:':2'|upper }}">
                                     </div>
                                 {% endfor %}
@@ -74,42 +67,30 @@
                     <div class="card-footer bg-white border-0 pt-3">
                         <div class="d-flex justify-content-around align-items-center mb-3">
                             <div class="text-center">
-                                <div class="stat-icon-wrapper icon-primary mb-1">
-                                    <i class="bi bi-person-workspace"></i>
-                                </div>
-                                {# MUDANÇA AQUI: de fs-4 para fs-5 #}
-                                <div class="fs-5 fw-bold">{{ item.tarefas_ativas }}</div>
+                                <div class="stat-icon-wrapper icon-primary mb-1"><i class="bi bi-person-workspace"></i></div>
+                                <div class="fs-5 fw-bold">{{ equipe.tarefas_ativas|default:0 }}</div>
                                 <div class="small text-muted">Ativas</div>
                             </div>
                             <div class="text-center">
-                                <div class="stat-icon-wrapper icon-success mb-1">
-                                    <i class="bi bi-check2-circle"></i>
-                                </div>
-                                {# MUDANÇA AQUI: de fs-4 para fs-5 #}
-                                <div class="fs-5 fw-bold">{{ item.tarefas_concluidas }}</div>
-                                <div class="small text-muted">Concluídas</div>
+                                <div class="stat-icon-wrapper icon-success mb-1"><i class="bi bi-check2-circle"></i></div>
+                                <div class="fs-5 fw-bold">{{ equipe.tarefas_concluidas|default:0 }}</div>
+                                <div class="small text-muted">Concluídas (30d)</div>
                             </div>
                         </div>
                         
                         <h6 class="card-title text-muted small text-uppercase mb-2 text-center">Foco de Atuação</h6>
-                        {% with total=item.denuncias_count|add:item.sugestoes_count %}
+                        {% with total=equipe.denuncias_count|add:equipe.sugestoes_count %}
                             {% if total > 0 %}
-                                <div class="progress" style="height: 15px;"> {# Altura reduzida #}
-                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio item.denuncias_count total 100 %}%" title="{{ item.denuncias_count }} Denúncias">
-                                        <small>{{ item.denuncias_count }}</small>
-                                    </div>
-                                    <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {% widthratio item.sugestoes_count total 100 %}%" title="{{ item.sugestoes_count }} Sugestões">
-                                        <small>{{ item.sugestoes_count }}</small>
-                                    </div>
+                                <div class="progress" style="height: 15px;" role="progressbar" aria-valuenow="{{ equipe.denuncias_count }}" aria-valuemin="0" aria-valuemax="{{ total }}">
+                                    <div class="progress-bar bg-danger" style="width: {% widthratio equipe.denuncias_count total 100 %}%" title="{{ equipe.denuncias_count }} Denúncias"><small>{{ equipe.denuncias_count }}</small></div>
+                                    <div class="progress-bar bg-warning text-dark" style="width: {% widthratio equipe.sugestoes_count total 100 %}%" title="{{ equipe.sugestoes_count }} Sugestões"><small>{{ equipe.sugestoes_count }}</small></div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-1 small text-muted">
-                                    <span><i class="bi bi-square-fill text-danger"></i> D</span>
-                                    <span><i class="bi bi-square-fill text-warning"></i> S</span>
+                                    <span><i class="bi bi-square-fill text-danger"></i> Denúncias</span>
+                                    <span>Sugestões <i class="bi bi-square-fill text-warning"></i></span>
                                 </div>
                             {% else %}
-                                <div class="progress-empty-state">
-                                    <small class="text-muted">Nenhuma tarefa registrada</small>
-                                </div>
+                                <div class="progress-empty-state"><small class="text-muted">Nenhuma tarefa registrada</small></div>
                             {% endif %}
                         {% endwith %}
                     </div>
@@ -139,6 +120,8 @@ document.addEventListener('DOMContentLoaded', function () {
     placeholders.forEach(el => {
         const initials = el.getAttribute('data-initials');
         if (initials) {
+            // Se a imagem correspondente quebrou (está com display:none), o placeholder já vai aparecer.
+            // Aqui a gente só garante que ele tenha as iniciais dentro.
             el.textContent = initials;
         }
     });

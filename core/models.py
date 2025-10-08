@@ -95,6 +95,7 @@ class Solicitacao(models.Model):
     cidade = models.ForeignKey(
         'CidadePermitida', on_delete=models.PROTECT, related_name='solicitacoes', null=True, blank=False
     )
+    data_finalizacao = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         # Atualizamos o __str__ para mostrar a cidade, ajuda a gente

@@ -3,6 +3,7 @@ from datetime import date, timedelta, datetime
 from django.http import JsonResponse
 # IMPORTS ADICIONADOS AQUI
 from django.urls import reverse
+from django.db.models import  OuterRef, Subquery
 from django.views.generic import DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -25,7 +26,7 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from .models import Profile
-
+from django.db.models import Avg, F, ExpressionWrapper, DurationField
 
 
 # --- VIEWS DE SOLICITAÇÃO ---
@@ -186,7 +187,6 @@ def solicitacao_detail(request, pk):
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     if request.method == 'POST':
-        # Passamos o `user` também na atualização
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao, user=request.user)
 
         imagens_novas = request.FILES.getlist('imagens')
@@ -196,8 +196,20 @@ def solicitacao_update(request, pk):
             return JsonResponse({'success': False, 'errors': {'imagens': [error_msg]}}, status=400)
 
         if form.is_valid():
-            form.save()
+            # ======================================================
+            # ============ LÓGICA DO CARIMBO AUTOMÁTICO ============
+            # ======================================================
+            solicitacao_instance = form.save(commit=False)
             
+            # Checa se o status foi alterado no formulário E se o novo status é 'FINALIZADO'
+            if 'status' in form.changed_data and solicitacao_instance.status == 'FINALIZADO':
+                # Se sim, a gente bate o carimbo com a hora atual!
+                solicitacao_instance.data_finalizacao = timezone.now()
+            
+            # Agora sim a gente salva no banco
+            solicitacao_instance.save()
+            # ======================================================
+
             for imagem_file in imagens_novas:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
             
@@ -207,7 +219,6 @@ def solicitacao_update(request, pk):
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             
     else: # GET
-        # E aqui também na hora de exibir o formulário preenchido
         form = SolicitacaoForm(instance=solicitacao, user=request.user)
     context = {
         'form': form,
@@ -230,38 +241,38 @@ def solicitacao_delete(request, pk):
 
 @login_required
 def equipe_list(request):
-    equipes_qs = Equipe.objects.prefetch_related('membros').all()
+    """
+    View 2.0 do painel de equipes, com busca otimizada.
+    """
     trinta_dias_atras = timezone.now() - timedelta(days=30)
     
-    equipes_com_stats = []
-    for equipe in equipes_qs:
-        tarefas_ativas = Solicitacao.objects.filter(equipe_delegada=equipe, status='EM_ANDAMENTO').count()
-        tarefas_concluidas = Solicitacao.objects.filter(
-            equipe_delegada=equipe, 
-            status='FINALIZADO',
-            # Adicionar um campo de data de finalização no futuro
-            # data_finalizacao__gte=trinta_dias_atras 
-        ).count()
-        
-        denuncias_count = Solicitacao.objects.filter(equipe_delegada=equipe, tipo='DENUNCIA').count()
-        sugestoes_count = Solicitacao.objects.filter(equipe_delegada=equipe, tipo='SUGESTAO').count()
+    # Esta é a SUBQUERY que vai contar as tarefas concluídas nos últimos 30 dias para cada equipe
+    tarefas_concluidas_recentemente = Solicitacao.objects.filter(
+        equipe_delegada=OuterRef('pk'),
+        status='FINALIZADO',
+        data_finalizacao__gte=trinta_dias_atras
+    ).values('equipe_delegada').annotate(count=Count('pk')).values('count')
 
-        equipes_com_stats.append({
-            'equipe': equipe,
-            'tarefas_ativas': tarefas_ativas,
-            'tarefas_concluidas': tarefas_concluidas,
-            'denuncias_count': denuncias_count,
-            'sugestoes_count': sugestoes_count,
-        })
+    # A MÁGICA ACONTECE AQUI: uma única viagem ao banco de dados!
+    equipes_com_stats = Equipe.objects.annotate(
+        # Conta tarefas ativas
+        tarefas_ativas=Count('solicitacao', filter=Q(solicitacao__status='EM_ANDAMENTO')),
+        # Usa a subquery para contar as concluídas
+        tarefas_concluidas=Subquery(tarefas_concluidas_recentemente),
+        # Conta denúncias e sugestões
+        denuncias_count=Count('solicitacao', filter=Q(solicitacao__tipo='DENUNCIA')),
+        sugestoes_count=Count('solicitacao', filter=Q(solicitacao__tipo='SUGESTAO')),
+    ).prefetch_related('membros__profile') # Já busca os membros e seus perfis de uma vez
 
     # Pega usuários que são staff mas não estão em nenhuma equipe
-    agentes_livres = User.objects.filter(is_staff=True, equipes__isnull=True)
+    agentes_livres = User.objects.filter(is_staff=True, equipes__isnull=True).select_related('profile')
 
     context = {
         'equipes_com_stats': equipes_com_stats,
         'agentes_livres': agentes_livres,
     }
     return render(request, 'core/equipe_list.html', context)
+
 
 @login_required
 def equipe_create(request):
@@ -595,72 +606,107 @@ def search_results_view(request):
 # --- VIEW DE OBRAS (KANBAN) ---
 
 @login_required
-def obras_view(request):
-    arvores = InstanciaArvore.objects.all()
+def planejamentos_view(request):
+    """
+    View da nova Sala de Estratégia, agora com KPIs de performance.
+    """
+    hoje = timezone.now()
 
-    # Função para contar árvores em uma área
-    def contar_arvores_na_area(area):
-        if not area.geom:
-            return 0
-        
-        polygon_coords = area.geom['coordinates'][0]
-        polygon = [(lat, lon) for lon, lat in polygon_coords]
-        
-        count = 0
-        for arvore in arvores:
-            ponto_arvore = (arvore.latitude, arvore.longitude)
-            if is_point_in_polygon(ponto_arvore, polygon):
-                count += 1
-        return count
-
-    # Coluna 1: A Fazer / Planejamento
-    solicitacoes_a_fazer = Solicitacao.objects.filter(status='EM_ABERTO').order_by('-data_criacao')
-    areas_a_fazer_qs = Area.objects.filter(status__in=['PLANEJANDO', 'AGUARDANDO_APROVAÇAO']).order_by('-data_criacao')
+    # --- MÓDULO 1: Balanço das Tropas ---
+    dados_carga_equipes = Equipe.objects.filter(solicitacao__status='EM_ANDAMENTO').annotate(
+        tarefas_ativas=Count('solicitacao')
+    ).values('nome', 'tarefas_ativas').order_by('-tarefas_ativas')
+    labels_equipes = [item['nome'] for item in dados_carga_equipes]
+    data_equipes = [item['tarefas_ativas'] for item in dados_carga_equipes]
+    agentes_livres = User.objects.filter(is_staff=True, equipes__isnull=True).order_by('username')
     
-    # Adiciona a contagem de árvores a cada área
-    areas_a_fazer = []
-    for area in areas_a_fazer_qs:
-        area.contagem_arvores = contar_arvores_na_area(area)
-        areas_a_fazer.append(area)
+    # --- MÓDULO 2: Arsenal Biológico ---
+    top_especies = InstanciaArvore.objects.values('especie__nome_popular').annotate(total=Count('id')).order_by('-total')[:10]
+    labels_top_especies = [item['especie__nome_popular'] for item in top_especies]
+    data_top_especies = [item['total'] for item in top_especies]
+    especies_plantadas_ids = set(InstanciaArvore.objects.values_list('especie_id', flat=True).distinct())
+    especies_nao_utilizadas = Especie.objects.exclude(id__in=especies_plantadas_ids).order_by('nome_popular')
 
-    # Coluna 2: Em Execução
-    solicitacoes_em_execucao = Solicitacao.objects.filter(status='EM_ANDAMENTO').order_by('-data_criacao')
-    areas_em_execucao_qs = Area.objects.filter(status='EM_EXECUCAO').order_by('-data_criacao')
-    areas_em_execucao = []
-    for area in areas_em_execucao_qs:
-        area.contagem_arvores = contar_arvores_na_area(area)
-        areas_em_execucao.append(area)
+    # ======================================================
+    # MÓDULO NOVO: O Placar do Jogo (KPIs)
+    # ======================================================
+    # --- KPI 1: Termômetro de Plantio ---
+    plantios_mes_atual = InstanciaArvore.objects.filter(
+        data_plantio__year=hoje.year,
+        data_plantio__month=hoje.month
+    ).count()
 
+    # --- KPI 2: Fila de Atendimento ---
+    resolvidas_mes_atual = Solicitacao.objects.filter(
+        data_finalizacao__year=hoje.year,
+        data_finalizacao__month=hoje.month
+    ).count()
 
-    # Coluna 3: Concluídas
-    solicitacoes_concluidas = Solicitacao.objects.filter(status='FINALIZADO').order_by('-data_criacao')
-    areas_concluidas_qs = Area.objects.filter(status='FINALIZADO').order_by('-data_criacao')
-    areas_concluidas = []
-    for area in areas_concluidas_qs:
-        area.contagem_arvores = contar_arvores_na_area(area)
-        areas_concluidas.append(area)
-
-    # A gente calcula o total de cada coluna aqui na view
-    count_a_fazer = solicitacoes_a_fazer.count() + len(areas_a_fazer)
-    count_em_execucao = solicitacoes_em_execucao.count() + len(areas_em_execucao)
-    count_concluido = solicitacoes_concluidas.count() + len(areas_concluidas)
+    # --- KPI 3: Velocímetro da Equipe ---
+    trinta_dias_atras = hoje - timedelta(days=30)
+    solicitacoes_recentes = Solicitacao.objects.filter(
+        status='FINALIZADO',
+        data_finalizacao__gte=trinta_dias_atras
+    )
+    
+    # Calcula a média da diferença entre a data de finalização e a de criação
+    tempo_medio_timedelta = solicitacoes_recentes.aggregate(
+        tempo_medio=Avg(F('data_finalizacao') - F('data_criacao'))
+    )['tempo_medio']
+    
+    tempo_medio_str = "N/A"
+    if tempo_medio_timedelta:
+        dias = tempo_medio_timedelta.days
+        horas = tempo_medio_timedelta.seconds // 3600
+        tempo_medio_str = f"{dias}d {horas}h"
 
     context = {
-        'solicitacoes_a_fazer': solicitacoes_a_fazer,
-        'areas_a_fazer': areas_a_fazer,
-        'solicitacoes_em_execucao': solicitacoes_em_execucao,
-        'areas_em_execucao': areas_em_execucao,
-        'solicitacoes_concluidas': solicitacoes_concluidas,
-        'areas_concluidas': areas_concluidas,
+        'pagina': 'planejamentos',
         
-        # E manda os números prontos para o template
-        'count_a_fazer': count_a_fazer,
-        'count_em_execucao': count_em_execucao,
-        'count_concluido': count_concluido,
+        # Dados Módulo Balanço das Tropas
+        'labels_equipes_carga': json.dumps(labels_equipes),
+        'data_equipes_carga': json.dumps(data_equipes),
+        'agentes_livres': agentes_livres,
+        
+        # Dados Módulo Arsenal Biológico
+        'labels_top_especies': json.dumps(labels_top_especies),
+        'data_top_especies': json.dumps(data_top_especies),
+        'especies_nao_utilizadas': especies_nao_utilizadas,
+
+        # ======================================================
+        # Dados do novo "Placar do Jogo"
+        'plantios_mes_atual': plantios_mes_atual,
+        'resolvidas_mes_atual': resolvidas_mes_atual,
+        'tempo_medio_str': tempo_medio_str,
+        # ======================================================
     }
+    
+    return render(request, 'core/planejamentos.html', context)
 
-    return render(request, 'core/obras.html', context)
+@login_required
+def api_heatmap_denuncias(request):
+    """
+    Retorna uma lista de coordenadas [lat, lon] para todas as solicitações
+    do tipo 'DENUNCIA' que pertencem às cidades do usuário.
+    """
+    # Pega as cidades permitidas para o usuário logado
+    profile = request.user.profile
+    cidades_ids = []
+    if profile.cidade_principal:
+        cidades_ids.append(profile.cidade_principal.id)
+    cidades_ids.extend(profile.cidades_secundarias.all().values_list('id', flat=True))
 
+    # Filtra as denúncias que têm coordenadas e pertencem a essas cidades
+    denuncias = Solicitacao.objects.filter(
+        tipo='DENUNCIA',
+        latitude__isnull=False,
+        longitude__isnull=False,
+        cidade__id__in=set(cidades_ids)
+    ).values_list('latitude', 'longitude')
+
+    # Converte o resultado para uma lista e retorna como JSON
+    coordenadas = list(denuncias)
+    return JsonResponse(coordenadas, safe=False)
 
 # --- NOVA API DE ANÁLISE DE ÁREA ---
 

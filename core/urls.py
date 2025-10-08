@@ -9,11 +9,10 @@ from .views import (
     especie_list, especie_create, especie_update, especie_delete,
     mapa_view, cadastro_view, salvar_area, area_manage_api, 
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
-    search_results_view,
-    obras_view,
+    search_results_view, planejamentos_view,
     analisar_area_api, recuperar_senha_view, home_view,
     AreaDeleteView,
-    relatorios_view, instancia_arvore_delete_api, 
+    relatorios_view, instancia_arvore_delete_api, api_heatmap_denuncias
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -56,10 +55,11 @@ urlpatterns = [
     path('api/arvores/<int:pk>/delete/', instancia_arvore_delete_api, name='instancia_arvore_delete_api'),
     path('api/minhas-cidades/', views.api_cidades_permitidas, name='api_cidades_usuario'),
     path('api/cidades-geo/', views.api_cidades_geo, name='api_cidades_geo'),
+    path('api/heatmap/denuncias/', api_heatmap_denuncias, name='api_heatmap_denuncias'),
 
 
     # --- Outras URLs do App ---
-    path('obras/', obras_view, name='obras_list'), 
+    path('planejamentos/', planejamentos_view, name='planejamentos'),
     path('cadastro/', cadastro_view, name='cadastro'),
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),

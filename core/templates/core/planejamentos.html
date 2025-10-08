@@ -1,0 +1,247 @@
+{% extends 'core/base_app.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="mb-0">Planejamentos</h2>
+    <p class="text-muted">Análise de dados para apoiar as decisões de planejamento.</p>
+</div>
+
+{# =================================================================== #}
+{# =================== MÓDULO: O PLACAR DO JOGO ====================== #}
+{# =================================================================== #}
+<div class="row mb-4">
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card h-100">
+            {# ====================================================== #}
+            {# AJUSTE FINAL DE ALINHAMENTO COM 'gap' e 'lh-1' #}
+            {# ====================================================== #}
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center gap-2">
+                <div class="card-icon success">
+                    <i class="bi bi-tree"></i>
+                </div>
+                <div class="card-title-dashboard text-uppercase text-muted small">Plantios no Mês</div>
+                <div class="card-number fs-1 fw-bold lh-1">{{ plantios_mes_atual }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center gap-2">
+                <div class="card-icon primary">
+                    <i class="bi bi-check2-square"></i>
+                </div>
+                <div class="card-title-dashboard text-uppercase text-muted small">Solicitações Resolvidas no Mês</div>
+                <div class="card-number fs-1 fw-bold lh-1">{{ resolvidas_mes_atual }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center gap-2">
+                <div class="card-icon warning-soft">
+                    <i class="bi bi-stopwatch"></i>
+                </div>
+                <div class="card-title-dashboard text-uppercase text-muted small">Tempo Médio de Atendimento</div>
+                <div class="card-number fs-1 fw-bold lh-1">{{ tempo_medio_str }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr class="my-4">
+
+{# =================================================================== #}
+{# =================== MÓDULO 1: BALANÇO DAS TROPAS ================== #}
+{# =================================================================== #}
+<div class="row">
+    <div class="col-12"><h4 class="mb-3">Balanço das Equipes</h4></div>
+</div>
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0"><i class="bi bi-bar-chart-line-fill me-2"></i>Carga de Trabalho Ativa</h6>
+            </div>
+            <div class="card-body"><div style="height: 300px;"><canvas id="cargaEquipesChart"></canvas></div></div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="m-0"><i class="bi bi-person-check-fill me-2"></i>Agentes Livres</h6></div>
+            <div class="card-body">
+                {% if agentes_livres %}
+                    <ul class="list-group list-group-flush">
+                        {% for agente in agentes_livres %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ agente.get_full_name|default:agente.username }}
+                                <a href="{% url 'equipe_list' %}" class="btn btn-sm btn-outline-primary">Alocar</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-success text-center"><i class="bi bi-check-circle h4"></i><p class="mb-0 mt-2">Todos os agentes estão alocados!</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# =================================================================== #}
+{# ================= MÓDULO 2: RADAR DE OPORTUNIDADES ================ #}
+{# =================================================================== #}
+<hr class="my-4">
+<div class="row">
+    <div class="col-12"><h4 class="mb-3">Radar de Oportunidades</h4></div>
+</div>
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header"><h6 class="m-0"><i class="bi bi-fire text-danger me-2"></i>Mapa de Calor de Denúncias</h6></div>
+            <div class="card-body"><div id="heatmap-container" style="height: 450px; border-radius: 8px;"></div></div>
+        </div>
+    </div>
+</div>
+
+{# =================================================================== #}
+{# =================== MÓDULO 3: ARSENAL BIOLÓGICO =================== #}
+{# =================================================================== #}
+<hr class="my-4">
+<div class="row">
+    <div class="col-12"><h4 class="mb-3">Arsenal Biológico (Espécies)</h4></div>
+</div>
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="m-0"><i class="bi bi-pie-chart-fill me-2"></i>Censo da População Verde (Top 10)</h6></div>
+            <div class="card-body"><div style="height: 300px;"><canvas id="topEspeciesChart"></canvas></div></div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="m-0"><i class="bi bi-gem me-2"></i>Espécies não utilizadas</h6></div>
+            <div class="card-body">
+                {% if especies_nao_utilizadas %}
+                    <p class="small text-muted">Espécies do catálogo que ainda não foram plantadas.</p>
+                    <ul class="list-group list-group-flush">
+                        {% for especie in especies_nao_utilizadas|slice:":5" %} {# Mostra só as 5 primeiras para não poluir #}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ especie.nome_popular }}
+                                <a href="{% url 'especie_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-success text-center">
+                        <i class="bi bi-check-circle h4"></i>
+                        <p class="mb-0 mt-2">Parabéns! Todas as espécies do catálogo já foram utilizadas!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- GRÁFICO DE CARGA DE TRABALHO POR EQUIPE ---
+    const ctxCargaEquipes = document.getElementById('cargaEquipesChart');
+    if (ctxCargaEquipes) {
+        new Chart(ctxCargaEquipes, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_equipes_carga|safe }},
+                datasets: [{
+                    label: 'Solicitações em Andamento',
+                    data: {{ data_equipes_carga|safe }},
+                    backgroundColor: '#1E5943',
+                    borderColor: '#153f2f',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1 // Garante que o eixo Y só mostre números inteiros
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- MAPA DE CALOR ---
+    const heatmapContainer = document.getElementById('heatmap-container');
+    if (heatmapContainer) {
+        // 1. Inicia o mapa
+        const map = L.map('heatmap-container', { zoomControl: true }).setView([-24.0965, -46.6212], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // 2. Busca os dados na nossa nova API
+        fetch("{% url 'api_heatmap_denuncias' %}")
+            .then(response => response.json())
+            .then(coordenadas => {
+                if (coordenadas.length > 0) {
+                    // 3. Cria a camada de calor com os dados recebidos
+                    L.heatLayer(coordenadas, {
+                        radius: 25,
+                        blur: 15,
+                        maxZoom: 18,
+                    }).addTo(map);
+                }
+            })
+            .catch(error => console.error('Erro ao buscar dados para o heatmap:', error));
+            
+        // Bônus: Centraliza o mapa nas cidades do usuário
+        fetch("{% url 'api_cidades_geo' %}")
+            .then(response => response.json())
+            .then(data => {
+                if(data.cidades && data.cidades.length > 0) {
+                    const group = L.featureGroup();
+                    data.cidades.forEach(cidade => {
+                        L.geoJSON(cidade.geom).addTo(group);
+                    });
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+            });
+    }
+
+    // --- GRÁFICO DE ESPÉCIES ---
+    const ctxTopEspecies = document.getElementById('topEspeciesChart');
+    if(ctxTopEspecies) {
+        new Chart(ctxTopEspecies, {
+            type: 'doughnut',
+            data: {
+                labels: {{ labels_top_especies|safe }},
+                datasets: [{
+                    label: 'Total Plantado',
+                    data: {{ data_top_especies|safe }},
+                    backgroundColor: ['#1E5943', '#2a9d8f', '#81c14b', '#e9c46a', '#f4a261', '#e76f51', '#219ebc', '#023047', '#ffb703', '#fb8500'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
