@@ -55,6 +55,8 @@ urlpatterns = [
     path('api/instancias/nova/', instancia_arvore_create_api, name='instancia_arvore_create_api'),
     path('api/arvores/<int:pk>/delete/', instancia_arvore_delete_api, name='instancia_arvore_delete_api'),
     path('api/minhas-cidades/', views.api_cidades_permitidas, name='api_cidades_usuario'),
+    path('api/cidades-geo/', views.api_cidades_geo, name='api_cidades_geo'),
+
 
     # --- Outras URLs do App ---
     path('obras/', obras_view, name='obras_list'), 

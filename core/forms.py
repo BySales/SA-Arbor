@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import Solicitacao, Area, Profile, Equipe, Especie, Tag# Adicionamos o Profile aqui
+from .models import Solicitacao, Area, Profile, Equipe, Especie, Tag, CidadePermitida
 
 class SolicitacaoForm(forms.ModelForm):
     imagens = forms.ImageField(
@@ -115,14 +115,19 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['imagem']
-        labels = {
-            'imagem': 'Alterar foto de perfil'
-        }
+        fields = ['imagem', 'cidade_principal', 'cidades_secundarias']
         widgets = {
-            # Adicionamos a classe aqui também para manter o padrão
             'imagem': forms.FileInput(attrs={'class': 'form-control-custom'}),
+            'cidade_principal': forms.Select(attrs={'class': 'form-select form-control-custom'}),
+            'cidades_secundarias': forms.SelectMultiple(attrs={'class': 'form-select form-control-custom select2-multiple'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = CidadePermitida.objects.filter(geom__isnull=False).order_by('nome')
+        self.fields['cidade_principal'].queryset = qs
+        self.fields['cidades_secundarias'].queryset = qs
+
 class EquipeForm(forms.ModelForm):
     class Meta:
         model = Equipe

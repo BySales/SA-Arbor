@@ -2202,3 +2202,36 @@ Essa regra aqui de baixo remove essa linha.
     padding-right: 1.25rem;
     padding-top: 1.25rem;
 }
+/* o contêiner da sua <div class="card map-card-container"> */
+.map-card-container { position: relative; }
+
+/* tamanho do mapa */
+#map { height: 72vh; min-height: 480px; width: 100%; }
+
+/* os overlays (selector e detalhes) */
+.map-overlay--topcenter,
+#city-selector-panel { /* cobre os dois casos (com e sem a classe extra) */
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);     /* centraliza */
+  z-index: 401;                     /* acima das tiles e abaixo do modal */
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(4px);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  padding: 8px 10px;                /* mais compacto */
+  max-width: 250px;                 /* menor */
+  width: auto;          /* responsivo */
+}
+#city-selector-panel .form-label {
+  font-size: .85rem;
+  margin-bottom: .35rem;
+}
+
+#details-panel{ left:auto; right:12px; }
+
+
+
+/* máscara por cima dos tiles */
+.leaflet-pane.mask{ z-index:350 !important; }

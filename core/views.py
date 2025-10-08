@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta, datetime
-
+from django.http import JsonResponse
 # IMPORTS ADICIONADOS AQUI
 from django.urls import reverse
 from django.views.generic import DeleteView
@@ -881,3 +881,25 @@ def api_cidades_permitidas(request):
     except Exception as e:
         # Se der qualquer outro B.O., informa o erro
         return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
+    
+@login_required
+def api_cidades_geo(request):
+    profile = request.user.profile
+    cidades = []
+
+    # Cidade principal
+    if profile.cidade_principal and profile.cidade_principal.geom:
+        cidades.append({
+            "nome": profile.cidade_principal.nome,
+            "geom": profile.cidade_principal.geom
+        })
+
+    # Cidades secundárias
+    for c in profile.cidades_secundarias.all():
+        if c.geom and not any(ci['nome'] == c.nome for ci in cidades):
+            cidades.append({
+                "nome": c.nome,
+                "geom": c.geom
+            })
+
+    return JsonResponse({"cidades": cidades})
