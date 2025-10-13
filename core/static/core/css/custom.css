@@ -349,7 +349,8 @@ body {
 }
 
 #togglePassword,
-#togglePassword2 {
+#togglePassword2,
+#togglePassword1 {
   position: absolute;
   right: 15px;
   top: 50%;
@@ -2296,4 +2297,43 @@ Essa regra aqui de baixo remove essa linha.
 }
 .member-avatar-placeholder {
     display: none; /* Escondido por padrão */
+}
+/* ====================================================== */
+/* ESTILOS PARA OS BOTÕES PERSONALIZADOS (Primário e Secundário) */
+/* ====================================================== */
+
+/* 1. Uma base comum para os dois botões */
+.btn-primary-custom,
+.btn-secondary-custom {
+    padding: 0.65rem 1rem;
+    border-radius: 8px; /* Bordas arredondadas para combinar com o card */
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    line-height: 1.5; /* Garante que o texto fique bem alinhado verticalmente */
+}
+
+/* 2. O uniforme do botão principal (verde, cor de ação) */
+.btn-primary-custom {
+    background-color: #1E5943; /* O verde principal do seu sistema */
+    color: #fff;
+    border-color: #1E5943;
+}
+.btn-primary-custom:hover {
+    background-color: #153f2f; /* Um tom mais escuro para o hover */
+    border-color: #153f2f;
+    color: #fff;
+}
+
+/* 3. O uniforme do botão secundário (cinza, discreto) */
+.btn-secondary-custom {
+    background-color: #e9ecef; /* Um cinza claro e neutro */
+    color: #495057;
+    border-color: #e9ecef;
+}
+.btn-secondary-custom:hover {
+    background-color: #dee2e6; /* Um cinza um pouco mais escuro para o hover */
+    color: #212529;
 }

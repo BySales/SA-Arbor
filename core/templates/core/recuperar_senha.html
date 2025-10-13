@@ -35,12 +35,58 @@
             </div>
         </div>
         
-        <div class="action-buttons">
-            <button type="submit" class="btn-primary-custom">Inserir</button>
-            <a href="{% url 'login' %}" class="btn-secondary-custom text-center">Cancelar</a>
+        {# ====================================================== #}
+        {# ============ AJUSTE DE ALINHAMENTO DOS BOTÕES ============ #}
+        {# ====================================================== #}
+        <div class="row g-2 mt-4">
+            <div class="col">
+                <a href="{% url 'login' %}" class="btn-secondary-custom text-center w-100">Cancelar</a>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn-primary-custom w-100">Inserir</button>
+            </div>
         </div>
         
         <a href="#" class="resend-code-link">Reenviar Código</a>
     </form>
 </div>
+
+{# Adicionando o script para os inputs de código #}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    inputs.forEach((input, index) => {
+        input.addEventListener('keyup', (e) => {
+            if (e.key >= 0 && e.key <= 9) { // Se for um número
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            } else if (e.key === 'Backspace') { // Se for backspace
+                if (index > 0) {
+                    inputs[index - 1].focus();
+                }
+            }
+        });
+
+        // Permite colar o código inteiro
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text').replace('-', '').trim();
+            inputs.forEach((input, i) => {
+                if (paste[i]) {
+                    input.value = paste[i];
+                }
+            });
+            // Foca no último input preenchido ou no último campo
+            const lastInputIndex = Math.min(paste.length -1, inputs.length - 1);
+            if(lastInputIndex >= 0) {
+                inputs[lastInputIndex].focus();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

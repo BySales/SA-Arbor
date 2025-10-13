@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     setupToggle('#togglePassword', '#id_password');
+    setupToggle('#togglePassword1', '#id_password1');
     setupToggle('#togglePassword2', '#id_password2');
 
     // A LÓGICA DA SIDEBAR FOI COMPLETAMENTE REMOVIDA DAQUI.
