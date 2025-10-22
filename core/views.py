@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao,TagCategory, Tag, CidadePermitida
-from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm
+from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm, CadastroCidadaoForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
@@ -467,12 +467,16 @@ def configuracoes_view(request):
 
 def cadastro_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        # form = UserCreationForm(request.POST) <--- TROCA ESSA LINHA
+        form = CadastroCidadaoForm(request.POST) # <--- POR ESSA
+
         if form.is_valid():
-            form.save()
+            form.save() # A mágica do nosso save() novo acontece aqui
             return redirect('login')
     else:
-        form = UserCreationForm()
+        # form = UserCreationForm() <--- TROCA ESSA LINHA
+        form = CadastroCidadaoForm() # <--- POR ESSA
+
     return render(request, 'core/cadastro.html', {'form': form})
 
 

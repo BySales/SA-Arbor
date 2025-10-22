@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from .models import Solicitacao, Area, Profile, Equipe, Especie, Tag, CidadePermitida
 
 
@@ -212,3 +212,42 @@ class EquipeForm(forms.ModelForm):
             # Checkbox não precisa da classe form-control, o Bootstrap já estiliza ele bem
             'membros':forms.CheckboxSelectMultiple,
         }
+
+class CadastroCidadaoForm(UserCreationForm):
+    # 1. CRIANDO O CAMPO NOVO
+    # Esse é o campo que cria o menu 'dropdown' com as cidades.
+    cidade_principal = forms.ModelChoiceField(
+        # A gente só puxa cidade que tem mapa (geom__isnull=False), pra não dar B.O. lá na frente.
+        queryset=CidadePermitida.objects.filter(geom__isnull=False).order_by('nome'),
+        label="Sua Cidade Principal",
+        required=True, # O maluco é OBRIGADO a escolher uma
+        empty_label="Selecione sua cidade"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Isso aqui é só pra deixar o campo bonito, com o mesmo estilo CSS dos outros
+        self.fields['cidade_principal'].widget.attrs.update({'class': 'form-select form-control-custom'})
+
+    # 2. ENSINANDO O FORMULÁRIO A SALVAR O PERFIL (A MÁGICA)
+    def save(self, commit=True):
+        # 1. Salva o User. Isso vai disparar o 'signal' fantasma 
+        #    que a gente suspeita que existe e que cria o Profile.
+        user = super().save(commit=True) 
+        
+        # 2. Pega a cidade que o maluco escolheu
+        cidade = self.cleaned_data.get('cidade_principal')
+
+        # 3. A MÁGICA ATUALIZADA:
+        #    Em vez de 'create' (criar), a gente vai 'get' (buscar) o perfil
+        #    que o 'signal' acabou de criar, e 'update' (atualizar) ele.
+        try:
+            profile = user.profile  # Acessa o perfil que o signal criou
+            profile.cidade_principal = cidade # Define a cidade
+            profile.save() # Salva a mudança no perfil
+        except Profile.DoesNotExist:
+            # Se, por algum motivo, o signal não existir ou falhar,
+            # a gente cria o perfil na mão, como antes (Plano B).
+            Profile.objects.create(user=user, cidade_principal=cidade)
+        
+        return user

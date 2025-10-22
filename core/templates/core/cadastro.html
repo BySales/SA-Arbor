@@ -22,6 +22,10 @@
         </div>
 
         <div class="form-group">
+            <label for="{{ form.cidade_principal.id_for_label }}">Sua Cidade Principal</label>
+            {{ form.cidade_principal }}
+        </div>
+        <div class="form-group">
             <label for="{{ form.password1.id_for_label }}">Senha</label>
             <div class="password-input-wrapper">
                 {{ form.password1 }}
@@ -39,11 +43,18 @@
 
         {% if form.errors %}
             <div class="alert alert-danger p-2 small">
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        {{ error }}
-                    {% endfor %}
+                
+                {% if form.non_field_errors %}
+                    {{ form.non_field_errors|striptags }}
+                {% endif %}
+
+                {% for field in form %}
+                    {% if field.errors %}
+                        <strong>{{ field.label }}:</strong>
+                        {{ field.errors|striptags }}<br>
+                    {% endif %}
                 {% endfor %}
+
             </div>
         {% endif %}
 
@@ -52,13 +63,13 @@
         </div>
 
         <div class="social-login">
-    <a href="#" class="social-btn">
-        <i class="bi bi-google me-2"></i> <span>Login com Google</span>
-    </a>
-    <a href="#" class="social-btn">
-        <i class="bi bi-apple me-2"></i> <span>Login com Apple</span>
-    </a>
-</div>
+            <a href="#" class="social-btn">
+                <i class="bi bi-google me-2"></i> <span>Login com Google</span>
+            </a>
+            <a href="#" class="social-btn">
+                <i class="bi bi-apple me-2"></i> <span>Login com Apple</span>
+            </a>
+        </div>
         
         <button type="submit" class="btn-login">Cadastrar</button>
     </form>
@@ -67,4 +78,5 @@
         Já tem cadastro? <a href="{% url 'login' %}">Login</a>
     </div>
 </div>
+
 {% endblock %}

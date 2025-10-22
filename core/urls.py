@@ -3,20 +3,23 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings  # <--- MOVIDO PRA CÁ
+from django.conf.urls.static import static  # <--- MOVIDO PRA CÁ
+
 from .views import (
     # Lista de todas as suas views
     solicitacao_list, solicitacao_create, solicitacao_update, solicitacao_delete, solicitacao_detail,
     especie_list, especie_create, especie_update, especie_delete,
-    mapa_view, cadastro_view, salvar_area, area_manage_api, 
+    mapa_view, cadastro_view, salvar_area, area_manage_api,
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
     search_results_view, planejamentos_view,
     analisar_area_api, recuperar_senha_view, home_view,
     AreaDeleteView,
     relatorios_view, instancia_arvore_delete_api, api_heatmap_denuncias
 )
-from django.conf import settings
-from django.conf.urls.static import static
+# O parêntese do 'from .views import' FECHA AQUI
 
+# 'urlpatterns' PRECISA FICAR AQUI FORA, no nível principal
 urlpatterns = [
     # --- URLs da Homepage ---
     path('', home_view, name='home'),
@@ -44,7 +47,7 @@ urlpatterns = [
     path('equipes/<int:pk>/deletar/', equipe_delete, name='equipe_delete'),
 
     # --- URLs DE ÁREA ---
-    path('areas/<int:pk>/delete/', AreaDeleteView.as_view(), name='area_delete'), 
+    path('areas/<int:pk>/delete/', AreaDeleteView.as_view(), name='area_delete'),
 
     # --- URLs do Mapa e APIs ---
     path('mapa/', mapa_view, name='mapa'),
@@ -70,5 +73,6 @@ urlpatterns = [
     path('relatorios/', relatorios_view, name='relatorios'),
 ]
 
+# Isso aqui também tem que ficar FORA do 'from' e DEPOIS do 'urlpatterns'
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
