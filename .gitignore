@@ -1,6 +1,13 @@
-# Python
-__pycache__/
-*.pyc
-
-# Virtual Environment
+# Ambiente Virtual
+.venv/
 venv/
+
+# Bancos de dados locais
+db.sqlite3
+arbor_db
+
+# Arquivos do VSCode (config pessoal)
+.vscode/
+
+# Pasta de Mídia (Uploads de usuário)
+media/
