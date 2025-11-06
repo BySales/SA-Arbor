@@ -345,12 +345,39 @@ def equipe_delete(request, pk):
 @login_required
 @user_passes_test(lambda u: u.is_staff, login_url='home')
 def especie_list(request):
-    # Esta view já está atualizada e otimizada
+    # 1. Pega TODAS as tags que vieram na URL (agora é uma lista)
+    tags_filtro = request.GET.getlist('tag')
+    
+    # 2. Começa a busca base
     especies = Especie.objects.prefetch_related('tags').order_by('nome_popular')
+    
+    # 3. Filtro Acumulativo (AND)
+    tags_ativas = []
+    if tags_filtro:
+        # Para cada tag na URL, a gente filtra mais um pouco
+        for tag_id in tags_filtro:
+            especies = especies.filter(tags__id=tag_id)
+        
+        # Pega os objetos das tags ativas pra mostrar bonito na tela
+        tags_ativas = Tag.objects.filter(id__in=tags_filtro)
+
+    # 4. Pega todas as categorias e suas tags para o botão "Adicionar Filtro"
+    # (O distinct é pra evitar duplicatas se a modelagem permitir)
+    categorias_tags = TagCategory.objects.prefetch_related('tags').all().distinct()
+
+    # 5. Paginação
     paginator = Paginator(especies, 9)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'core/especie_list.html', {'especies': page_obj})
+    
+    context = {
+        'especies': page_obj,
+        'tags_ativas': tags_ativas,    # Agora é uma lista de objetos
+        'categorias_tags': categorias_tags, # Pro dropdown novo
+        # Passamos os IDs atuais pra facilitar a vida do template
+        'tags_ativas_ids': [int(t) for t in tags_filtro if t.isdigit()]
+    }
+    return render(request, 'core/especie_list.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_staff, login_url='home')

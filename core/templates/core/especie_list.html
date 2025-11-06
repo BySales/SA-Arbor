@@ -4,11 +4,75 @@
 {% block content %}
     <div class="page-header d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Catálogo de Espécies</h2>
+        
+        {% if user.is_staff or user.is_superuser %}
         <a href="{% url 'especie_create' %}" class="btn btn-principal-acao">
             <i class="bi bi-plus-circle-fill me-1"></i>
             Adicionar Nova Espécie
         </a>
+        {% endif %}
     </div>
+
+    {% if tags_ativas or categorias_tags %}
+    <div class="card mb-4 border-0 shadow-sm" style="background-color: #f8f9fa;">
+        <div class="card-body d-flex align-items-center flex-wrap p-3">
+            
+            <div class="me-3 fw-bold text-muted d-flex align-items-center">
+                <i class="bi bi-funnel-fill me-2"></i> Filtrando por:
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 me-auto">
+                {% for tag in tags_ativas %}
+                    <span class="badge d-flex align-items-center p-2 px-3" 
+                          style="background-color: {{ tag.cor_fundo }}; color: {{ tag.cor_texto }}; border: 1px solid {{ tag.cor_texto }}40; font-size: 0.9rem;">
+                        {{ tag.nome }}
+                        <a href="javascript:removerTagDoFiltro({{ tag.id }})" class="ms-2 text-decoration-none" style="color: inherit; opacity: 0.6;">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </a>
+                    </span>
+                {% empty %}
+                    <span class="text-muted fst-italic">Nenhum filtro ativo</span>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <div class="dropdown">
+                    <button class="btn btn-outline-principal rounded-pill dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-plus-lg me-1"></i> Adicionar Filtro
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+                        <li><h6 class="dropdown-header text-uppercase">Adicionar tag ao filtro</h6></li>
+                        
+                        {% for categoria in categorias_tags %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><span class="dropdown-item-text fw-bold small text-muted">{{ categoria.nome }}</span></li>
+                            <li>
+                                <div class="d-flex flex-wrap gap-1 px-3 py-2">
+                                {% for tag in categoria.tags.all %}
+                                    {% if tag.id not in tags_ativas_ids %}
+                                        <a href="javascript:adicionarTagAoFiltro({{ tag.id }})" 
+                                           class="badge text-decoration-none p-2" 
+                                           style="background-color: {{ tag.cor_fundo }}; color: {{ tag.cor_texto }}; border: 1px solid #dee2e6; cursor: pointer;">
+                                            {{ tag.nome }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {% if tags_ativas %}
+                <a href="{% url 'especie_list' %}" class="btn btn-sm btn-outline-danger rounded-pill title="Remover todos os filtros">
+                    <i class="bi bi-trash-fill me-1"></i> Limpar
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row">
         {% for especie in especies %}
@@ -19,31 +83,40 @@
                         <div>
                             <h5 class="card-title mb-1">{{ especie.nome_popular }}</h5>
                             <small class="text-muted fst-italic">{{ especie.nome_cientifico|default:"" }}</small>
-                            <p class="card-text small my-2">{{ especie.descricao|default:"Sem descrição."|truncatewords:15 }}</p>
+                            
                             
                             {% if especie.tags.all %}
                             <div class="tags-container">
-                                
                                 {% for tag in especie.tags.all|slice:":3" %}
-                                    <span class="tag" style="background-color: {{ tag.cor_fundo }}; color: {{ tag.cor_texto }};">{{ tag.nome }}</span>
+                                    <a href="javascript:adicionarTagAoFiltro({{ tag.id }})" 
+                                       class="tag text-decoration-none" 
+                                       style="background-color: {{ tag.cor_fundo }}; color: {{ tag.cor_texto }};" 
+                                       title="Adicionar filtro: {{ tag.nome }}">
+                                        {{ tag.nome }}
+                                    </a>
                                 {% endfor %}
 
                                 {% if especie.tags.all.count > 3 %}
-                                    <span class="tag tag-more">+{{ especie.tags.all.count|add:"-3" }}</span>
+                                    <span class="tag tag-more" 
+      data-bs-toggle="tooltip" data-bs-placement="top"
+      title="{% for tag in especie.tags.all|slice:"3:" %}{{ tag.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+    +{{ especie.tags.all.count|add:"-3" }}
+</span>
                                 {% endif %}
-
                             </div>
                             {% endif %}
-                            </div>
+                        </div>
 
-                        <div class="mt-auto pt-3 d-flex justify-content-between">
-                            <a href="{% url 'especie_update' pk=especie.pk %}" class="btn btn-secondary-custom btn-sm">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
+                        {% if user.is_staff or user.is_superuser %}
+                        <div class="mt-auto pt-3 d-flex gap-2">
+                            <a href="{% url 'especie_update' pk=especie.pk %}" class="btn btn-secondary-custom btn-icon-only" title="Editar Espécie">
+                                <i class="bi bi-pencil-fill"></i>
                             </a>
-                            <a href="{% url 'especie_delete' pk=especie.pk %}" class="btn btn-danger-outline btn-sm">
-                                <i class="bi bi-trash-fill me-1"></i> Deletar
+                            <a href="{% url 'especie_delete' pk=especie.pk %}" class="btn btn-danger-outline btn-icon-only" title="Deletar Espécie">
+                                <i class="bi bi-trash-fill"></i>
                             </a>
                         </div>
+                        {% endif %}
 
                     </div>
                     <div class="card-body-img">
@@ -55,16 +128,29 @@
                         {% endif %}
                     </div>
                 </div>
-                </div>
+            </div>
         {% empty %}
             <div class="col-12">
                 <div class="empty-state-container text-center py-5">
-                    <div class="empty-state-icon"><i class="bi bi-journal-bookmark"></i></div>
-                    <h4>Seu catálogo está vazio</h4>
-                    <p class="text-muted">Comece adicionando a primeira espécie de árvore.</p>
-                    <a href="{% url 'especie_create' %}" class="btn btn-principal-acao mt-3">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Adicionar Espécie
-                    </a>
+                    <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+                    <h4>Nenhuma espécie encontrada</h4>
+                    <p class="text-muted">
+                        {% if tags_ativas %}
+                            Não encontramos espécies com essa combinação de filtros. Tente remover algum.
+                        {% else %}
+                            Seu catálogo está vazio.
+                        {% endif %}
+                    </p>
+                    
+                    {% if tags_ativas %}
+                        <a href="{% url 'especie_list' %}" class="btn btn-secondary-custom mt-3">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Limpar Filtros
+                        </a>
+                    {% elif user.is_staff or user.is_superuser %}
+                        <a href="{% url 'especie_create' %}" class="btn btn-principal-acao mt-3">
+                            <i class="bi bi-plus-circle-fill me-1"></i> Adicionar Espécie
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
@@ -74,7 +160,7 @@
     <nav aria-label="Navegação do catálogo">
         <ul class="pagination justify-content-center mt-4">
             {% if especies.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ especies.previous_page_number }}">Anterior</a></li>
+                <li class="page-item"><a class="page-link" href="#" data-page="{{ especies.previous_page_number }}">Anterior</a></li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Anterior</span></li>
             {% endif %}
@@ -83,12 +169,12 @@
                 {% if especies.number == i %}
                     <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
                 {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    <li class="page-item"><a class="page-link" href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endif %}
             {% endfor %}
 
             {% if especies.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ especies.next_page_number }}">Próxima</a></li>
+                <li class="page-item"><a class="page-link" href="#" data-page="{{ especies.next_page_number }}">Próxima</a></li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Próxima</span></li>
             {% endif %}
@@ -96,4 +182,48 @@
     </nav>
     {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // --- FUNÇÕES DE GERENCIAMENTO DE URL (FILTROS) ---
+
+    // Adiciona um novo parâmetro 'tag=ID' na URL atual e recarrega
+    function adicionarTagAoFiltro(tagId) {
+        const url = new URL(window.location.href);
+        url.searchParams.append('tag', tagId);
+        url.searchParams.delete('page'); // Reseta pra página 1 quando filtra
+        window.location.href = url.toString();
+    }
+
+    // Remove um parâmetro 'tag=ID' específico da URL
+    function removerTagDoFiltro(tagIdToRemove) {
+        const url = new URL(window.location.href);
+        const tags = url.searchParams.getAll('tag');
+        url.searchParams.delete('tag'); // Remove todos primeiro
+        
+        // Readiciona todos MENOS o que a gente quer remover
+        tags.forEach(tagId => {
+            if (parseInt(tagId) !== tagIdToRemove) {
+                url.searchParams.append('tag', tagId);
+            }
+        });
+        
+        url.searchParams.delete('page'); // Reseta a página
+        window.location.href = url.toString();
+    }
+
+    // --- PAGINAÇÃO INTELIGENTE VIA JS ---
+    // Intercepta os cliques na paginação pra manter os filtros atuais
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.pagination .page-link[data-page]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', this.dataset.page);
+                window.location.href = url.toString();
+            });
+        });
+    });
+</script>
 {% endblock %}

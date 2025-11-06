@@ -1,167 +1,270 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
+<style>
+    .required-label::after { content: " *"; color: #dc3545; font-weight: bold; }
+    .category-card { background-color: #f8f9fa; border: 1px solid #e9ecef; height: 100%; transition: all 0.2s ease-in-out; }
+    .category-card:hover { border-color: #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .category-header { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #1E5943; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+    .tag-checkbox-label { cursor: pointer; padding: 2px 8px; border-radius: 4px; transition: background-color 0.2s; width: 100%; display: block; }
+    .tag-checkbox-label:hover { background-color: #e9ecef; }
+    .form-check-input:checked + .tag-checkbox-label { font-weight: 600; color: #1E5943; }
+    .square-wrapper { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; }
+    .square-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .square-wrapper .remove-image-btn { position: absolute; top: 10px; right: 10px; z-index: 10; }
+</style>
+
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">{{ titulo }}</h2>
     <a href="{% url 'especie_list' %}" class="btn btn-secondary-custom">
-        <i class="bi bi-arrow-left me-1"></i>
-        Voltar ao Catálogo
+        <i class="bi bi-arrow-left me-1"></i> Voltar ao Catálogo
     </a>
 </div>
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm border-0">
         <div class="card-body p-4">
-
             <div class="row">
                 <div class="col-lg-8">
+                    <h5 class="form-section-title">Informações Básicas</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ form.nome_popular.label }}</label>
+                            <label class="form-label fw-bold required-label">{{ form.nome_popular.label }}</label>
                             {{ form.nome_popular }}
+                            {% if form.nome_popular.errors %}<div class="invalid-feedback d-block">{{ form.nome_popular.errors|striptags }}</div>{% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">{{ form.nome_cientifico.label }}</label>
                             {{ form.nome_cientifico }}
+                             {% if form.nome_cientifico.errors %}<div class="invalid-feedback d-block">{{ form.nome_cientifico.errors|striptags }}</div>{% endif %}
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">{{ form.descricao.label }}</label>
                         {{ form.descricao }}
+                         {% if form.descricao.errors %}<div class="invalid-feedback d-block">{{ form.descricao.errors|striptags }}</div>{% endif %}
                     </div>
                 </div>
-
-                <div class="col-lg-4 d-flex flex-column">
-                    <label class="form-label fw-bold">{{ form.imagem.label }}</label>
-                    
-                    <div class="image-upload-area flex-grow-1 d-flex flex-column">
+                <div class="col-lg-4 d-flex flex-column mt-4 mt-lg-0">
+                    <h5 class="form-section-title">{{ form.imagem.label }}</h5>
+                    <div class="image-upload-area flex-grow-1 d-flex flex-column bg-light rounded p-3 border">
                         {% if form.instance.imagem %}
-                            <div class="image-preview-card mb-2">
-                                <img src="{{ form.instance.imagem.url }}" alt="Imagem atual" class="img-fluid rounded">
-                                <button type="button" class="btn btn-sm btn-danger remove-image-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Remover imagem">
+                            <div class="square-wrapper mb-3" id="initial-preview">
+                                <img src="{{ form.instance.imagem.url }}" alt="Imagem atual">
+                                <button type="button" id="btn-remove-inicial" class="btn btn-sm btn-danger remove-image-btn shadow-sm" data-bs-toggle="tooltip" title="Remover imagem">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </div>
                         {% endif %}
-                
                         <div class="custom-file-upload-container d-flex flex-column flex-grow-1 {% if form.instance.imagem %}d-none{% endif %}">
-                            <label for="{{ form.imagem.id_for_label }}" class="custom-file-upload w-100 h-100">
-                                <i class="bi bi-cloud-arrow-up-fill"></i>
-                                <span id="file-name-display">Escolher arquivo...</span>
+                            <label for="{{ form.imagem.id_for_label }}" class="custom-file-upload w-100 h-100 d-flex flex-column align-items-center justify-content-center text-center p-4 bg-white rounded" style="border: 2px dashed #ced4da; cursor: pointer; transition: all 0.2s; min-height: 200px;">
+                                <i class="bi bi-cloud-arrow-up-fill fs-1 text-muted mb-3"></i>
+                                <span id="file-name-display" class="fw-medium text-muted">Clique ou arraste uma foto aqui</span>
+                                <small class="text-muted mt-2">(JPG, PNG)</small>
                             </label>
-                            {{ form.imagem }}
+                            <div class="d-none">{{ form.imagem }}</div>
                         </div>
-                
-                        {% if form.instance.imagem %}
-                            <input type="checkbox" name="imagem-clear" id="id_imagem-clear" style="display: none;">
-                        {% endif %}
+                        <input type="checkbox" name="imagem-clear" id="id_imagem-clear" style="display: none;">
+                        {% if form.imagem.errors %}<div class="invalid-feedback d-block mt-2">{{ form.imagem.errors|striptags }}</div>{% endif %}
                     </div>
                 </div>
             </div>
-
-            <div class="form-section pt-3">
-                <h6 class="form-section-title">Tags (Categorias)</h6>
-                <div class="row">
+            <div class="form-section pt-4 mt-5 border-top">
+                <h5 class="form-section-title mb-4"><i class="bi bi-tags-fill me-2"></i>Características</h5>
+                {% if categorias_com_tags %}
+                <div class="row g-4">
                     {% for categoria in categorias_com_tags %}
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <strong class="d-block mb-2">{{ categoria.nome }}</strong>
-                        {% for tag in categoria.tags.all %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="tags" value="{{ tag.id }}" id="tag-{{ tag.id }}"
-                                {% if tag in form.instance.tags.all %}checked{% endif %}>
-                            <label class="form-check-label" for="tag-{{ tag.id }}">
-                                {{ tag.nome }}
-                            </label>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card category-card border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="category-header fw-bold">{{ categoria.nome }}</h6>
+                                <div class="d-flex flex-column gap-1">
+                                    {% for tag in categoria.tags.all %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tags" value="{{ tag.id }}" id="tag-{{ tag.id }}" {% if tag in form.instance.tags.all %}checked{% endif %}>
+                                        <label class="form-check-label tag-checkbox-label" for="tag-{{ tag.id }}">
+                                            {{ tag.nome }}
+                                            <span class="d-inline-block rounded-circle ms-1" style="width: 8px; height: 8px; background-color: {{ tag.cor_fundo }}; border: 1px solid {{ tag.cor_texto }};"></span>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
-                        {% endfor %}
                     </div>
                     {% endfor %}
                 </div>
-            </div>
-
-        </div>
-        <div class="card-footer text-end bg-light">
-            <a href="{% url 'especie_list' %}" class="btn btn-secondary-custom me-2">Cancelar</a>
-            <button type="submit" class="btn btn-principal-acao">
-                <i class="bi bi-check-circle-fill me-1"></i>
-                {% if form.instance.pk %}
-                    Atualizar Espécie
                 {% else %}
-                    Salvar Espécie
+                    <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>Nenhuma categoria de tag cadastrada no sistema.</div>
                 {% endif %}
-            </button>
+            </div>
+        </div>
+        <div class="card-footer text-end bg-light py-3 border-top-0">
+            <a href="{% url 'especie_list' %}" class="btn btn-secondary-custom me-2">Cancelar</a>
+            <button type="submit" class="btn btn-principal-acao px-4"><i class="bi bi-check-circle-fill me-2"></i>{% if form.instance.pk %}Salvar Alterações{% else %}Cadastrar Espécie{% endif %}</button>
         </div>
     </div>
 </form>
 
+<div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger">Remover Imagem</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">Tem certeza que deseja remover a foto desta espécie?</div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteImageBtn">Sim, Remover</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplica as classes do Bootstrap nos campos de texto e textarea
-    const formFields = document.querySelectorAll('form input[type="text"], form textarea');
-    formFields.forEach(function(field) {
-        if (!field.classList.contains('form-control')) {
-            field.classList.add('form-control', 'form-control-custom');
-        }
+    // --- AJUSTES VISUAIS GERAIS ---
+    document.querySelectorAll('form input[type="text"], form textarea').forEach(field => {
+        if (!field.classList.contains('form-control')) field.classList.add('form-control');
     });
-
-    // Aumenta a altura do campo de descrição
     const descTextarea = document.querySelector('textarea[name="descricao"]');
-    if (descTextarea) {
-        descTextarea.rows = 8;
-    }
+    if (descTextarea) { descTextarea.rows = 5; descTextarea.style.resize = "vertical"; }
 
-    // --- LÓGICA ATUALIZADA PARA O UPLOAD DE IMAGEM ---
+    // --- VARIÁVEIS GERAIS ---
     const fileInput = document.getElementById('{{ form.imagem.id_for_label }}');
-    const fileNameDisplay = document.getElementById('file-name-display');
-    const removeImageBtn = document.querySelector('.remove-image-btn');
-    const imageClearCheckbox = document.getElementById('id_imagem-clear');
     const uploadContainer = document.querySelector('.custom-file-upload-container');
+    const imageUploadArea = document.querySelector('.image-upload-area');
+    const imageClearCheckbox = document.getElementById('id_imagem-clear');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    
+    // Variáveis do Modal
+    const deleteModalEl = document.getElementById('deleteImageModal');
+    // Garante que o modal existe antes de tentar criar
+    if (!deleteModalEl) {
+        console.error("Erro VITAL: Modal de exclusão não encontrado no HTML!");
+        return;
+    }
+    const deleteModal = new bootstrap.Modal(deleteModalEl);
+    const confirmDeleteBtn = document.getElementById('confirmDeleteImageBtn');
 
-    // Atualiza o nome do arquivo na área de upload
+    // --- FUNÇÕES ---
+
+    // 1. Abre o modal (COM A ARMA NUCLEAR ANTI-ALERT)
+    function openDeleteModal(event) {
+        if (event) {
+            // 🔥 ESTES TRÊS COMANDOS MATAM QUALQUER OUTRO SCRIPT NO BOTÃO
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation(); // <--- ESSE É O EXORCISTA
+
+            // Esconde o tooltip pra não bugar
+            const tooltip = bootstrap.Tooltip.getInstance(event.currentTarget);
+            if (tooltip) tooltip.hide();
+        }
+        deleteModal.show();
+        return false; // Mais uma garantia pra não deixar nada passar
+    }
+
+    // 2. Executa a remoção (só o modal chama isso)
+    function executeImageRemoval() {
+        if (imageClearCheckbox) imageClearCheckbox.checked = true;
+        const currentPreviewWrapper = imageUploadArea.querySelector('.square-wrapper');
+        if (currentPreviewWrapper) currentPreviewWrapper.remove();
+        if (fileInput) fileInput.value = '';
+        if (uploadContainer) uploadContainer.classList.remove('d-none');
+        if (fileNameDisplay) {
+            fileNameDisplay.textContent = 'Clique ou arraste uma foto aqui';
+            fileNameDisplay.classList.remove('text-success', 'fw-bold');
+        }
+        deleteModal.hide();
+    }
+
+    // --- CONECTANDO OS EVENTOS ---
+
+    // Conecta o botão "Sim" do modal
+    if (confirmDeleteBtn) {
+        // Clona e substitui pra remover qualquer listener antigo que pudesse existir
+        const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+        confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
+        newConfirmBtn.addEventListener('click', executeImageRemoval);
+    }
+
+    // Função de Preview de NOVA imagem
+    function showNewImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const oldPreview = imageUploadArea.querySelector('.square-wrapper');
+            if (oldPreview) oldPreview.remove();
+
+            const previewWrapperDiv = document.createElement('div');
+            previewWrapperDiv.className = 'square-wrapper mb-3';
+            previewWrapperDiv.innerHTML = `
+                <img src="${e.target.result}" alt="Pré-visualização">
+                <button type="button" class="btn btn-sm btn-danger remove-image-btn shadow-sm" title="Remover imagem">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            `;
+
+            imageUploadArea.insertBefore(previewWrapperDiv, uploadContainer);
+            uploadContainer.classList.add('d-none');
+            
+            // Conecta o NOVO botão ao modal usando a função nuclear
+            previewWrapperDiv.querySelector('.remove-image-btn').onclick = openDeleteModal; // Usando .onclick direto pra sobrescrever
+            new bootstrap.Tooltip(previewWrapperDiv.querySelector('[title]'));
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // Listener do Input de Arquivo
     if (fileInput) {
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-                if(imageClearCheckbox) {
-                    imageClearCheckbox.checked = false;
-                }
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                if (imageClearCheckbox) imageClearCheckbox.checked = false;
+                showNewImagePreview(this.files[0]);
             }
         });
     }
 
-    // Lógica para o botão de remover imagem
-    if (removeImageBtn && imageClearCheckbox) {
-        removeImageBtn.addEventListener('click', function() {
-            if (confirm('Tem certeza que deseja remover esta imagem?')) {
-                // Marca o checkbox para o Django remover a imagem
-                imageClearCheckbox.checked = true;
-                
-                // Esconde a imagem de preview
-                const imagePreviewCard = document.querySelector('.image-preview-card');
-                if (imagePreviewCard) {
-                    imagePreviewCard.style.display = 'none';
-                }
+    // 🔥 CONEXÃO DO BOTÃO INICIAL (O QUE TÁ DANDO PROBLEMA) 🔥
+    // Estamos usando uma abordagem diferente aqui pra ter certeza absoluta
+    const initialRemoveBtn = document.getElementById('btn-remove-inicial');
+    // Ou tenta pegar pela classe se o ID falhar por algum motivo obscuro
+    const anyRemoveBtn = document.querySelector('.remove-image-btn');
 
-                // Reseta o input de arquivo
-                fileInput.value = '';
-                
-                // Desativa o botão de remover
-                this.style.display = 'none';
-                
-                // REVELA A ÁREA DE UPLOAD
-                if (uploadContainer) {
-                    uploadContainer.classList.remove('d-none');
-                }
+    if (initialRemoveBtn) {
+        // Remove qualquer listener anterior usando o truque do clone
+        const freshBtn = initialRemoveBtn.cloneNode(true);
+        initialRemoveBtn.parentNode.replaceChild(freshBtn, initialRemoveBtn);
+        // Usa onclick pra garantir que só tem UM handler
+        freshBtn.onclick = openDeleteModal;
+        // Reativa o tooltip porque o clone perdeu
+        new bootstrap.Tooltip(freshBtn);
+    } else if (anyRemoveBtn) {
+         // Fallback caso o ID não tenha funcionado
+         anyRemoveBtn.onclick = openDeleteModal;
+    }
+
+    // --- DRAG & DROP (Mantido igual) ---
+    if (uploadContainer) {
+        ['dragenter', 'dragover'].forEach(evt => {
+            uploadContainer.addEventListener(evt, (e) => { e.preventDefault(); uploadContainer.querySelector('label').style.backgroundColor = '#e9ecef'; uploadContainer.querySelector('label').style.borderColor = '#1E5943'; });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            uploadContainer.addEventListener(evt, (e) => { e.preventDefault(); uploadContainer.querySelector('label').style.backgroundColor = '#fff'; uploadContainer.querySelector('label').style.borderColor = '#ced4da'; });
+        });
+        uploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length > 0 && fileInput) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
             }
         });
     }
 
-    // Ativa os tooltips do Bootstrap (para o botão de lixeira)
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    // Inicializa outros tooltips da página
+    [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).map(el => new bootstrap.Tooltip(el));
 });
 </script>
 {% endblock %}

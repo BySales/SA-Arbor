@@ -2375,6 +2375,26 @@ Essa regra aqui de baixo remove essa linha.
 .marker-denuncia i.bi { color: #fff; }
 .marker-fantasma i.bi { color: #fff; }
 
+.btn-outline-principal {
+    color: #1E5943;
+    border-color: #1E5943;
+    font-weight: 500; /* Um pouco mais de peso pra ficar legível */
+}
 
-/* Adicione aqui qualquer outra customização de CSS que você já tenha. */
-/* Certifique-se de que este arquivo custom.css está sendo carregado no seu template HTML. */
+/* Estado Hover e quando o Dropdown tá aberto (.show) */
+.btn-outline-principal:hover,
+.btn-outline-principal:active,
+.btn-outline-principal.show {
+    background-color: #1E5943;
+    color: #fff !important; /* Força o branco no texto */
+    border-color: #1E5943;
+}
+
+/* Ajuste fino pro botão de Limpar ficar na mesma altura visualmente */
+.btn-outline-danger {
+    font-weight: 500;
+}
+.tag-more {
+    cursor: default; /* O 'help' mostra uma setinha com interrogação, perfeito pra tooltip */
+    /* OU use 'default' pra setinha normal, ou 'pointer' pra mãozinha */
+}

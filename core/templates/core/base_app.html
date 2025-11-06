@@ -128,16 +128,30 @@
         </main>
     </div>
 
-    <script src="{% static 'core/js/main.js' %}"></script>
+<script src="{% static 'core/js/main.js' %}"></script>
     
     {% block scripts %}{% endblock %}
 
     <script>
-        // Ativa os tooltips do Bootstrap em toda a página
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 1. ATIVA TOOLTIPS (JÁ TINHA) ---
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+              return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+
+            // --- 2. AUTO-FECHAR NOTIFICAÇÕES (NOVO) ---
+            // Pega todos os alertas que têm o botãozinho de fechar
+            var alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                // Marca um tempo de 5 segundos (5000ms) pra fechar
+                setTimeout(function() {
+                    // Usa o próprio Bootstrap pra fechar com estilo (fade out)
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 3000); // <--- Se quiser mais rápido, diminui esse número (ex: 3000 para 3s)
+            });
+        });
     </script>
   </body>
 </html>
