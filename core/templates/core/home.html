@@ -3,11 +3,17 @@
 {% block content %}
     <div class="header-greeting mb-4">
         <h2>Painel de Controle</h2>
-        <p class="text-muted">Uma olha rápida no sistema!</p>
+        
+                {% if is_staff_dashboard %}
+            <p class="text-muted">Visão geral do sistema.</p>
+        {% else %}
+            <p class="text-muted">Seu resumo pessoal.</p>
+        {% endif %}
     </div>
 
     <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
+        
+                        <div class="col-xl-3 col-md-6 mb-4">
             <a href="{% url 'mapa' %}" class="card-link">
                 <div class="card shadow h-100">
                     <div class="card-body">
@@ -21,87 +27,149 @@
             </a>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <a href="{% url 'solicitacao_list' %}" class="card-link">
-                <div class="card shadow h-100">
-                    <div class="card-body">
-                        <div class="card-icon danger">
-                            <i class="bi bi-file-earmark-text-fill"></i>
+                        
+        {% if is_staff_dashboard %}
+                                    <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'solicitacao_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="card-icon danger">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </div>
+                            <div class="card-title-dashboard">Solicitações em Aberto</div>
+                            <div class="card-number">{{ solicitacoes_abertas_count }}</div>
                         </div>
-                        <div class="card-title-dashboard">Solicitações em Aberto</div>
-                        <div class="card-number">{{ solicitacoes_abertas_count }}</div>
                     </div>
-                </div>
-            </a>
-        </div>
+                </a>
+            </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <a href="{% url 'equipe_list' %}" class="card-link">
-                <div class="card shadow h-100">
-                    <div class="card-body">
-                        <div class="card-icon info">
-                            <i class="bi bi-people-fill"></i>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'equipe_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="card-icon info">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="card-title-dashboard">Equipes Cadastradas</div>
+                            <div class="card-number">{{ equipes_count }}</div>
                         </div>
-                        <div class="card-title-dashboard">Equipes Cadastradas</div>
-                        <div class="card-number">{{ equipes_count }}</div>
                     </div>
-                </div>
-            </a>
-        </div>
+                </a>
+            </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <a href="{% url 'especie_list' %}" class="card-link">
-                <div class="card shadow h-100">
-                    <div class="card-body">
-                        <div class="card-icon success">
-                            <i class="bi bi-collection-fill"></i>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'especie_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="card-icon success">
+                                <i class="bi bi-collection-fill"></i>
+                            </div>
+                            <div class="card-title-dashboard">Espécies no Catálogo</div>
+                            <div class="card-number">{{ especies_count }}</div>
                         </div>
-                        <div class="card-title-dashboard">Espécies no Catálogo</div>
-                        <div class="card-number">{{ especies_count }}</div>
                     </div>
-                </div>
-            </a>
-        </div>
-    </div>
+                </a>
+            </div>
+        
+        {% else %}
+                                    <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'solicitacao_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="card-icon danger">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </div>
+                            <div class="card-title-dashboard">Minhas Solicitações Abertas</div>
+                             <div class="card-number">{{ minhas_solicitacoes_abertas }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
 
-    <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'solicitacao_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="card-icon info">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="card-title-dashboard">Minhas em Andamento</div>
+                            <div class="card-number">{{ minhas_solicitacoes_andamento }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{% url 'solicitacao_list' %}" class="card-link">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                              <div class="card-icon success">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div class="card-title-dashboard">Minhas Finalizadas</div>
+                         <div class="card-number">{{ minhas_solicitacoes_finalizadas }}</div>
+                        </div>
+                    </div>
+                </a>
+                </div>
+
+        {% endif %}
+
+    </div>     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold" style="color: #1E5943;">Últimas Solicitações Recebidas</h6>
+                    <h6 class="m-0 font-weight-bold" style="color: #1E5943;">
+                        {% if is_staff_dashboard %}
+                            Últimas Solicitações Recebidas
+                        {% else %}
+                            Minhas Últimas Solicitações
+                        {% endif %}
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        {% for solicitacao in ultimas_solicitacoes %}
+                        
+                                                                        {% for solicitacao in ultimas_solicitacoes %}
                             <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <div>
                                         <p class="mb-0 fw-bold">{{ solicitacao.descricao|truncatewords:12 }}</p>
                                         <small class="text-muted d-flex align-items-center mt-1">
                                             {% if solicitacao.tipo == 'DENUNCIA' %}
-                                                <span class="tag tag-denuncia">Denúncia</span>
+                                              <span class="tag tag-denuncia">Denúncia</span>
                                             {% else %}
-                                                <span class="tag tag-sugestao">Sugestão</span>
+                                              <span class="tag tag-sugestao">Sugestão</span>
                                             {% endif %}
                                             <span class="mx-2">•</span>
-                                            <span>Por: {{ solicitacao.cidadao.username }} • {{ solicitacao.data_criacao|timesince }} atrás</span>
+                                        
+                                        {% if is_staff_dashboard %}
+                                          	<span>Por: {{ solicitacao.cidadao.username }} • {{ solicitacao.data_criacao|timesince }} atrás</span>
+                                        {% else %}
+                                            <span>{{ solicitacao.data_criacao|timesince }} atrás</span>
+                                        {% endif %}
                                         </small>
                                     </div>
-                                </div>
+                     </div>
                                 <div class="d-flex align-items-center">
                                     <span class="badge status-badge status-{{ solicitacao.status|lower }} me-3">
                                         {{ solicitacao.get_status_display }}
-                                    </span>
-                                    <span class="bi bi-chevron-right text-muted"></span>
-                                </div>
-                            </a>
-                        {% empty %}
-                            <div class="list-group-item text-center text-muted">
-                                Nenhuma solicitação encontrada ainda.
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                                  </span>
+                                  <span class="bi bi-chevron-right text-muted"></span>
+                     </div>
+                          	</a>
+                      	{% empty %}
+                          	<div class="list-group-item text-center text-muted">
+                                {% if is_staff_dashboard %}
+                              	Nenhuma solicitação encontrada ainda.
+                                {% else %}
+                                    Você ainda não fez nenhuma solicitação.
+                                {% endif %}
+                          	</div>
+                      	{% endfor %}
+                  </div>
+              	</div>
             </div>
         </div>
     </div>

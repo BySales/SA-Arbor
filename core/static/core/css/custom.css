@@ -2337,3 +2337,44 @@ Essa regra aqui de baixo remove essa linha.
     background-color: #dee2e6; /* Um cinza um pouco mais escuro para o hover */
     color: #212529;
 }
+/* static/core/css/custom.css */
+
+/* Estilo base para os ícones coloridos (L.divIcon) */
+.custom-marker-icon {
+    background-color: transparent; /* Fundo transparente */
+    border-radius: 50%; /* Faz a forma do círculo */
+    border: 2px solid #fff; /* Borda branca pra destaque */
+    width: 24px; /* Tamanho do ícone */
+    height: 24px; /* Tamanho do ícone */
+    text-align: center;
+    line-height: 20px; /* Alinha o conteúdo verticalmente */
+    font-size: 14px; /* Tamanho da fonte do ícone interno */
+    color: #fff; /* Cor do ícone interno (texto ou ícone de fonte) */
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4); /* Sombra para dar profundidade */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cores específicas para cada tipo */
+.marker-arvore { background-color: #28a745; border-color: #fff; } /* Verde */
+.marker-denuncia { background-color: #dc3545; border-color: #fff; } /* Vermelho */
+.marker-sugestao { background-color: #ffc107; border-color: #fff; } /* Amarelo (borda escura pra contraste) */
+.marker-fantasma { background-color: #6c757d; border-color: #fff; opacity: 0.7; } /* Cinza, um pouco transparente */
+
+/* Ajuste para ícones do Bootstrap dentro do divIcon, se for usar */
+.custom-marker-icon i.bi {
+    font-size: 1.1em; /* Ajusta o tamanho do ícone interno */
+    margin: 0;
+    padding: 0;
+    line-height: 1; /* Garante alinhamento */
+}
+.marker-sugestao i.bi { color: #fff; } /* Ícone interno escuro para contraste no amarelo */
+.marker-arvore i.bi { color: #fff; }
+.marker-denuncia i.bi { color: #fff; }
+.marker-fantasma i.bi { color: #fff; }
+
+
+/* Adicione aqui qualquer outra customização de CSS que você já tenha. */
+/* Certifique-se de que este arquivo custom.css está sendo carregado no seu template HTML. */

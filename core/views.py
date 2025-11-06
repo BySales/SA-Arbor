@@ -1,12 +1,13 @@
 import json
 from datetime import date, timedelta, datetime
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 # IMPORTS ADICIONADOS AQUI
 from django.urls import reverse
 from django.db.models import  OuterRef, Subquery
 from django.views.generic import DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.decorators.http import require_POST
 # FIM DOS IMPORTS ADICIONADOS
 from django.views.decorators.http import require_http_methods
@@ -15,7 +16,7 @@ from django.db.models.functions import TruncDate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from .models import Solicitacao, Projeto, Area, User, Equipe, Especie, InstanciaArvore, ImagemSolicitacao,TagCategory, Tag, CidadePermitida
 from .forms import SolicitacaoForm, AreaForm, UserUpdateForm, ProfileUpdateForm, EquipeForm, EspecieForm, CadastroCidadaoForm
@@ -186,6 +187,10 @@ def solicitacao_detail(request, pk):
 @login_required
 def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    if not request.user.is_staff and solicitacao.cidadao != request.user:
+        # ...CHUTA ELE! Manda uma mensagem e joga de volta pra lista.
+        messages.error(request, f"Você não pode mexer na solicitação #{pk}, ela não é sua.")
+        return redirect('solicitacao_list')
     if request.method == 'POST':
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao, user=request.user)
 
@@ -201,12 +206,29 @@ def solicitacao_update(request, pk):
             # ======================================================
             solicitacao_instance = form.save(commit=False)
             
-            # Checa se o status foi alterado no formulário E se o novo status é 'FINALIZADO'
-            if 'status' in form.changed_data and solicitacao_instance.status == 'FINALIZADO':
-                # Se sim, a gente bate o carimbo com a hora atual!
+            # Checa se o status foi alterado no formulário E se o novo status é 'FINALIZADO' ou 'RECUSADO'
+            if 'status' in form.changed_data and (solicitacao_instance.status == 'FINALIZADO' or solicitacao_instance.status == 'RECUSADO'):
                 solicitacao_instance.data_finalizacao = timezone.now()
             
-            # Agora sim a gente salva no banco
+            # ======================================================
+            # ============ LÓGICA DE CRIAÇÃO DA ÁRVORE ============
+            # ======================================================
+            # Pega a espécie que o "fiscal" (form) validou
+            especie_para_plantar = form.cleaned_data.get('especie_plantada')
+            
+            # Se o status é FINALIZADO e o fiscal mandou uma espécie...
+            if solicitacao_instance.status == 'FINALIZADO' and especie_para_plantar:
+                # A gente "planta" a árvore (cria a InstanciaArvore)
+                InstanciaArvore.objects.create(
+                    especie=especie_para_plantar,
+                    latitude=solicitacao_instance.latitude,   # Puxa a Lat da solicitação
+                    longitude=solicitacao_instance.longitude, # Puxa a Lon da solicitação
+                    estado_saude='BOA',                       # Padrão de plantio
+                    data_plantio=timezone.now().date()        # Padrão de plantio
+                )
+            # ======================================================
+
+            # Agora sim a gente salva a SOLICITAÇÃO no banco
             solicitacao_instance.save()
             # ======================================================
 
@@ -229,6 +251,10 @@ def solicitacao_update(request, pk):
 @login_required
 def solicitacao_delete(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    if not request.user.is_staff and solicitacao.cidadao != request.user:
+        # ...CHUTA ELE! Manda uma mensagem e joga de volta pra lista.
+        messages.error(request, f"Você não pode apagar a solicitação #{pk}, ela não é sua.")
+        return redirect('solicitacao_list')
     if request.method == 'POST':
         id_solicitacao = solicitacao.id
         solicitacao.delete()
@@ -240,6 +266,7 @@ def solicitacao_delete(request, pk):
 # --- VIEWS DE EQUIPE ---
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def equipe_list(request):
     """
     View 2.0 do painel de equipes, com busca otimizada.
@@ -275,6 +302,7 @@ def equipe_list(request):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home') # <--- 🔥 O LEÃO DE CHÁCARA V.I.P.
 def equipe_create(request):
     if request.method == 'POST':
         form = EquipeForm(request.POST)
@@ -287,6 +315,7 @@ def equipe_create(request):
     return render(request, 'core/equipe_form.html', {'form': form, 'titulo': 'Cadastrar Nova Equipe'})
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def equipe_update(request, pk):
     equipe = get_object_or_404(Equipe, pk=pk)
     if request.method == 'POST':
@@ -300,6 +329,7 @@ def equipe_update(request, pk):
     return render(request, 'core/equipe_form.html', {'form': form, 'titulo': f'Editar Equipe: {equipe.nome}'})
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def equipe_delete(request, pk):
     equipe = get_object_or_404(Equipe, pk=pk)
     if request.method == 'POST':
@@ -313,6 +343,7 @@ def equipe_delete(request, pk):
 # --- VIEWS DE ESPÉCIE ---
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def especie_list(request):
     # Esta view já está atualizada e otimizada
     especies = Especie.objects.prefetch_related('tags').order_by('nome_popular')
@@ -322,6 +353,7 @@ def especie_list(request):
     return render(request, 'core/especie_list.html', {'especies': page_obj})
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def especie_create(request):
     if request.method == 'POST':
         form = EspecieForm(request.POST, request.FILES)
@@ -344,6 +376,7 @@ def especie_create(request):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def especie_update(request, pk):
     especie = get_object_or_404(Especie, pk=pk)
     if request.method == 'POST':
@@ -366,6 +399,7 @@ def especie_update(request, pk):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def especie_delete(request, pk):
     # Esta view não precisa de mudanças
     especie = get_object_or_404(Especie, pk=pk)
@@ -382,10 +416,18 @@ def especie_delete(request, pk):
 
 # --- VIEWS DE ÁREA (NOVA SEÇÃO) ---
 
-class AreaDeleteView(LoginRequiredMixin, DeleteView):
+class AreaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # <--- 🔥 MIXIN DO LEÃO DE CHÁCARA
     model = Area 
     template_name = 'core/area_confirm_delete.html'
-    success_url = reverse_lazy('mapa')
+    success_url = reverse_lazy('mapa') # Você já usa o reverse_lazy, perfeito
+
+    # 🔥 A REGRA: "Só passa se for staff"
+    def test_func(self):
+        return self.request.user.is_staff
+
+    # 🔥 Se não for staff, CHUTA PRA HOME
+    def get_login_url(self):
+        return reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -394,34 +436,68 @@ class AreaDeleteView(LoginRequiredMixin, DeleteView):
 
 
 # --- VIEW DO MAPA ---
-
+@login_required
 def mapa_view(request):
     solicitacao_foco_id = request.GET.get('solicitacao_id')
-    area_foco_id = request.GET.get('area_id')
+    area_foco_id = request.GET.get('area_id') # Mantido caso use para focar área
+    
+    # 1. Busca as ÁRVORES (como antes)
     instancias_de_arvores = InstanciaArvore.objects.select_related('especie').all()
     arvores_data = [{"id": instancia.id, "nome": instancia.especie.nome_popular, "nome_cientifico": instancia.especie.nome_cientifico, "descricao": instancia.especie.descricao, "lat": instancia.latitude, "lon": instancia.longitude, "saude": instancia.get_estado_saude_display(), "plantio": instancia.data_plantio.strftime('%d/%m/%Y') if instancia.data_plantio else 'N/A'} for instancia in instancias_de_arvores]
-    solicitacoes_com_coords = Solicitacao.objects.filter(latitude__isnull=False, longitude__isnull=False)
+    
+    # 2. Busca SÓ as SOLICITAÇÕES ATIVAS para o mapa principal (como antes)
+    solicitacoes_com_coords = Solicitacao.objects.filter(
+        latitude__isnull=False, 
+        longitude__isnull=False,
+        status__in=['EM_ABERTO', 'EM_ANDAMENTO'] 
+    )
     solicitacoes_data = [{"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.get_status_display(), "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude} for solicitacao in solicitacoes_com_coords]
+    
+    # 3. Busca as ÁREAS (como antes)
     areas_salvas = Area.objects.filter(geom__isnull=False)
     areas_data = [{"id": area.id, "nome": area.nome, "geom": area.geom, "tipo": area.get_tipo_display(), "status": area.get_status_display()} for area in areas_salvas]
-    form_area = AreaForm()
     
-    # =======================================================================
-    # MUDANÇA 1: Buscando a lista de espécies para o novo modal de árvore
-    # =======================================================================
+    # 4. Busca as ESPÉCIES para os modais (como antes)
     especies_catalogo = Especie.objects.all().order_by('nome_popular')
-    
-    opcoes_saude = InstanciaArvore.ESTADO_SAUDE_CHOICES
-    
+    opcoes_saude = InstanciaArvore.ESTADO_SAUDE_CHOICES 
+    form_area = AreaForm() # Você usa isso? Se sim, mantido.
+
+    # ======================================================
+    # ============ LÓGICA DO "GPS FANTASMA" ============
+    # ======================================================
+    foco_solicitacao_data = None # Começa como nulo
+    if solicitacao_foco_id:
+        try:
+            # Tenta buscar a solicitação específica pelo ID, NÃO IMPORTA O STATUS
+            foco_solicitacao_obj = Solicitacao.objects.get(
+                pk=solicitacao_foco_id,
+                latitude__isnull=False, # Garante que ela tem coords
+                longitude__isnull=False
+            )
+            # Formata os dados dela pra mandar pro JS
+            foco_solicitacao_data = {
+                "id": foco_solicitacao_obj.id,
+                "tipo_display": foco_solicitacao_obj.get_tipo_display(),
+                "tipo_codigo": foco_solicitacao_obj.tipo,
+                "status": foco_solicitacao_obj.get_status_display(), # Mostra o status real (Finalizado/Recusado)
+                "descricao": foco_solicitacao_obj.descricao,
+                "lat": foco_solicitacao_obj.latitude,
+                "lon": foco_solicitacao_obj.longitude
+            }
+        except ObjectDoesNotExist: # Se o ID for inválido, não faz nada
+            pass 
+    # ======================================================
+
     context = {
         'arvores_data': arvores_data,
-        'solicitacoes_data': solicitacoes_data,
+        'solicitacoes_data': solicitacoes_data, # Só as ativas
         'areas_data': areas_data,
         'form_area': form_area,
-        'especies_catalogo': especies_catalogo, # Enviando a lista para o template
+        'especies_catalogo': especies_catalogo,
         'opcoes_saude': opcoes_saude,
-        'solicitacao_foco_id': solicitacao_foco_id,
+        # 'solicitacao_foco_id': solicitacao_foco_id, # Não precisamos mais mandar o ID solto
         'area_foco_id': area_foco_id,
+        'foco_solicitacao_data': foco_solicitacao_data # <<< MANDA OS DADOS DO "FANTASMA"
     }
     return render(request, 'core/mapa.html', context)
 
@@ -466,6 +542,8 @@ def configuracoes_view(request):
     return render(request, 'core/configuracoes.html', context)
 
 def cadastro_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method == 'POST':
         # form = UserCreationForm(request.POST) <--- TROCA ESSA LINHA
         form = CadastroCidadaoForm(request.POST) # <--- POR ESSA
@@ -516,6 +594,7 @@ def salvar_area(request):
 
 @csrf_exempt
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def area_manage_api(request, pk):
     area = get_object_or_404(Area, pk=pk)
 
@@ -546,6 +625,7 @@ def area_manage_api(request, pk):
         return JsonResponse(data)
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 @require_POST # Garante que esta view só aceite requisições POST
 def instancia_arvore_create_api(request):
     try:
@@ -575,41 +655,50 @@ def instancia_arvore_create_api(request):
     except Exception as e:
         return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
 
+@login_required
 def search_results_view(request):
     query = request.GET.get('q')
     context = {'query': query}
 
+    # Zera os contadores
+    solicitacoes_results = Solicitacao.objects.none() # Começa com uma lista vazia
+    especies_results = Especie.objects.none()
+    equipes_results = Equipe.objects.none()
+
+
     if query:
-        # Busca em Solicitações (descrição OU cidadão)
-        solicitacoes_results = Solicitacao.objects.filter(
-            Q(descricao__icontains=query) | Q(cidadao__username__icontains=query)
-        ).distinct()
+        if request.user.is_staff:
+            solicitacoes_results = Solicitacao.objects.filter(
+                Q(descricao__icontains=query) | Q(cidadao__username__icontains=query)).distinct(
+            )
+            especies_results = Especie.objects.filter(
+          		Q(nome_popular__icontains=query) | Q(nome_cientifico__icontains=query)
+        	).distinct()
+
+            equipes_results = Equipe.objects.filter(
+                Q(nome__icontains=query)).distinct()
+        else:
+            solicitacoes_results + Solicitacao.objects.filter(
+                cidadao=request.user
+            ).filter(
+                Q(descricao__icontains=query)).distinct(
+            )
+        
+
         context['solicitacoes_results'] = solicitacoes_results
-
-        # Busca em Espécies (nome popular OU científico)
-        especies_results = Especie.objects.filter(
-            Q(nome_popular__icontains=query) | Q(nome_cientifico__icontains=query)
-        ).distinct()
         context['especies_results'] = especies_results
-
-        # Busca em Equipes (nome)
-        equipes_results = Equipe.objects.filter(
-            Q(nome__icontains=query)
-        ).distinct()
         context['equipes_results'] = equipes_results
-
-        # --- A MÁGICA ACONTECE AQUI ---
-        # Adiciona o total de resultados ao contexto
         total_results = len(solicitacoes_results) + len(especies_results) + len(equipes_results)
         context['total_results'] = total_results
 
-    # Renderiza o NOVO template com o contexto completo
+
     return render(request, 'core/search_results.html', context)
 
 
 # --- VIEW DE OBRAS (KANBAN) ---
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def planejamentos_view(request):
     """
     View da nova Sala de Estratégia, agora com KPIs de performance.
@@ -688,6 +777,7 @@ def planejamentos_view(request):
     return render(request, 'core/planejamentos.html', context)
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def api_heatmap_denuncias(request):
     """
     Retorna uma lista de coordenadas [lat, lon] para todas as solicitações
@@ -742,6 +832,7 @@ def is_point_in_polygon(point, polygon):
 
 @csrf_exempt
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def analisar_area_api(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'erro', 'message': 'Método não permitido'}, status=405)
@@ -787,32 +878,81 @@ def analisar_area_api(request):
     })
 
 def recuperar_senha_view(request):
-    # Por enquanto, esta view apenas renderiza o template.
-    # A lógica de envio de email e validação de código será adicionada no futuro.
+    if request.user.is_authenticated:
+        return redirect('home')
     return render(request, 'core/recuperar_senha.html')
 
 # Adicione esta nova view
 @login_required
 def home_view(request):
-    # Buscando os dados para o nosso dashboard
-    instancias_count = InstanciaArvore.objects.count()
-    solicitacoes_abertas_count = Solicitacao.objects.filter(status='EM_ABERTO').count()
-    equipes_count = Equipe.objects.count()
-    especies_count = Especie.objects.count()
 
-    # Pegando as 5 solicitações mais recentes pra mostrar na tela
-    ultimas_solicitacoes = Solicitacao.objects.order_by('-data_criacao')[:5]
+    context = {} # Começa o contexto vazio
+    
+    # Se o maluco for da DIRETORIA (staff)...
+    if request.user.is_staff:
+        # --- Ele vê o DASHBOARD V.I.P. (O teu código original) ---
+        instancias_count = InstanciaArvore.objects.count()
+        solicitacoes_abertas_count = Solicitacao.objects.filter(status='EM_ABERTO').count()
+        equipes_count = Equipe.objects.count()
+        especies_count = Especie.objects.count()
+        # Pega as 5 últimas do SISTEMA INTEIRO
+        ultimas_solicitacoes = Solicitacao.objects.order_by('-data_criacao')[:5]
 
-    context = {
-        'instancias_count': instancias_count,
-        'solicitacoes_abertas_count': solicitacoes_abertas_count,
-        'equipes_count': equipes_count,
-        'especies_count': especies_count,
-        'ultimas_solicitacoes': ultimas_solicitacoes,
-    }
+        context = {
+            'instancias_count': instancias_count,
+            'solicitacoes_abertas_count': solicitacoes_abertas_count,
+            'equipes_count': equipes_count,
+            'especies_count': especies_count,
+            'ultimas_solicitacoes': ultimas_solicitacoes,
+            'is_staff_dashboard': True # <--- Uma "bandeira" pro HTML saber
+        }
+
+    # Se for do POVÃO (usuário comum)...
+    else:
+        # --- Ele vê o DASHBOARD PESSOAL (focado nele) ---
+        
+        # Total de árvores da cidade (isso é público, beleza)
+        instancias_count = InstanciaArvore.objects.count() 
+        
+        # Contagem de solicitações SÓ DELE
+        minhas_solicitacoes_abertas = Solicitacao.objects.filter(
+            cidadao=request.user, 
+            status='EM_ABERTO'
+        ).count()
+        
+        # Contagem de solicitações SÓ DELE
+        minhas_solicitacoes_andamento = Solicitacao.objects.filter(
+            cidadao=request.user, 
+            status='EM_ANDAMENTO'
+        ).count()
+        
+        # Contagem de solicitações SÓ DELE
+        minhas_solicitacoes_finalizadas = Solicitacao.objects.filter(
+            cidadao=request.user, 
+            status='FINALIZADO'
+        ).count()
+        
+        # Pega as 5 últimas SÓ DELE
+        ultimas_solicitacoes = Solicitacao.objects.filter(
+            cidadao=request.user
+        ).order_by('-data_criacao')[:5]
+
+        context = {
+            'instancias_count': instancias_count,
+            'minhas_solicitacoes_abertas': minhas_solicitacoes_abertas,
+            'minhas_solicitacoes_andamento': minhas_solicitacoes_andamento,
+            'minhas_solicitacoes_finalizadas': minhas_solicitacoes_finalizadas,
+            'ultimas_solicitacoes': ultimas_solicitacoes,
+            'is_staff_dashboard': False # <--- A "bandeira" pro HTML
+        }
+
+    # ======================================================
+    # O render é o mesmo, mas o 'context' agora é inteligente
+    # ======================================================
     return render(request, 'core/home.html', context)
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 def relatorios_view(request):
     """
     View para a Central de Relatórios com filtros de período.
@@ -888,6 +1028,7 @@ def relatorios_view(request):
     return render(request, 'core/relatorios.html', context)
 
 @login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
 @require_http_methods(["DELETE"]) # Só aceita o método DELETE
 def instancia_arvore_delete_api(request, pk):
     try:

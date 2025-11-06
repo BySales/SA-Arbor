@@ -1,26 +1,115 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
+{% load l10n %}
+
 <style>
-    /* --- ESTILOS PARA O FORMULÁRIO PASSO A PASSO (WIZARD) --- */
-    .progress-bar-container{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;position:relative}.progress-step{text-align:center;z-index:1}.progress-step .step-circle{width:30px;height:30px;border-radius:50%;background-color:#e9ecef;color:#6c757d;border:3px solid #e9ecef;display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-weight:700;transition:all .3s ease}.progress-step .step-label{font-size:.85rem;color:#6c757d;transition:all .3s ease}.progress-step.active .step-circle{background-color:#fff;border-color:#1E5943;color:#1E5943}.progress-step.active .step-label{color:#1E5943;font-weight:700}.progress-line{position:absolute;top:15px;left:0;width:100%;height:3px;background-color:#e9ecef;z-index:0}.progress-line-fill{position:absolute;top:0;left:0;height:100%;background-color:#1E5943;width:0%;transition:width .3s ease}.form-step{display:none}.form-step.active{display:block}
-    
-    /* --- AJUSTES PARA DEIXAR O PASSO 2 MAIS ENXUTO --- */
+    /* --- ESTILOS PARA O WIZARD (PASSO A PASSO) --- */
+    .progress-bar-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .progress-step {
+        text-align: center;
+        z-index: 1;
+    }
+    #map-picker {
+    cursor: crosshair !important;
+}
+
+/* (Opcional) Se quiser que a mãozinha só apareça quando estiver ARRASTANDO o mapa */
+.leaflet-dragging .leaflet-grab {
+    cursor: grabbing !important;
+}
+    .progress-step .step-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border: 3px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto .5rem;
+        font-weight: 700;
+        transition: all .3s ease;
+    }
+    .progress-step .step-label {
+        font-size: .85rem;
+        color: #6c757d;
+        transition: all .3s ease;
+    }
+    .progress-step.active .step-circle {
+        background-color: #fff;
+        border-color: #1E5943;
+        color: #1E5943;
+    }
+    .progress-step.active .step-label {
+        color: #1E5943;
+        font-weight: 700;
+    }
+    .progress-line {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #e9ecef;
+        z-index: 0;
+    }
+    .progress-line-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: #1E5943;
+        width: 0%;
+        transition: width .3s ease;
+    }
+    .form-step {
+        display: none;
+    }
+    .form-step.active {
+        display: block;
+    }
+
+    /* --- OUTROS AJUSTES VISUAIS --- */
     .map-container-form {
-        height: 275px; /* Diminuímos a altura do mapa */
+        height: 275px;
         width: 100%;
         border-radius: 8px;
         z-index: 1;
     }
     #image-carousel-preview .carousel-item img {
-        height: 140px; /* Diminuímos um pouco a altura das imagens do carrossel */
+        height: 140px;
     }
-
-    /* A NOSSA REGRA DEFINITIVA PARA VENCER A BRIGA DE ESTILOS.
-       POR ESTAR NO FINAL, ELA SEMPRE VENCE QUANDO EMPATA COM OUTRA REGRA '!important'.
-    */
     .force-hide {
         display: none !important;
+    }
+    .invalid-feedback.d-block {
+        display: block !important;
+        width: 100%;
+        margin-top: .25rem;
+        font-size: .875em;
+        color: #dc3545;
+    }
+    /* Trava redimensionamento de textareas */
+    #id_descricao, #id_motivo_recusa {
+        resize: none;
+    }
+    /* Esconde a opção vazia "Selecione..." da lista após abrir */
+    select option[value=""] {
+        display: none;
+    }
+    /* Estrelinha vermelha para campos obrigatórios */
+    .required-label::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
     }
 </style>
 
@@ -41,41 +130,107 @@
 
             <div class="progress-bar-container">
                 <div class="progress-line"><div class="progress-line-fill" id="progress-line-fill"></div></div>
-                <div class="progress-step active" data-step="1"><div class="step-circle">1</div><div class="step-label">Detalhes</div></div>
-                <div class="progress-step" data-step="2"><div class="step-circle">2</div><div class="step-label">Local e Mídia</div></div>
-                {% if user.is_staff or user.is_superuser %}<div class="progress-step" data-step="3"><div class="step-circle">3</div><div class="step-label">Gestão</div></div>{% endif %}
-            </div>
-            
-            <div class="form-step active" id="step-1">
-                <div class="row">
-                    <div class="col-lg-10 col-xl-8">
-                        <h5 class="form-section-title">Detalhes da Solicitação</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="id_cidade">{{ form.cidade.label }}</label>
-                                    {{ form.cidade }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="id_tipo">{{ form.tipo.label }}</label>
-                                    {{ form.tipo }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_descricao">{{ form.descricao.label }}</label>
-                            {{ form.descricao }}
-                            <div id="char-counter" class="form-text text-end mt-1">0 / 1000</div>
-                        </div>
-                    </div>
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Detalhes & Gestão</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Local e Mídia</div>
                 </div>
             </div>
 
-            <div class="form-step" id="step-2">
+            <div class="form-step active" id="step-1">
+                <h5 class="form-section-title">Detalhes da Solicitação</h5>
+
                 <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label required-label" for="id_cidade">{{ form.cidade.label }}</label>
+                            {{ form.cidade }}
+                            {% if form.cidade.errors %}
+                                <div class="invalid-feedback d-block">{{ form.cidade.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label required-label" for="id_tipo">{{ form.tipo.label }}</label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.tipo.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="categoria-wrapper" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label required-label" for="id_categoria">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                                <div class="invalid-feedback d-block">{{ form.categoria.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label required-label" for="id_descricao">{{ form.descricao.label }}</label>
+                            {{ form.descricao }}
+                            <div id="char-counter" class="form-text text-end mt-1">0 / 1000</div>
+                            {% if form.descricao.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descricao.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user.is_staff or user.is_superuser %}
+                    <div class="col-md-4">
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-success fw-bold required-label" for="id_status">{{ form.status.label }} (Admin)</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">{{ form.status.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3" id="equipe-wrapper" style="display: none;">
+                            <label class="form-label text-success fw-bold" for="id_equipe_delegada">{{ form.equipe_delegada.label }} (Admin)</label>
+                            {{ form.equipe_delegada }}
+                            {% if form.equipe_delegada.errors %}
+                                <div class="invalid-feedback d-block">{{ form.equipe_delegada.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3" id="bloco_especie_plantada" style="display: none;">
+                            <label class="form-label text-success fw-bold required-label" for="{{ form.especie_plantada.id_for_label }}">
+                                {{ form.especie_plantada.label }} (Admin)
+                            </label>
+                            {{ form.especie_plantada }}
+                            {% if form.especie_plantada.errors %}
+                                <div class="invalid-feedback d-block">{{ form.especie_plantada.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3" id="motivo-recusa-wrapper" style="display: none;">
+                            <label class="form-label text-danger fw-bold required-label" for="id_motivo_recusa">{{ form.motivo_recusa.label }} (Admin)</label>
+                            {{ form.motivo_recusa }}
+                            {% if form.motivo_recusa.errors %}
+                                <div class="invalid-feedback d-block">{{ form.motivo_recusa.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    {% endif %}
+                    </div> {% if form.non_field_errors %}
+                    <div class="alert alert-danger p-2 small">{{ form.non_field_errors|striptags }}</div>
+                {% endif %}
+
+            </div> <div class="form-step" id="step-2">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5">
                         <h5 class="form-section-title">Anexar Imagens</h5>
                         <div class="custom-file-upload">
                             <i class="bi bi-cloud-arrow-up-fill"></i>
@@ -83,38 +238,46 @@
                             <input type="file" name="imagens" multiple id="id_imagens" class="d-none">
                         </div>
                         <div class="form-text">Você pode adicionar até 10 imagens.</div>
+                        {% if form.imagens.errors %}
+                            <div class="invalid-feedback d-block">{{ form.imagens.errors|striptags }}</div>
+                        {% endif %}
+                        
                         <div id="image-carousel-preview" class="carousel slide mt-3" data-bs-interval="false">
-                            <div class="carousel-indicators"></div><div class="carousel-inner"></div>
-                            <button class="carousel-control-prev" type="button" id="carousel-prev-btn"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span></button>
-                            <button class="carousel-control-next" type="button" id="carousel-next-btn"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span></button>
+                            <div class="carousel-indicators"></div>
+                            <div class="carousel-inner"></div>
+                            <button class="carousel-control-prev" type="button" id="carousel-prev-btn">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" id="carousel-next-btn">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+
+                    <div class="col-lg-1 d-none d-lg-block"></div> <div class="col-lg-5">
                         <h5 class="form-section-title">Marcar Localização</h5>
                         <div id="map-picker" class="map-container-form"></div>
                         <div id="coords-display-text" class="form-text mt-2">Clique no mapa para marcar a localização exata.</div>
+                        {% if form.latitude.errors %}
+                            <div class="invalid-feedback d-block">{{ form.latitude.errors|striptags }}</div>
+                        {% endif %}
+                        {% if form.longitude.errors %}
+                            <div class="invalid-feedback d-block">{{ form.longitude.errors|striptags }}</div>
+                        {% endif %}
                     </div>
                 </div>
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger p-2 small mt-3">{{ form.non_field_errors|striptags }}</div>
+                {% endif %}
             </div>
-            
-            {% if user.is_staff or user.is_superuser %}
-            <div class="form-step" id="step-3">
-                <div class="row">
-                    <div class="col-lg-10 col-xl-8">
-                        <h5 class="form-section-title">Gestão da Solicitação (Admin)</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3"><label class="form-label">{{ form.status.label }}</label>{{ form.status }}</div>
-                            <div class="col-md-6 mb-3" id="equipe-wrapper" style="display: none;"><label class="form-label">{{ form.equipe_delegada.label }}</label>{{ form.equipe_delegada }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-        
-        <div class="card-footer d-flex justify-content-between align-items-center border-top-0 pt-4">
+
+        </div> <div class="card-footer d-flex justify-content-between align-items-center border-top-0 pt-4">
             <div>
-                {% if form.instance.pk %}<a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger-outline"><i class="bi bi-trash-fill me-1"></i> Deletar</a>{% endif %}
+                {% if form.instance.pk %}
+                    <a href="{% url 'solicitacao_delete' pk=form.instance.pk %}" class="btn btn-danger-outline"><i class="bi bi-trash-fill me-1"></i> Deletar</a>
+                {% endif %}
             </div>
             <div>
                 <button type="button" class="btn btn-secondary-custom" id="prev-btn"><i class="bi bi-arrow-left me-1"></i> Anterior</button>
@@ -124,44 +287,33 @@
         </div>
     </div>
 </form>
-    
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // --- DEFINIÇÃO DE TODOS OS ELEMENTOS (CONSTANTES) ---
+
+    // ======================================================
+    // 1. VARIÁVEIS GERAIS
+    // ======================================================
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-button');
     const formSteps = document.querySelectorAll('.form-step');
     const progressSteps = document.querySelectorAll('.progress-step');
     const progressLineFill = document.getElementById('progress-line-fill');
-    
     const solicitacaoForm = document.getElementById('solicitacao-form');
-    const imageInput = document.getElementById('id_imagens');
-    const uploadBox = imageInput.closest('.custom-file-upload');
-    const carousel = document.getElementById('image-carousel-preview');
-    const carouselInner = carousel.querySelector('.carousel-inner');
-    const carouselIndicators = carousel.querySelector('.carousel-indicators');
-    const uploadBoxText = document.getElementById('upload-box-text');
-    const prevCarouselBtn = document.getElementById('carousel-prev-btn');
-    const nextCarouselBtn = document.getElementById('carousel-next-btn');
 
     const latInput = document.getElementById('id_latitude');
     const lonInput = document.getElementById('id_longitude');
-    const coordsDisplayText = document.getElementById('coords-display-text');
     const descTextarea = document.getElementById('id_descricao');
     const charCounter = document.getElementById('char-counter');
-    
-    const submitButton = document.getElementById('submit-button');
-    const submitIcon = submitButton.querySelector('.bi');
-    const submitText = submitButton.querySelector('span');
 
     let currentStep = 1;
-    let fileList = []; 
-    const totalSteps = {% if user.is_staff or user.is_superuser %}3{% else %}2{% endif %};
+    const totalSteps = 2;
     const maxLength = 1000;
 
-    // --- LÓGICA DO WIZARD (PASSO A PASSO) ---
+    // ======================================================
+    // 2. LÓGICA DO WIZARD (NAVEGAÇÃO ENTRE ETAPAS)
+    // ======================================================
     function updateFormSteps() {
         formSteps.forEach(step => {
             const stepNumber = parseInt(step.id.replace('step-', ''));
@@ -170,24 +322,35 @@ document.addEventListener('DOMContentLoaded', function() {
         progressSteps.forEach((step, index) => {
             step.classList.toggle('active', (index + 1) <= currentStep);
         });
-        const progressPercentage = totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1)) * 100 : 0;
-        progressLineFill.style.width = `${progressPercentage}%`;
-        
-        prevBtn.classList.toggle('force-hide', currentStep === 1);
-        nextBtn.classList.toggle('force-hide', currentStep === totalSteps);
-        submitBtn.classList.toggle('force-hide', currentStep !== totalSteps);
+
+        const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        if (progressLineFill) progressLineFill.style.width = `${progressPercentage}%`;
+
+        if (prevBtn) prevBtn.classList.toggle('force-hide', currentStep === 1);
+        if (nextBtn) nextBtn.classList.toggle('force-hide', currentStep === totalSteps);
+        if (submitBtn) submitBtn.classList.toggle('force-hide', currentStep !== totalSteps);
     }
 
     function validateStep(step) {
         if (step === 1) {
-            if (descTextarea.value.trim() === '') {
+            // Validação da Categoria (se estiver visível)
+            const categoriaSelect = document.getElementById('id_categoria');
+            const categoriaWrapper = document.getElementById('categoria-wrapper');
+            if (categoriaSelect && categoriaWrapper && categoriaWrapper.style.display !== 'none' && categoriaSelect.value === '') {
+                alert('Por favor, selecione um detalhe para sua solicitação.');
+                categoriaSelect.focus();
+                return false;
+            }
+            // Validação da Descrição
+            if (descTextarea && descTextarea.value.trim() === '') {
                 alert('Por favor, preencha a descrição da solicitação.');
                 descTextarea.focus();
                 return false;
             }
         }
         if (step === 2) {
-            if (latInput.value.trim() === '') {
+            // Validação do Mapa
+            if (latInput && latInput.value.trim() === '') {
                 alert('Por favor, marque a localização no mapa.');
                 return false;
             }
@@ -195,153 +358,441 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    nextBtn.addEventListener('click', () => {
-        if (validateStep(currentStep)) {
-            if (currentStep < totalSteps) {
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (validateStep(currentStep) && currentStep < totalSteps) {
                 currentStep++;
                 updateFormSteps();
+                // Corrige o tamanho do mapa ao mudar de aba
                 if (currentStep === 2) {
-                    setTimeout(() => { if(typeof map !== 'undefined') map.invalidateSize(); }, 100);
+                    setTimeout(() => { 
+    if(typeof map !== 'undefined' && map) {
+        map.invalidateSize();
+        // Se tiver a camada da cidade, garante que ela tá enquadrada depois de redimensionar
+        if (cityLayer && (!latInput.value || !lonInput.value)) {
+             map.fitBounds(cityLayer.getBounds());
+        }
+    }
+}, 100); // Aumentei pra 300ms
                 }
             }
-        }
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (currentStep > 1) {
-            currentStep--;
-            updateFormSteps();
-        }
-    });
-
-    // --- LÓGICA DE UPLOAD DE IMAGEM ---
-    async function updateCarousel() {
-        // --- DEBUGGING ---
-        console.log('--- Rodando updateCarousel ---');
-        console.log('Total de imagens na lista:', fileList.length);
-
-        const showButtons = fileList.length > 1;
-        console.log('Devo mostrar os botões de seta?', showButtons);
-
-        carousel.classList.toggle('d-none', fileList.length === 0);
-
-        // --- A SOLUÇÃO "NUCLEAR" ---
-        // Usando o método mais forte do JavaScript para garantir que eles obedeçam
-        if (showButtons) {
-            console.log('Ação: MOSTRAR botões de seta.');
-            prevCarouselBtn.style.display = 'flex'; // Botões do carrossel do Bootstrap usam 'flex'
-            nextCarouselBtn.style.display = 'flex';
-        } else {
-            console.log('Ação: ESCONDER botões de seta.');
-            // .setProperty permite adicionar o '!important' via JS
-            prevCarouselBtn.style.setProperty('display', 'none', 'important');
-            nextCarouselBtn.style.setProperty('display', 'none', 'important');
-        }
-
-        if (fileList.length === 0) { 
-            uploadBoxText.innerHTML = 'Clique para selecionar ou arraste as imagens aqui'; 
-        } else { 
-            const plural = fileList.length > 1 ? 's' : ''; 
-            uploadBoxText.innerHTML = `<strong>${fileList.length} imagem${plural} selecionada${plural}</strong><br><small>Clique ou arraste para adicionar mais</small>`; 
-        }
-        
-        const previews = await Promise.all(fileList.map(readFileAsDataURL)); 
-        let innerHTML = ''; 
-        let indicatorsHTML = ''; 
-        previews.forEach((previewSrc, index) => { 
-            const file = fileList[index]; 
-            innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${previewSrc}" class="d-block w-100" alt="Prévia da imagem"><button type="button" class="delete-image-btn" data-file-id="${file.uniqueId}"><i class="bi bi-trash-fill"></i></button></div>`; 
-            indicatorsHTML += `<button type="button" data-bs-target="#image-carousel-preview" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="true"></button>`; 
-        }); 
-        carouselInner.innerHTML = innerHTML; 
-        carouselIndicators.innerHTML = indicatorsHTML; 
+        });
     }
 
-    if (uploadBox) { uploadBox.addEventListener('click', () => imageInput.click()); }
-    function readFileAsDataURL(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); }); }
-    
-    imageInput.addEventListener('change', function(event) { 
-        const newFiles = Array.from(event.target.files); 
-        const totalFiles = fileList.length + newFiles.length; 
-        if (totalFiles > 10) { 
-            alert(`Você só pode ter no máximo 10 imagens. Você já tem ${fileList.length} e tentou adicionar mais ${newFiles.length}.`); 
-            event.target.value = ''; 
-            return; 
-        } 
-        newFiles.forEach(file => { file.uniqueId = Date.now() + Math.random(); fileList.push(file); }); 
-        event.target.value = ''; 
-        updateCarousel(); 
-    });
-
-    carousel.addEventListener('click', function(event){ 
-        const deleteBtn = event.target.closest('.delete-image-btn'); 
-        if(deleteBtn){ 
-            const fileIdToRemove = parseFloat(deleteBtn.dataset.fileId); 
-            fileList = fileList.filter(file => file.uniqueId !== fileIdToRemove); 
-            updateCarousel(); 
-        } 
-    });
-    prevCarouselBtn.addEventListener('click', function() {
-    if (carouselInner.querySelector('.carousel-item')) {
-        // Pega a largura do item + o espaço entre eles
-        const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15; 
-        // Rola o carrossel pra esquerda
-        carouselInner.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateFormSteps();
+            }
+        });
     }
-});
 
-nextCarouselBtn.addEventListener('click', function() {
-    if (carouselInner.querySelector('.carousel-item')) {
-        // Pega a largura do item + o espaço entre eles
-        const itemWidth = carouselInner.querySelector('.carousel-item').offsetWidth + 15;
-        // Rola o carrossel pra direita
-        carouselInner.scrollBy({ left: itemWidth, behavior: 'smooth' });
+    // ======================================================
+    // 3. LÓGICA "PENTE FINO" (TIPO -> CATEGORIA)
+    // ======================================================
+    const tipoSelect = document.getElementById('id_tipo');
+    const categoriaSelect = document.getElementById('id_categoria');
+    const categoriaWrapper = document.getElementById('categoria-wrapper');
+
+    if (tipoSelect && categoriaSelect && categoriaWrapper) {
+        const opcoesCategorias = {
+            'SUGESTAO': [
+                {valor: 'PLANTIO', texto: 'Plantio de Muda'},
+                {valor: 'TROCA_LOCAL', texto: 'Troca de Local'},
+                {valor: 'JARDINAGEM', texto: 'Manutenção de Jardim/Canteiro'},
+                {valor: 'EDUCACAO', texto: 'Ação Educativa'},
+                {valor: 'OUTRO', texto: 'Outra Sugestão'}
+            ],
+            'DENUNCIA': [
+                {valor: 'RISCO_QUEDA', texto: 'Risco de Queda (Urgente)'},
+                {valor: 'PODA_IRREGULAR', texto: 'Poda Drástica/Irregular'},
+                {valor: 'CORTE_ILEGAL', texto: 'Corte Ilegal'},
+                {valor: 'PRAGAS', texto: 'Pragas ou Doenças'},
+                {valor: 'MAUS_TRATOS', texto: 'Maus Tratos/Danos à Árvore'},
+                {valor: 'OUTRO', texto: 'Outra Denúncia'}
+            ]
+        };
+
+        function atualizarCategorias() {
+            const tipoSelecionado = tipoSelect.value;
+            const categoriaAtual = "{{ form.instance.categoria|default:'' }}";
+            const valorSelecionadoPeloUsuario = categoriaSelect.value;
+
+            categoriaSelect.innerHTML = '<option value="">Selecione um detalhe...</option>';
+
+            if (tipoSelecionado && opcoesCategorias[tipoSelecionado]) {
+                categoriaWrapper.style.display = 'block';
+                opcoesCategorias[tipoSelecionado].forEach(opcao => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = opcao.valor;
+                    optionElement.textContent = opcao.texto;
+                    // Mantém selecionado se for edição ou se o usuário já escolheu
+                    if (opcao.valor === valorSelecionadoPeloUsuario || (opcao.valor === categoriaAtual && !valorSelecionadoPeloUsuario)) {
+                        optionElement.selected = true;
+                    }
+                    categoriaSelect.appendChild(optionElement);
+                });
+            } else {
+                categoriaWrapper.style.display = 'none';
+            }
+
+            // Sempre que mudar a categoria, chama a validação do admin também
+            if (typeof window.toggleAdminFields === 'function') {
+                window.toggleAdminFields();
+            }
+        }
+
+        tipoSelect.addEventListener('change', atualizarCategorias);
+        categoriaSelect.addEventListener('change', function() {
+             if (typeof window.toggleAdminFields === 'function') {
+                window.toggleAdminFields();
+            }
+        });
+        atualizarCategorias(); // Roda no início
     }
-});
 
-    // --- LÓGICA DO MAPA, CONTADOR, ADMIN, ETC. ---
-    const map = L.map('map-picker', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    let marker = null;
-    function updateCoordsDisplay(lat, lon) { coordsDisplayText.innerHTML = `<strong>Localização Marcada:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`; }
-    if (latInput.value && lonInput.value) { let initialLatLng = [parseFloat(latInput.value), parseFloat(lonInput.value)]; map.setView(initialLatLng, 18); marker = L.marker(initialLatLng).addTo(map); updateCoordsDisplay(initialLatLng[0], initialLatLng[1]); }
-    map.on('click', function(e) { const { lat, lng } = e.latlng; latInput.value = lat.toFixed(6); lonInput.value = lng.toFixed(6); if (marker === null) { marker = L.marker(e.latlng).addTo(map); } else { marker.setLatLng(e.latlng); } updateCoordsDisplay(lat, lng); });
-    
-    charCounter.innerHTML = `${descTextarea.value.length} / ${maxLength}`;
-    descTextarea.addEventListener('input', () => { const currentLength = descTextarea.value.length; charCounter.innerHTML = `${currentLength} / ${maxLength}`; if (currentLength > maxLength) { charCounter.classList.add('text-danger', 'fw-bold'); } else { charCounter.classList.remove('text-danger', 'fw-bold'); } });
-    
+    // ======================================================
+    // 4. LÓGICA ADMIN (MOSTRAR/ESCONDER CAMPOS)
+    // ======================================================
     {% if user.is_staff or user.is_superuser %}
     const statusSelect = document.getElementById('id_status');
     const equipeWrapper = document.getElementById('equipe-wrapper');
-    function toggleEquipeField() { if (statusSelect.value === 'EM_ANDAMENTO') { equipeWrapper.style.display = 'block'; } else { equipeWrapper.style.display = 'none'; } }
-    toggleEquipeField();
-    statusSelect.addEventListener('change', toggleEquipeField);
-    {% endif %}
-    
-    solicitacaoForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitButton.disabled = true;
-        submitIcon.classList.remove('bi-check-circle-fill');
-        submitIcon.classList.add('bi-arrow-repeat', 'spinner-icon');
-        submitText.textContent = 'Salvando...';
-        const formData = new FormData(solicitacaoForm);
-        formData.delete('imagens'); 
-        fileList.forEach(file => { formData.append('imagens', file); });
-        fetch(solicitacaoForm.action, { method: 'POST', body: formData, headers: {'X-CSRFToken': formData.get('csrfmiddlewaretoken')} })
-        .then(response => response.json().then(data => ({ ok: response.ok, data })))
-        .then(({ ok, data }) => { if (ok && data.success) { window.location.href = data.redirect_url; } else { const errorMessages = Object.entries(data.errors || {}).map(([field, errors]) => `${field}: ${errors.join(', ')}`).join('\n'); alert('Ocorreu um erro ao salvar:\n' + (errorMessages || 'Erro desconhecido.')); } })
-        .catch(error => { console.error('Erro:', error); alert('Ocorreu um erro de conexão ou validação.'); })
-        .finally(() => {
-            submitButton.disabled = false;
-            submitIcon.classList.add('bi-check-circle-fill');
-            submitIcon.classList.remove('bi-arrow-repeat', 'spinner-icon');
-            submitText.textContent = 'Salvar Solicitação';
-        });
-    });
+    const especieWrapper = document.getElementById('bloco_especie_plantada');
+    const motivoRecusaWrapper = document.getElementById('motivo-recusa-wrapper');
 
-    // --- INICIALIZAÇÃO ---
+    if (statusSelect && equipeWrapper && especieWrapper && motivoRecusaWrapper) {
+        // Função global para poder ser chamada pelo 'atualizarCategorias'
+        window.toggleAdminFields = function() {
+            const status = statusSelect.value;
+            // Tenta pegar o valor da categoria, se o campo existir
+            const categoria = categoriaSelect ? categoriaSelect.value : '';
+
+            // 4.1. Equipe: só se estiver EM ANDAMENTO
+            equipeWrapper.style.display = (status === 'EM_ANDAMENTO') ? 'block' : 'none';
+
+            // 4.2. Espécie: só se FINALIZADO **E** for PLANTIO ou TROCA
+            const precisaEspecie = (status === 'FINALIZADO' && (categoria === 'PLANTIO' || categoria === 'TROCA_LOCAL'));
+            especieWrapper.style.display = precisaEspecie ? 'block' : 'none';
+
+            // 4.3. Motivo Recusa: só se RECUSADO
+            motivoRecusaWrapper.style.display = (status === 'RECUSADO') ? 'block' : 'none';
+        }
+
+        statusSelect.addEventListener('change', window.toggleAdminFields);
+        // A chamada inicial já é feita pelo atualizarCategorias()
+    }
+    {% endif %}
+
+    // ======================================================
+    // 5. UPLOAD DE IMAGEM & CARROSSEL
+    // ======================================================
+    const imageInput = document.getElementById('id_imagens');
+    const uploadBox = imageInput ? imageInput.closest('.custom-file-upload') : null;
+    const carousel = document.getElementById('image-carousel-preview');
+    const carouselInner = carousel ? carousel.querySelector('.carousel-inner') : null;
+    const carouselIndicators = carousel ? carousel.querySelector('.carousel-indicators') : null;
+    const uploadBoxText = document.getElementById('upload-box-text');
+    const prevCarouselBtn = document.getElementById('carousel-prev-btn');
+    const nextCarouselBtn = document.getElementById('carousel-next-btn');
+    let fileList = [];
+
+    async function updateCarousel() {
+        if (!carousel || !carouselInner || !carouselIndicators || !uploadBoxText) return;
+
+        const showButtons = fileList.length > 1;
+        carousel.classList.toggle('d-none', fileList.length === 0);
+        if (prevCarouselBtn && nextCarouselBtn) {
+             prevCarouselBtn.style.setProperty('display', showButtons ? 'flex' : 'none', showButtons ? '' : 'important');
+             nextCarouselBtn.style.setProperty('display', showButtons ? 'flex' : 'none', showButtons ? '' : 'important');
+        }
+
+        if (fileList.length === 0) {
+            uploadBoxText.innerHTML = 'Clique para selecionar ou arraste as imagens aqui';
+        } else {
+            const plural = fileList.length > 1 ? 's' : '';
+            uploadBoxText.innerHTML = `<strong>${fileList.length} imagem${plural} selecionada${plural}</strong><br><small>Clique ou arraste para adicionar mais</small>`;
+        }
+
+        const previews = await Promise.all(fileList.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        })));
+
+        let innerHTML = '';
+        let indicatorsHTML = '';
+        previews.forEach((previewSrc, index) => {
+            const file = fileList[index];
+            innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${previewSrc}" class="d-block w-100" alt="Prévia"><button type="button" class="delete-image-btn" data-file-id="${file.uniqueId}"><i class="bi bi-trash-fill"></i></button></div>`;
+            indicatorsHTML += `<button type="button" data-bs-target="#image-carousel-preview" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}"></button>`;
+        });
+        carouselInner.innerHTML = innerHTML;
+        carouselIndicators.innerHTML = indicatorsHTML;
+    }
+
+    if (uploadBox && imageInput) {
+        uploadBox.addEventListener('click', () => imageInput.click());
+        imageInput.addEventListener('change', (e) => {
+            const newFiles = Array.from(e.target.files);
+            if (fileList.length + newFiles.length > 10) {
+                alert(`Máximo de 10 imagens permitido.`);
+                e.target.value = '';
+                return;
+            }
+            newFiles.forEach(f => { f.uniqueId = Date.now() + Math.random(); fileList.push(f); });
+            e.target.value = '';
+            updateCarousel();
+        });
+    }
+    if (carousel) {
+        carousel.addEventListener('click', (e) => {
+            const btn = e.target.closest('.delete-image-btn');
+            if (btn) {
+                fileList = fileList.filter(f => f.uniqueId !== parseFloat(btn.dataset.fileId));
+                updateCarousel();
+            }
+        });
+    }
+    // Scroll dos botões do carrossel
+    if (prevCarouselBtn && carouselInner) {
+        prevCarouselBtn.addEventListener('click', () => {
+             const item = carouselInner.querySelector('.carousel-item');
+             if(item) carouselInner.scrollBy({ left: -(item.offsetWidth + 15), behavior: 'smooth' });
+        });
+    }
+    if (nextCarouselBtn && carouselInner) {
+        nextCarouselBtn.addEventListener('click', () => {
+             const item = carouselInner.querySelector('.carousel-item');
+             if(item) carouselInner.scrollBy({ left: (item.offsetWidth + 15), behavior: 'smooth' });
+        });
+    }
+
+
+// ======================================================
+    // 6. MAPA LEAFLET (TURBINADO 🚀)
+    // ======================================================
+    let map = null;
+    let marker = null;
+    let cityLayer = null; // Camada pra desenhar o limite da cidade
+    let cidadesGeoData = {}; // Vai guardar os GeoJSONs das cidades
+
+    const mapContainer = document.getElementById('map-picker');
+    const coordsDisplayText = document.getElementById('coords-display-text');
+    const cidadeSelect = document.getElementById('id_cidade'); // Precisa desse elemento
+
+    if (mapContainer && latInput && lonInput) {
+        map = L.map('map-picker', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+        L.control.zoom({ position: 'bottomright' }).addTo(map); // Bota o zoom embaixo na direita
+
+        // --- 6.1. BUSCA POR ENDEREÇO ---
+        if (L.Control.Geocoder) {
+            L.Control.geocoder({
+                defaultMarkGeocode: false,
+                position: 'topleft',
+                placeholder: 'Buscar endereço...',
+                errorMessage: 'Endereço não encontrado.'
+            })
+            .on('markgeocode', function(e) {
+                const bbox = e.geocode.bbox;
+                const poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]);
+                map.fitBounds(poly.getBounds());
+            })
+            .addTo(map);
+        }
+
+        // --- 6.2. BOTÃO DE GPS ---
+        const gpsControl = L.Control.extend({
+            options: { position: 'topleft' },
+            onAdd: function(map) {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                container.innerHTML = '<a href="#" title="Minha Localização" role="button" style="width: 30px; height: 30px; line-height: 30px; text-align: center; font-size: 18px; display: block; background: white;"><i class="bi bi-crosshair"></i></a>';
+                container.onclick = function(e) {
+                    e.preventDefault();
+                    if (navigator.geolocation) {
+                         map.locate({setView: true, maxZoom: 16});
+                    } else {
+                        alert("Geolocalização não suportada pelo seu navegador.");
+                    }
+                    return false;
+                }
+                return container;
+            }
+        });
+        map.addControl(new gpsControl());
+        // Escuta quando o mapa acha a localização
+        map.on('locationfound', function(e) {
+             if (marker) marker.setLatLng(e.latlng);
+             else marker = L.marker(e.latlng).addTo(map);
+             latInput.value = e.latlng.lat.toFixed(6);
+             lonInput.value = e.latlng.lng.toFixed(6);
+             updateCoords(e.latlng.lat, e.latlng.lng);
+        });
+        map.on('locationerror', function(e) { alert(e.message); });
+
+
+        function updateCoords(lat, lon) {
+            if (coordsDisplayText) coordsDisplayText.innerHTML = `<strong>Local:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        }
+
+        // --- 6.3. DESENHAR LIMITE DA CIDADE ---
+        // Primeiro, busca os dados das cidades na API
+        fetch('/api/cidades-geo/')
+            .then(r => r.json())
+            .then(data => {
+                if (data.cidades) {
+                    data.cidades.forEach(c => {
+                        cidadesGeoData[c.nome] = c.geom; 
+                    });
+                    // 🔥 A CORREÇÃO TÁ AQUI:
+                    // Assim que os dados chegam, a gente força a atualização do mapa
+                    // pra ele pegar a cidade que já veio selecionada no form.
+                    atualizarMapaCidade();
+                }
+            })
+            .catch(err => console.error("Erro ao carregar cidades:", err));
+
+            function atualizarMapaCidade() {
+            // Garante que tudo que a gente precisa existe antes de tentar usar
+            if (!cidadeSelect || !map || Object.keys(cidadesGeoData).length === 0) return;
+            
+            const cidadeNome = cidadeSelect.options[cidadeSelect.selectedIndex].text;
+            
+            // Se por acaso o texto for "Selecione a cidade...", a gente ignora
+            if (cidadeNome === "Selecione a cidade...") return;
+
+            const geom = cidadesGeoData[cidadeNome];
+
+            if (geom) {
+                if (cityLayer) map.removeLayer(cityLayer); 
+                
+                cityLayer = L.geoJSON(geom, {
+                    style: { color: '#1E5943', weight: 2, fillOpacity: 0.1 },
+                    interactive: false
+                }).addTo(map);
+                
+                // Só dá zoom na cidade se NÃO tiver um pino já marcado (pra não tirar o foco do usuário se ele estiver editando)
+                if (!latInput.value || !lonInput.value) {
+                     map.fitBounds(cityLayer.getBounds());
+                }
+                // 🔥 FORÇA O REDESENHO DO MAPA (CORRIGE O MAPA CINZA)
+                map.invalidateSize();
+            }
+        }
+
+        // Escuta quando o usuário muda a cidade na Etapa 1
+        if (cidadeSelect) {
+            cidadeSelect.addEventListener('change', atualizarMapaCidade);
+        }
+
+        if (latInput.value && lonInput.value) {
+            try {
+                const lat = parseFloat(latInput.value.replace(',', '.'));
+                const lon = parseFloat(lonInput.value.replace(',', '.'));
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    const latlng = [lat, lon];
+                    map.setView(latlng, 18);
+                    marker = L.marker(latlng).addTo(map);
+                    updateCoords(lat, lon);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        map.on('click', function(e) {
+            const { lat, lng } = e.latlng;
+            latInput.value = lat.toFixed(6);
+            lonInput.value = lng.toFixed(6);
+            if (marker) marker.setLatLng(e.latlng);
+            else marker = L.marker(e.latlng).addTo(map);
+            updateCoords(lat, lng);
+        });
+    }
+
+    // ======================================================
+    // 7. CONTADOR DE CARACTERES
+    // ======================================================
+    if (descTextarea && charCounter) {
+        const updateCharCounter = () => {
+            const len = descTextarea.value.length;
+            charCounter.innerHTML = `${len} / ${maxLength}`;
+            charCounter.classList.toggle('text-danger', len > maxLength);
+            charCounter.classList.toggle('fw-bold', len > maxLength);
+        };
+        descTextarea.addEventListener('input', updateCharCounter);
+        updateCharCounter(); // Inicializa
+    }
+
+    // ======================================================
+    // 8. SUBMIT DO FORMULÁRIO (AJAX)
+    // ======================================================
+    const submitButton = document.getElementById('submit-button');
+    const submitIcon = submitButton ? submitButton.querySelector('.bi') : null;
+    const submitText = submitButton ? submitButton.querySelector('span') : null;
+
+    if (solicitacaoForm && submitButton) {
+        solicitacaoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitButton.disabled = true;
+            if (submitIcon) {
+                submitIcon.classList.remove('bi-check-circle-fill');
+                submitIcon.classList.add('bi-arrow-repeat', 'spinner-icon');
+            }
+            if (submitText) submitText.textContent = 'Salvando...';
+
+            const formData = new FormData(solicitacaoForm);
+            // Adiciona imagens manualmente porque elas não estão no input original
+            fileList.forEach(file => formData.append('imagens', file));
+
+            fetch(solicitacaoForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok && data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    let msg = 'Erro desconhecido.';
+                    if (data.errors) {
+                        msg = '';
+                        for (const [field, errors] of Object.entries(data.errors)) {
+                            // Tenta achar o label legível do campo
+                            let label = field;
+                            if (field !== '__all__') {
+                                const labelEl = document.querySelector(`label[for="id_${field}"]`);
+                                if (labelEl) label = labelEl.textContent.replace('(Admin)', '').replace('*', '').trim();
+                            }
+                            msg += `${label !== field ? label + ': ' : ''}${errors.join(', ')}\n`;
+                        }
+                    }
+                    alert('Erro ao salvar:\n\n' + msg);
+                }
+            })
+            .catch(() => alert('Erro de conexão.'))
+            .finally(() => {
+                submitButton.disabled = false;
+                if (submitIcon) {
+                    submitIcon.classList.add('bi-check-circle-fill');
+                    submitIcon.classList.remove('bi-arrow-repeat', 'spinner-icon');
+                }
+                if (submitText) submitText.textContent = 'Salvar Solicitação';
+            });
+        });
+    }
+
+    // Inicializa tudo
     updateFormSteps();
-    updateCarousel(); // Chama pra garantir o estado inicial correto do carrossel
+    updateCarousel();
 });
 </script>
 {% endblock %}

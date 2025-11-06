@@ -78,6 +78,21 @@ class Solicitacao(models.Model):
         ('SUGESTAO', 'Sugestão'),
         ('DENUNCIA', 'Denúncia'),
     )
+    CATEGORIA_CHOICES = (
+        # --- SUGESTÕES ---
+        ('PLANTIO', 'Plantio de Muda'),
+        ('TROCA_LOCAL', 'Troca de Local'),
+        ('JARDINAGEM', 'Manutenção de Jardim/Canteiro'),
+        ('EDUCACAO', 'Ação Educativa'),
+        # --- DENÚNCIAS ---
+        ('RISCO_QUEDA', 'Risco de Queda'),
+        ('PODA_IRREGULAR', 'Poda Drástica/Irregular'),
+        ('CORTE_ILEGAL', 'Corte Ilegal'),
+        ('PRAGAS', 'Pragas ou Doenças'),
+        ('MAUS_TRATOS', 'Maus Tratos/Danos à Árvore'),
+        # --- OUTROS ---
+        ('OUTRO', 'Outro'),
+    )
     STATUS_CHOICES = (
         ('EM_ABERTO', 'Em Aberto'),
         ('EM_ANDAMENTO', 'Em Andamento'),
@@ -96,6 +111,13 @@ class Solicitacao(models.Model):
         'CidadePermitida', on_delete=models.PROTECT, related_name='solicitacoes', null=True, blank=False
     )
     data_finalizacao = models.DateTimeField(null=True, blank=True)
+
+    categoria = models.CharField(
+        max_length=30, 
+        choices=CATEGORIA_CHOICES,
+        null=True, blank=False, # Obrigatório preencher
+        verbose_name="Categoria Detalhada")
+    motivo_recusa = models.TextField(blank=True, null=True, verbose_name="Motivo da Recusa")
 
     def __str__(self):
         # Atualizamos o __str__ para mostrar a cidade, ajuda a gente
