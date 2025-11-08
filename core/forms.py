@@ -222,11 +222,25 @@ class AreaForm(forms.ModelForm):
         model = Area
         fields = ['nome', 'tipo', 'status', 'especies']
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control form-control-custom', 'autocomplete': 'off'}),
-            'tipo': forms.Select(attrs={'class': 'form-select form-control-custom'}),
-            'status': forms.Select(attrs={'class': 'form-select form-control-custom'}),
-            'especies': forms.SelectMultiple(attrs={'class': 'form-select form-control-custom select2-multiple', 'style': 'width: 100%;'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da área (Ex: Bosque Central)'}),
+            'tipo': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            # 🔥 O SEGREDO TÁ AQUI: 'select2-multiple' pra gente achar via JS
+            'especies': forms.SelectMultiple(attrs={'class': 'form-control select2-multiple', 'style': 'width: 100%', 'multiple': 'multiple'}),
         }
+        labels = {
+            'nome': 'Nome da Área',
+            'tipo': 'Tipo de Área',
+            'status': 'Status Atual',
+            'especies': 'Espécies Previstas'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 🔥 REMOVENDO OS TRACINHOS "-------"
+        # Pega as opções atuais, ignora a primeira (que é o tracinho) e adiciona a nossa
+        self.fields['tipo'].choices = [('', 'Selecione o tipo...')] + list(self.fields['tipo'].choices)[1:]
+        self.fields['status'].choices = [('', 'Selecione o status...')] + list(self.fields['status'].choices)[1:]
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:

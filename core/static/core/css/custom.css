@@ -1862,15 +1862,15 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
 
 /* ADICIONA O TEXTO EM CADA BOTÃO USANDO O SELETOR CORRETO E UNIFICADO */
 .leaflet-draw-toolbar a.leaflet-draw-draw-polygon::after {
-  content: "Área";
+  content: "Nova Área";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-draw-rectangle::after {
-  content: "Retângulo";
+  content: "Novo Retângulo";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-draw-marker::after {
-  content: "Ponto";
+  content: "Nova Árvore";
 }
 
 .leaflet-draw-toolbar a.leaflet-draw-edit-edit::after {
