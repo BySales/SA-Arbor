@@ -2,176 +2,295 @@
 {% load static %}
 
 {% block content %}
-    <div class="page-header">
-        <h2 class="mb-0">(Beta) Mapa Interativo</h2>
-        <p class="text-muted">Visualize, gerencie e planeje as áreas verdes da cidade.</p>
+<style>
+    /* --- LAYOUT GERAL --- */
+    .page-header { margin-bottom: 1.5rem; }
+    .map-card-container {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        height: 75vh;
+        min-height: 500px;
+    }
+    #map { height: 100%; width: 100%; z-index: 1; }
+
+    /* --- PAINÉIS FLUTUANTES (VIDRO) --- */
+    .map-overlay-panel,
+    .leaflet-control-layers,
+    .leaflet-bar a {
+        background-color: rgba(255, 255, 255, 0.9) !important; /* Um pouco menos transparente pra leitura */
+        backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    }
+
+    /* --- CONTROLE DE CAMADAS (O DONO DA FESTA AGORA) --- */
+    /* --- CONTROLE DE CAMADAS (FORÇANDO A BARRA) --- */
+    .leaflet-control-layers {
+        padding: 6px 10px !important;
+        min-width: 220px !important; /* Garante largura suficiente */
+    }
+
+    /* A linha completa da camada */
+    .leaflet-control-layers label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important; /* Garante que fiquem nas pontas */
+        width: 100% !important;
+        padding: 8px 10px !important;
+        margin-bottom: 4px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: background-color 0.2s ease !important;
+    }
+    .leaflet-control-layers label:hover {
+        background-color: rgba(0,0,0,0.04) !important;
+    }
+
+    /* O TEXTO/ÍCONE (Força ele a ir pra esquerda e ocupar o espaço) */
+    .leaflet-control-layers label span {
+        order: 1 !important;        /* Fica em primeiro */
+        flex-grow: 1 !important;    /* Ocupa todo o espaço disponível */
+        text-align: left !important;
+        font-weight: 500 !important;
+        color: #343a40 !important;
+        display: flex !important;   /* Garante que o ícone e texto fiquem alinhados */
+        align-items: center !important;
+    }
+
+    /* O CHECKBOX (Força ele a ir pra direita) */
+    .leaflet-control-layers-selector {
+        order: 2 !important;        /* Fica em segundo */
+        margin: 0 !important;       /* Sem margens */
+        flex-shrink: 0 !important;  /* Não deixa esmagar */
+        cursor: pointer !important;
+        height: 18px !important;    /* Tamanho fixo */
+        width: 18px !important;
+        accent-color: #1E5943 !important; /* Cor do check */
+    }
+
+    /* O TEXTO/ÍCONE (Vem pra esquerda) */
+    .leaflet-control-layers label span {
+        order: 1 !important; /* Força ser o primeiro */
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #343a40;
+    }
+
+    /* O CHECKBOX (Vai pra direita) */
+    .leaflet-control-layers-selector {
+        order: 2 !important; /* Força ser o segundo */
+        margin: 0 !important; /* Sem margens extras */
+        cursor: pointer;
+        /* Estilo do checkbox nativo mais bonitinho se o navegador suportar accent-color */
+        accent-color: #1E5943; 
+        width: 16px;
+        height: 16px;
+    }
+
+    /* --- ÍCONES DAS CAMADAS (MANTIDOS IGUAIS) --- */
+    .layer-label { display: flex; align-items: center; }
+    .layer-icon-box {
+        width: 22px; height: 22px; /* Um tiquinho menor pra compactar */
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 6px; margin-right: 8px;
+    }
+    .bg-success-soft { background-color: #d1e7dd; color: #198754; }
+    .bg-warning-soft { background-color: #fff3cd; color: #ffc107; }
+    .bg-primary-soft { background-color: #cfe2ff; color: #0d6efd; }
+    .bg-danger-soft { background-color: #f8d7da; color: #dc3545; }
+
+    /* --- RESTO DOS ESTILOS (PAINÉIS, ETC) MANTIDOS --- */
+    #city-selector-panel {
+        position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 400; padding: 8px 16px; text-align: center;
+    }
+    #city-selector-panel label {
+        font-weight: 700; color: #1E5943; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 2px;
+    }
+    #details-panel {
+        position: absolute; top: 20px; right: 60px; z-index: 400; width: 300px;
+        max-height: 80vh; overflow-y: auto; padding: 15px; display: none;
+    }
+    #details-panel.show { display: block; animation: slideInRight 0.3s ease; }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .leaflet-bar { border: none !important; }
+    .leaflet-bar a { color: #1E5943 !important; border-bottom: 1px solid rgba(0,0,0,0.1) !important; }
+    .leaflet-bar a:hover { background-color: #1E5943 !important; color: #fff !important; }
+    .leaflet-bar a:first-child { border-top-left-radius: 12px !important; border-top-right-radius: 12px !important; }
+    .leaflet-bar a:last-child { border-bottom-left-radius: 12px !important; border-bottom-right-radius: 12px !important; border-bottom: none !important; }
+    .map-coords-display {
+        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 400;
+        background: rgba(33, 37, 41, 0.8); color: #fff; padding: 4px 10px; border-radius: 20px;
+        font-size: 0.7rem; font-family: monospace; pointer-events: none;
+    }
+    .leaflet-pane.mask-pane { z-index: 350; }
+</style>
+
+<div class="page-header">
+    <h2 class="mb-0 fw-bold" style="color: #212529;">Mapa Interativo</h2>
+    <p class="text-muted">Gestão visual e inteligente da arborização urbana.</p>
+</div>
+
+<div class="map-card-container">
+    <div id="map" data-analisar-url="{% url 'analisar_area_api' %}"></div>
+
+    <div id="city-selector-panel">
+        <label for="city-select" class="form-label"><i class="bi bi-geo-alt-fill me-1"></i>Visualizando:</label>
+        <div id="city-select-container">
+            </div>
+        <div id="map-status" class="small text-danger mt-1" style="display: none;"></div>
     </div>
 
-    <div class="card map-card-container">
-        <!-- Onde o mapa em si aparece -->
-        <div id="map" data-analisar-url="{% url 'analisar_area_api' %}"></div>
-
-        <!-- ======================================================================= -->
-        <!-- AQUI O NOSSO PALCO: O PAINEL DE CIDADES -->
-        <!-- O JS vai procurar essa div pra montar o menu aqui dentro. -->
-        <!-- ======================================================================= -->
-        <div id="city-selector-panel" class="map-overlay-panel map-overlay--topcenter">
-            <label for="city-select" class="form-label small mb-1">Visualizando cidade:</label>
-            <div id="city-select-container">
-                <!-- O JavaScript vai criar o menu <select> aqui dentro -->
+    <div id="details-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 id="details-title" class="mb-0 fw-bold text-truncate pe-2" style="color: #1E5943;">Detalhes</h6>
+            <button id="close-details-btn" type="button" class="btn-close btn-sm" aria-label="Close"></button>
+        </div>
+        <div id="details-content" style="max-height: 60vh; overflow-y: auto;">
             </div>
-            <div id="map-status" class="small text-muted mt-1" style="font-style: italic;"></div>
-        </div>
-        <!-- ======================================================================= -->
-
-        <!-- Painel de Detalhes que você já tinha -->
-        <div id="details-panel" class="map-overlay-panel d-none">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 id="details-title" class="mb-0 text-truncate">Detalhes</h6>
-                <button id="close-details-btn" type="button" class="btn-close btn-sm"></button>
-            </div>
-            <hr class="my-2">
-            <div id="details-content"></div>
-        </div>
-        
-        <!-- Display de Coordenadas que você já tinha -->
-        <div id="coords-display" class="map-coords-display">
-            Lat: -- | Lon: --
-        </div>
     </div>
+    
+    <div id="coords-display" class="map-coords-display">
+        <i class="bi bi-crosshair me-1"></i> Lat: -- | Lon: --
+    </div>
+</div>
 
-    <!-- 
-    =================================================
-    DAQUI PRA BAIXO, NADA MUDA.
-    Todos os seus Modals (Janelas Pop-up) continuam aqui.
-    =================================================
-    -->
-
-    <!-- Modal para Formulário de Área -->
-    <div class="modal fade" id="areaFormModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Detalhes da Nova Área</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="area-form">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ form_area.nome.label }}</label>
-                            {{ form_area.nome }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{ form_area.tipo.label }}</label>
+<div class="modal fade" id="areaFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalTitle" style="color: #1E5943;">Nova Área</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <form id="area-form">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Nome da Área</label>
+                        {{ form_area.nome }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Tipo</label>
                             {{ form_area.tipo }}
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{ form_area.status.label }}</label>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
                             {{ form_area.status }}
                         </div>
-                         <div class="mb-3">
-                            <label class="form-label">{{ form_area.especies.label }}</label>
-                            {{ form_area.especies }}
+                    </div>
+                     <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Espécies Previstas</label>
+                        {{ form_area.especies }}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-principal-acao" id="saveAreaButton">
+                    <i class="bi bi-check-lg me-1"></i> Salvar
+                </button>
+                <button type="button" class="btn btn-danger-outline d-none ms-auto" id="deleteAreaButton">
+                    <i class="bi bi-trash me-1"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addTreeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E5943;"><i class="bi bi-tree-fill me-2"></i>Nova Árvore</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <form id="add-tree-form">
+                    <input type="hidden" id="tree-lat" name="latitude">
+                    <input type="hidden" id="tree-lon" name="longitude">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Qual a espécie?</label>
+                        <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
+                            <option value="" selected disabled>Busque pelo nome popular...</option>
+                            {% for especie in especies_catalogo %}
+                                <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Estado de Saúde</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="saude" id="saude1" value="BOA" checked>
+                            <label class="btn btn-outline-success" for="saude1">Boa</label>
+                            <input type="radio" class="btn-check" name="saude" id="saude2" value="MEDIA">
+                            <label class="btn btn-outline-warning" for="saude2">Média</label>
+                            <input type="radio" class="btn-check" name="saude" id="saude3" value="RUIM">
+                            <label class="btn btn-outline-danger" for="saude3">Ruim</label>
                         </div>
-                    </form>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Observações</label>
+                        <textarea class="form-control form-control-custom" id="tree-observacoes" name="observacoes" rows="2" placeholder="Algo a mais sobre esta árvore?"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-principal-acao px-4" id="submitNewTree">Plantada!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-principal-acao" id="saveAreaButton">
-                        <i class="bi bi-check-circle-fill me-1"></i>
-                        Salvar Área
-                    </button>
-                    <button type="button" class="btn btn-danger-outline d-none" id="deleteAreaButton">Deletar Área</button>
+                <h5 class="fw-bold mb-2">Tem certeza?</h5>
+                <p class="text-muted small mb-4">Você vai apagar a árvore #<span id="tree-id-placeholder"></span>. Isso não tem volta!</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">Não, espera</button>
+                    <button type="button" class="btn btn-danger flex-grow-1" id="confirm-delete-btn">Sim, apagar</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal para Adicionar Árvore -->
-    <div class="modal fade" id="addTreeModal" tabindex="-1" aria-labelledby="addTreeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTreeModalLabel">Adicionar Nova Árvore</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="add-tree-form">
-                        {% csrf_token %}
-                        <input type="hidden" id="tree-lat" name="latitude">
-                        <input type="hidden" id="tree-lon" name="longitude">
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
-                        <div class="mb-3">
-                            <label for="tree-especie" class="form-label">Espécie</label>
-                            <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
-                                <option value="" selected disabled>Selecione uma espécie...</option>
-                                {% for especie in especies_catalogo %}
-                                    <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="tree-saude" class="form-label">Estado de Saúde</label>
-                            <select class="form-select form-control-custom" id="tree-saude" name="saude">
-                                <option value="BOA">Boa</option>
-                                <option value="MEDIA">Média</option>
-                                <option value="RUIM">Ruim</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="tree-observacoes" class="form-label">Observações</label>
-                            <textarea class="form-control form-control-custom" id="tree-observacoes" name="observacoes" rows="3"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-principal-acao" id="submitNewTree"> <i class="bi bi-check-circle-fill me-1"></i>
-                        Salvar Árvore
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Confirmar Deleção -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <p>Tem certeza que deseja apagar a árvore #<strong id="tree-id-placeholder"></strong> permanentemente?</p>
-                    <p class="text-danger small">Esta ação não pode ser desfeita.</p>
-                </div>
-                <div class="modal-footer border-0 justify-content-center">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger-outline" id="confirm-delete-btn">
-                        <i class="bi bi-trash-fill me-1"></i> Sim, Apagar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Container para os Toasts (notificações) -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
-
-    <!-- Passando os dados do Django para o JavaScript -->
-    {{ arvores_data|json_script:"arvores-data-json" }}
-    {{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
-    {{ areas_data|json_script:"areas-data-json" }}
-    {{ solicitacao_foco_id|json_script:"solicitacao-foco-id" }}
-    {{ area_foco_id|json_script:"area-foco-id" }}
+{{ arvores_data|json_script:"arvores-data-json" }}
+{{ solicitacoes_data|json_script:"solicitacoes-data-json" }}
+{{ areas_data|json_script:"areas-data-json" }}
+{{ solicitacao_foco_id|json_script:"solicitacao-foco-id" }}
+{{ area_foco_id|json_script:"area-foco-id" }}
+{{ foco_solicitacao_data|json_script:"foco-solicitacao-data" }}
 
 {% endblock %}
 
 {% block scripts %}
-    <!-- Carregando o nosso JavaScript mágico -->
-    <script src="{% static 'core/js/mapa.js' %}"></script>
+<script src="{% static 'core/js/mapa.js' %}"></script>
+<script>
+    // Pequeno ajuste inline pra garantir que o painel de detalhes abra com a classe certa
+    const detailsPanelEl = document.getElementById('details-panel');
+    if (detailsPanelEl) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('d-none') === false) {
+                    mutation.target.classList.add('show');
+                } else {
+                    mutation.target.classList.remove('show');
+                }
+            });
+        });
+        observer.observe(detailsPanelEl, { attributes: true, attributeFilter: ['class'] });
+    }
+</script>
 {% endblock %}

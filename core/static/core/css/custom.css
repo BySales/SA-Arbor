@@ -2351,26 +2351,26 @@ Essa regra aqui de baixo remove essa linha.
     font-size: 14px; /* Tamanho da fonte do ícone interno */
     color: #fff; /* Cor do ícone interno (texto ou ícone de fonte) */
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4); /* Sombra para dar profundidade */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4); 
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Cores específicas para cada tipo */
-.marker-arvore { background-color: #28a745; border-color: #fff; } /* Verde */
-.marker-denuncia { background-color: #dc3545; border-color: #fff; } /* Vermelho */
-.marker-sugestao { background-color: #ffc107; border-color: #fff; } /* Amarelo (borda escura pra contraste) */
-.marker-fantasma { background-color: #6c757d; border-color: #fff; opacity: 0.7; } /* Cinza, um pouco transparente */
 
-/* Ajuste para ícones do Bootstrap dentro do divIcon, se for usar */
+.marker-arvore { background-color: #28a745; border-color: #fff; } 
+.marker-denuncia { background-color: #dc3545; border-color: #fff; } 
+.marker-sugestao { background-color: #ffc107; border-color: #fff; } 
+.marker-fantasma { background-color: #6c757d; border-color: #fff; opacity: 0.7; } 
+
+
 .custom-marker-icon i.bi {
-    font-size: 1.1em; /* Ajusta o tamanho do ícone interno */
+    font-size: 1.1em;
     margin: 0;
     padding: 0;
-    line-height: 1; /* Garante alinhamento */
+    line-height: 1;
 }
-.marker-sugestao i.bi { color: #fff; } /* Ícone interno escuro para contraste no amarelo */
+.marker-sugestao i.bi { color: #fff; } 
 .marker-arvore i.bi { color: #fff; }
 .marker-denuncia i.bi { color: #fff; }
 .marker-fantasma i.bi { color: #fff; }
@@ -2378,23 +2378,18 @@ Essa regra aqui de baixo remove essa linha.
 .btn-outline-principal {
     color: #1E5943;
     border-color: #1E5943;
-    font-weight: 500; /* Um pouco mais de peso pra ficar legível */
+    font-weight: 500; 
 }
-
-/* Estado Hover e quando o Dropdown tá aberto (.show) */
 .btn-outline-principal:hover,
 .btn-outline-principal:active,
 .btn-outline-principal.show {
     background-color: #1E5943;
-    color: #fff !important; /* Força o branco no texto */
+    color: #fff !important;
     border-color: #1E5943;
 }
-
-/* Ajuste fino pro botão de Limpar ficar na mesma altura visualmente */
 .btn-outline-danger {
     font-weight: 500;
 }
 .tag-more {
-    cursor: default; /* O 'help' mostra uma setinha com interrogação, perfeito pra tooltip */
-    /* OU use 'default' pra setinha normal, ou 'pointer' pra mãozinha */
+    cursor: default;
 }

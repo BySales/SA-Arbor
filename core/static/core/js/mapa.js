@@ -318,13 +318,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const baseLayers = {};
     const overlayLayers = {
-        // Agora usa ícones Bootstrap com o CSS customizado
-        "<span class='layer-name'><i class='bi bi-tree-fill text-success me-1'></i> Árvores</span>": camadaArvores,
-        "<span class='layer-name'><i class='bi bi-file-earmark-text-fill text-warning me-1'></i> Solicitações</span>": camadaSolicitacoes,
-        "<span class='layer-name'><i class='bi bi-bounding-box text-primary me-1'></i> Áreas Planejadas</span>": camadaAreas
+        "<div class='layer-label'><div class='layer-icon-box bg-success-soft'><i class='bi bi-tree-fill'></i></div> Árvores</div>": camadaArvores,
+        "<div class='layer-label'><div class='layer-icon-box bg-warning-soft'><i class='bi bi-file-earmark-text-fill'></i></div> Solicitações</div>": camadaSolicitacoes,
+        "<div class='layer-label'><div class='layer-icon-box bg-primary-soft'><i class='bi bi-bounding-box'></i></div> Áreas Planejadas</div>": camadaAreas
     };
     if (camadaHeatmap) {
-         overlayLayers["<span class='layer-name'><i class='bi bi-thermometer-half text-danger me-1'></i> Mapa de Calor</span>"] = camadaHeatmap;
+         overlayLayers["<div class='layer-label'><div class='layer-icon-box bg-danger-soft'><i class='bi bi-thermometer-half'></i></div> Mapa de Calor</div>"] = camadaHeatmap;
     }
 
     L.control.layers(baseLayers, overlayLayers, { collapsed: false, position: 'topright' }).addTo(map);

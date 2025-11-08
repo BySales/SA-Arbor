@@ -42,22 +42,23 @@
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                            <li class="menu-header"><span>Início</span></li>
+                    <li class="menu-header"><span>Início</span></li>
                     
-                                                        <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
-                            <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
-                            <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
+                    <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
+                    <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
+                    <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
 
-                            {% if user.is_staff %}
-                            <li><a href="{% url 'planejamentos' %}" class="{% if pagina == 'planejamentos' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
-                            <li><a href="{% url 'relatorios' %}" class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
-                            {% endif %}
-                            {% if user.is_staff %}
-                            <li class="menu-header"><span>Cadastros</span></li>
-                            <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Espécies</span></a></li>
-                            <li><a href="{% url 'equipe_list' %}" class="{% if 'equipe' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
-                            {% endif %}
-                                            </ul>
+                    {% if user.is_staff %}
+                    <li><a href="{% url 'planejamentos' %}" class="{% if pagina == 'planejamentos' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
+                    <li><a href="{% url 'relatorios' %}" class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
+                    {% endif %}
+
+                    {% if user.is_staff %}
+                    <li class="menu-header"><span>Cadastros</span></li>
+                    <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Espécies</span></a></li>
+                    <li><a href="{% url 'equipe_list' %}" class="{% if 'equipe' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
+                    {% endif %}
+                </ul>
             </div>
 
             <div class="sidebar-footer">
@@ -115,7 +116,7 @@
                 <div class="container-xl">
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
@@ -128,7 +129,7 @@
         </main>
     </div>
 
-<script src="{% static 'core/js/main.js' %}"></script>
+    <script src="{% static 'core/js/main.js' %}"></script>
     
     {% block scripts %}{% endblock %}
 
@@ -141,17 +142,144 @@
             })
 
             // --- 2. AUTO-FECHAR NOTIFICAÇÕES (NOVO) ---
-            // Pega todos os alertas que têm o botãozinho de fechar
             var alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(function(alert) {
-                // Marca um tempo de 5 segundos (5000ms) pra fechar
                 setTimeout(function() {
                     // Usa o próprio Bootstrap pra fechar com estilo (fade out)
                     var bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
-                }, 3000); // <--- Se quiser mais rápido, diminui esse número (ex: 3000 para 3s)
+                }, 3000); // 5 segundos
             });
         });
     </script>
+    <style>
+    /* =================================================================
+       FORÇANDO A BARRA NOS DROPDOWNS NORMAIS
+       ================================================================= */
+    html body .dropdown-menu.show {
+        border-radius: 12px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+        border: 0px solid transparent !important;
+        padding: 8px !important;
+        margin-top: 10px !important; /* Força um espaço do botão */
+    }
+    html body .dropdown-item {
+        border-radius: 8px !important;
+        margin-bottom: 2px !important;
+    }
+    /* O hover verde */
+    html body .dropdown-item:hover, 
+    html body .dropdown-item:focus {
+        background-color: #f0fdf4 !important;
+        color: #1E5943 !important;
+        box-shadow: none !important; /* Mata qualquer sombra azul teimosa */
+    }
+    html body .dropdown-item.active {
+        background-color: #1E5943 !important;
+        color: #fff !important;
+    }
+
+    /* =================================================================
+       SELECT2 - O INIMIGO NÚMERO 1
+       ================================================================= */
+
+    /* 1. Matando o foco nativo azul do navegador em TUDO */
+    *:focus, .select2-container *:focus {
+        outline: none !important;
+        /* box-shadow: none !important;  <-- Cuidado com esse, pode matar sombras que a gente quer */
+    }
+
+    /* 2. O Campo Select2 (Estado Normal) */
+    html body .select2-container--default .select2-selection--single,
+    html body .select2-container--default .select2-selection--multiple {
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        min-height: 45px !important; /* Força altura mínima */
+        height: auto !important;
+        padding: 5px 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        background-image: none !important; /* Mata gradientes padrão */
+    }
+
+    /* 3. O Campo Select2 (QUANDO FOCADO/ABERTO) - AQUI É A GUERRA DO AZUL */
+    /* Usando seletor de atributo pra aumentar especificidade */
+    html body .select2-container--default.select2-container--focus .select2-selection--single,
+    html body .select2-container--default.select2-container--open .select2-selection--single,
+    html body span.select2-container--focus span.select2-selection--single {
+        border-color: #1E5943 !important;
+        /* A sombra verde exata do seu tema */
+        box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.25) !important; 
+        outline: 0 !important;
+    }
+
+    /* 4. A seta do dropdown */
+    html body .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+        right: 10px !important;
+    }
+    html body .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: #888 transparent transparent transparent !important;
+        border-width: 6px 5px 0 5px !important; /* Seta um pouco maior */
+    }
+    html body .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+        border-color: transparent transparent #888 transparent !important;
+        border-width: 0 5px 6px 5px !important;
+    }
+
+    /* 5. O Dropdown Flutuante (A lista que abre) */
+    html body .select2-dropdown, 
+    html body .select2-dropdown--above,
+    html body .select2-dropdown--below {
+        border: 0px solid transparent !important; /* Remove borda padrão feia */
+        border-radius: 12px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.18) !important;
+        padding: 8px !important;
+        overflow: hidden !important;
+        z-index: 99999 !important; /* Garante que fica em cima de modais */
+        background-color: #fff !important;
+    }
+
+    /* 6. Itens da Lista */
+    html body .select2-results__option {
+        padding: 10px 15px !important;
+        border-radius: 8px !important;
+        margin: 3px 0 !important;
+        font-size: 0.95rem !important;
+        color: #495057 !important;
+        transition: all 0.1s ease !important;
+    }
+
+    /* 7. Item com Hover/Foco (O verde clarinho) */
+    html body .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #e6f3eb !important; /* Verde bem suave */
+        color: #1E5943 !important;            /* Texto verde escuro */
+        font-weight: 500 !important;
+    }
+
+    /* 8. Item Selecionado (O cinza) */
+    html body .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+        font-weight: 600 !important;
+    }
+
+    /* 9. Campo de busca dentro do dropdown */
+    html body .select2-search--dropdown {
+        padding: 8px !important;
+    }
+    html body .select2-search--dropdown .select2-search__field {
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        padding: 8px 12px !important;
+        outline: none !important;
+    }
+    /* Foco no campo de busca interno */
+    html body .select2-search--dropdown .select2-search__field:focus {
+        border-color: #1E5943 !important;
+        box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.25) !important;
+    }
+</style>
   </body>
 </html>

@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.loca.lt', '.app.github.dev']
 CSRF_TRUSTED_ORIGINS = [
     'https://*.loca.lt',
-    'https://*.ws.loca.lt', 'https://*.github.dev'
+    'https://*.ws.loca.lt', 'https://*.github.dev', 'https://humble-engine-5gvgx9j7wqwg3jg5-8000.app.github.dev/', 'https://*.github.dev','https://*.githubpreview.dev'
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
