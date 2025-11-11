@@ -1873,14 +1873,6 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
   content: "Nova Árvore";
 }
 
-.leaflet-draw-toolbar a.leaflet-draw-edit-edit::after {
-  content: "Editar";
-}
-
-.leaflet-draw-toolbar a.leaflet-draw-edit-remove::after {
-  content: "Apagar";
-}
-
 /* Estilo para quando o mouse passa por cima ou o botão está ativo */
 .leaflet-draw-toolbar a:hover,
 .leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {

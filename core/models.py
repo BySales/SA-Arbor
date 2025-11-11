@@ -118,6 +118,12 @@ class Solicitacao(models.Model):
         null=True, blank=False, # Obrigatório preencher
         verbose_name="Categoria Detalhada")
     motivo_recusa = models.TextField(blank=True, null=True, verbose_name="Motivo da Recusa")
+    interessados = models.ManyToManyField(
+        User, 
+        related_name='solicitacoes_interesse', 
+        blank=True,
+        verbose_name="Usuários Interessados"
+    )
 
     def __str__(self):
         # Atualizamos o __str__ para mostrar a cidade, ajuda a gente
@@ -220,4 +226,28 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
+    
+class Notificacao(models.Model):
+    # Pra quem é a notificação
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes')
+    
+    # (Opcional) Link pra solicitação que mudou
+    solicitacao = models.ForeignKey(Solicitacao, on_delete=models.CASCADE, null=True, blank=True)
+    
+    # A mensagem que vai aparecer
+    mensagem = models.TextField()
+    
+    # Quando ela foi criada
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    # Se o maluco já clicou no sininho ou não
+    lida = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Notificação para {self.usuario.username} - {self.mensagem[:20]}...'
+
+    class Meta:
+        ordering = ['-data_criacao'] # As mais novas primeiro
+        verbose_name = "Notificação"
+        verbose_name_plural = "Notificações"
     

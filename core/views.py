@@ -26,7 +26,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
-from .models import Profile
+from .models import Profile, Notificacao
 from django.db.models import Avg, F, ExpressionWrapper, DurationField
 
 
@@ -146,9 +146,29 @@ def solicitacao_list(request):
 @login_required
 def solicitacao_create(request):
     if request.method == 'POST':
-        # Passamos o `user` para o formulário saber quais cidades mostrar
-        form = SolicitacaoForm(request.POST, request.FILES, user=request.user)
         
+        # ======================================================
+        # 🔥 MODIFICAÇÃO 1: O "CHEFE MALANDRO" (POST)
+        # Adiciona o status 'EM_ABERTO' pro usuário comum
+        # ======================================================
+        
+        # 1. Copia os dados do POST pra poder mexer neles
+        post_data = request.POST.copy()
+
+        # 2. Se o usuário NÃO for staff E o campo 'status' não veio no envelope...
+        if not request.user.is_staff and 'status' not in post_data:
+            # 3. ...a gente bota o 'status' default NA MÃO.
+            post_data['status'] = 'EM_ABERTO'
+        
+        # ======================================================
+        # FIM DA MODIFICAÇÃO 1
+        # ======================================================
+
+        # 4. Agora a gente cria o form com os dados já "corrigidos"
+        #    (Troca 'request.POST' por 'post_data')
+        form = SolicitacaoForm(post_data, request.FILES, user=request.user)
+        
+        # O resto da tua lógica de POST continua igual...
         if len(request.FILES.getlist('imagens')) > 10:
             return JsonResponse({'success': False, 'errors': {'imagens': ['Você só pode enviar no máximo 10 imagens.']}}, status=400)
 
@@ -164,11 +184,38 @@ def solicitacao_create(request):
             messages.success(request, 'Solicitação criada com sucesso!')
             return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
         else:
+            # É aqui que o erro ("campo obrigatório") era gerado. Agora não vai mais.
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     
     else: # GET
-        # Passamos o `user` para o formulário saber quais cidades mostrar
+        # ======================================================
+        # 🔥 MODIFICAÇÃO 2: O "LEÃO DE CHÁCARA" (GET)
+        # Barra o usuário que não tem cidade no perfil
+        # ======================================================
+        try:
+            profile = request.user.profile
+            
+            # Checa se o maluco tem PELO MENOS UMA cidade (principal ou secundária)
+            tem_cidade_principal = profile.cidade_principal is not None
+            tem_cidades_secundarias = profile.cidades_secundarias.exists()
+
+            if not tem_cidade_principal and not tem_cidades_secundarias:
+                # Se não tem... CHUTA ELE!
+                messages.error(request, "Você precisa definir sua 'Cidade Principal' em 'Configurações' antes de poder criar uma solicitação.")
+                return redirect('configuracoes')
+                
+        except Profile.DoesNotExist:
+             # Se o cara nem perfil tem (B.O. grave), chuta ele também
+             messages.error(request, "Seu perfil de usuário não foi encontrado. Contate o administrador.")
+             return redirect('home')
+        
+        # ======================================================
+        # FIM DA MODIFICAÇÃO 2
+        # ======================================================
+        
+        # Se ele passou pelo Leão de Chácara, aí sim ele vê o form
         form = SolicitacaoForm(user=request.user)
+        
     return render(request, 'core/solicitacao_form.html', {'form': form})
 
 
@@ -186,62 +233,135 @@ def solicitacao_detail(request, pk):
 
 @login_required
 def solicitacao_update(request, pk):
+    # 1. O CHEFE BUSCA A COMANDA (SOLICITAÇÃO) NO ESTOQUE
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
+    
+    # 2. O LEÃO DE CHÁCARA (BOUNCER)
+    # Se o cara não é staff E não é o dono da comanda...
     if not request.user.is_staff and solicitacao.cidadao != request.user:
-        # ...CHUTA ELE! Manda uma mensagem e joga de volta pra lista.
-        messages.error(request, f"Você não pode mexer na solicitação #{pk}, ela não é sua.")
+        messages.error(request, f"Tu não pode mexer na solicitação #{pk}, ela não é tua, parça.")
         return redirect('solicitacao_list')
+
+    # 3. CHEFE VÊ SE O PEDIDO É PRA ATUALIZAR (POST)
     if request.method == 'POST':
+        
+        # ======================================================
+        # 🔥 ANTES DE OUVIR A MUDANÇA, ELE ANOTA O ESTADO ANTIGO
+        # ======================================================
+        status_antigo = solicitacao.get_status_display() 
+        equipe_antiga = solicitacao.equipe_delegada
+        
+        # 4. O CHEFE PEGA O PAPEL DE ATUALIZAÇÃO (O FORM)
         form = SolicitacaoForm(request.POST, request.FILES, instance=solicitacao, user=request.user)
 
+        # 5. OUTRO LEÃO DE CHÁCARA (BOUNCER DAS FOTOS)
         imagens_novas = request.FILES.getlist('imagens')
         imagens_atuais_count = solicitacao.imagens.count()
         if (imagens_atuais_count + len(imagens_novas)) > 10:
-            error_msg = f'Você não pode ter mais de 10 imagens. Esta solicitação já tem {imagens_atuais_count} e você está tentando adicionar mais {len(imagens_novas)}.'
+            error_msg = f'Não pode ter mais de 10 imagens. Esta solicitação já tem {imagens_atuais_count}.'
             return JsonResponse({'success': False, 'errors': {'imagens': [error_msg]}}, status=400)
 
+        # 6. O CHEFE CONFERE SE O PEDIDO TÁ PREENCHIDO CERTO
         if form.is_valid():
-            # ======================================================
-            # ============ LÓGICA DO CARIMBO AUTOMÁTICO ============
-            # ======================================================
+            
+            # 7. PEGA A COMANDA ATUALIZADA, MAS SEGURA ANTES DE SALVAR
             solicitacao_instance = form.save(commit=False)
             
-            # Checa se o status foi alterado no formulário E se o novo status é 'FINALIZADO' ou 'RECUSADO'
+            # ======================================================
+            # 🔥 LÓGICA DO "MENSAGEIRO" (O X9 DAS NOTIFICAÇÕES)
+            # ======================================================
+            
+            # 7a. O Mensageiro monta a lista de quem quer saber da fofoca
+            destinatarios = set()
+            if solicitacao.cidadao: # O dono
+                destinatarios.add(solicitacao.cidadao)
+            for interessado in solicitacao.interessados.all(): # A galera do "sininho"
+                destinatarios.add(interessado)
+
+            # 7b. O Mensageiro vê se o STATUS mudou
+            if 'status' in form.changed_data:
+                status_novo = solicitacao_instance.get_status_display() # Pega o valor novo
+                mensagem = f"A Solicitação #{solicitacao.id} mudou de status: de '{status_antigo}' para '{status_novo}'."
+                
+                # Manda o papo pra toda a lista
+                for user in destinatarios:
+                    Notificacao.objects.create(
+                        usuario=user,
+                        solicitacao=solicitacao_instance,
+                        mensagem=mensagem
+                    )
+
+            # 7c. O Mensageiro vê se a EQUIPE mudou
+            if 'equipe_delegada' in form.changed_data:
+                equipe_nova = solicitacao_instance.equipe_delegada
+                mensagem = ""
+                if equipe_nova and equipe_antiga: # Se trocou de uma pra outra
+                    mensagem = f"A Solicitação #{solicitacao.id} foi transferida da equipe '{equipe_antiga.nome}' para '{equipe_nova.nome}'."
+                elif equipe_nova: # Se foi delegada (antes era Nulo)
+                    mensagem = f"A Solicitação #{solicitacao.id} foi delegada para a equipe '{equipe_nova.nome}'."
+                else: # Se foi "des-delegada" (ficou Nulo)
+                    mensagem = f"A Solicitação #{solicitacao.id} foi removida da equipe '{equipe_antiga.nome}'."
+                
+                for user in destinatarios:
+                    Notificacao.objects.create(
+                        usuario=user,
+                        solicitacao=solicitacao_instance,
+                        mensagem=mensagem
+                    )
+
+            # 7d. O Mensageiro vê se foi RECUSADA (e tem motivo)
+            if 'motivo_recusa' in form.changed_data and solicitacao_instance.status == 'RECUSADO':
+                motivo_curto = solicitacao_instance.motivo_recusa[:70] + '...' if len(solicitacao_instance.motivo_recusa) > 70 else solicitacao_instance.motivo_recusa
+                mensagem = f"A Solicitação #{solicitacao.id} foi recusada. Motivo: '{motivo_curto}'"
+                
+                for user in destinatarios:
+                    Notificacao.objects.create(
+                        usuario=user,
+                        solicitacao=solicitacao_instance,
+                        mensagem=mensagem
+                    )
+            # ======================================================
+            # FIM DO MENSAGEIRO
+            # ======================================================
+
+            # ======================================================
+            # 8. LÓGICA DO CARIMBO AUTOMÁTICO (TUA LÓGICA ANTIGA)
+            # ======================================================
             if 'status' in form.changed_data and (solicitacao_instance.status == 'FINALIZADO' or solicitacao_instance.status == 'RECUSADO'):
                 solicitacao_instance.data_finalizacao = timezone.now()
             
             # ======================================================
-            # ============ LÓGICA DE CRIAÇÃO DA ÁRVORE ============
+            # 9. LÓGICA DE CRIAÇÃO DA ÁRVORE (TUA LÓGICA ANTIGA)
             # ======================================================
-            # Pega a espécie que o "fiscal" (form) validou
             especie_para_plantar = form.cleaned_data.get('especie_plantada')
-            
-            # Se o status é FINALIZADO e o fiscal mandou uma espécie...
             if solicitacao_instance.status == 'FINALIZADO' and especie_para_plantar:
-                # A gente "planta" a árvore (cria a InstanciaArvore)
                 InstanciaArvore.objects.create(
                     especie=especie_para_plantar,
-                    latitude=solicitacao_instance.latitude,   # Puxa a Lat da solicitação
-                    longitude=solicitacao_instance.longitude, # Puxa a Lon da solicitação
-                    estado_saude='BOA',                       # Padrão de plantio
-                    data_plantio=timezone.now().date()        # Padrão de plantio
+                    latitude=solicitacao_instance.latitude,
+                    longitude=solicitacao_instance.longitude,
+                    estado_saude='BOA',
+                    data_plantio=timezone.now().date()
                 )
-            # ======================================================
 
-            # Agora sim a gente salva a SOLICITAÇÃO no banco
+            # 10. AGORA SIM! O CHEFE SALVA A COMANDA NO ESTOQUE
             solicitacao_instance.save()
-            # ======================================================
-
+            
+            # 11. O CHEFE SALVA AS FOTOS NOVAS
             for imagem_file in imagens_novas:
                 ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
             
+            # 12. O CHEFE AVISA QUE DEU TUDO CERTO (JSON pro JS)
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
             return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
-        else:
+        
+        else: # Se o formulário for inválido
+            # 13. O CHEFE AVISA QUE O PEDIDO VEIO ZOADO (JSON pro JS)
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             
-    else: # GET
+    else: # 14. SE O PEDIDO FOR SÓ PRA VER (GET)
+        # O Chefe só monta o prato (HTML) com o formulário preenchido
         form = SolicitacaoForm(instance=solicitacao, user=request.user)
+    
     context = {
         'form': form,
         'solicitacao': solicitacao 
@@ -1129,3 +1249,48 @@ def api_cidades_geo(request):
             })
 
     return JsonResponse({"cidades": cidades})
+
+@login_required
+@require_POST # Só aceita POST
+@csrf_exempt # A gente vai chamar com JS, facilita
+def toggle_interesse_api(request, pk):
+    try:
+        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        user = request.user
+        
+        if user in solicitacao.interessados.all():
+            # Se já segue, para de seguir
+            solicitacao.interessados.remove(user)
+            interessado = False
+        else:
+            # Se não segue, começa a seguir
+            solicitacao.interessados.add(user)
+            interessado = True
+            
+        return JsonResponse({'status': 'ok', 'interessado': interessado, 'count': solicitacao.interessados.count()})
+    except Exception as e:
+        return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
+
+@login_required
+@require_POST  # Só aceita POST
+@csrf_exempt   # Facilita a vida pro nosso JS
+def api_marcar_notificacoes_lidas(request):
+    """
+    API "Deduradora": Pega todas as notificações NÃO LIDAS
+    do usuário logado e marca elas como LIDAS.
+    """
+    try:
+        # 1. Acha todas as notificações do usuário com 'lida=False'
+        notificacoes_para_limpar = Notificacao.objects.filter(
+            usuario=request.user, 
+            lida=False
+        )
+        
+        # 2. Manda o "update" de uma vez só (muito rápido)
+        notificacoes_para_limpar.update(lida=True)
+        
+        # 3. Manda o "jóia" de volta pro JS
+        return JsonResponse({'status': 'ok'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)

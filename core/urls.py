@@ -15,7 +15,7 @@ from .views import (
     search_results_view, planejamentos_view,
     analisar_area_api, recuperar_senha_view, home_view,
     AreaDeleteView,
-    relatorios_view, instancia_arvore_delete_api, api_heatmap_denuncias
+    relatorios_view, instancia_arvore_delete_api, api_heatmap_denuncias,
 )
 # O parêntese do 'from .views import' FECHA AQUI
 
@@ -59,6 +59,8 @@ urlpatterns = [
     path('api/minhas-cidades/', views.api_cidades_permitidas, name='api_cidades_usuario'),
     path('api/cidades-geo/', views.api_cidades_geo, name='api_cidades_geo'),
     path('api/heatmap/denuncias/', api_heatmap_denuncias, name='api_heatmap_denuncias'),
+    path('api/solicitacao/<int:pk>/toggle_interesse/', views.toggle_interesse_api, name='toggle_interesse_api'),
+    path('api/notificacoes/marcar-como-lidas/', views.api_marcar_notificacoes_lidas, name='api_marcar_lidas'),
 
 
     # --- Outras URLs do App ---

@@ -12,71 +12,151 @@
         gap: 20px;
         flex-wrap: wrap;
     }
-    .header-title { flex: 1; min-width: 300px; }
-    .header-filters { display: flex; gap: 10px; align-items: center; }
+
+    .header-title {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .header-filters {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
 
     /* --- FILTROS (ESTILO LOJA) --- */
-    .filter-select, .filter-dropdown-btn {
+    .filter-select,
+    .filter-dropdown-btn {
         background-color: #fff;
         border: 1px solid #e9ecef;
         border-radius: 8px;
         padding: 8px 12px;
         font-weight: 500;
         color: #343a40;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease;
         cursor: pointer;
-        display: flex; align-items: center; justify-content: space-between;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         min-width: 180px;
     }
-    .filter-select:hover, .filter-dropdown-btn:hover, .filter-dropdown-btn.show {
+
+    .filter-select:hover,
+    .filter-dropdown-btn:hover,
+    .filter-dropdown-btn.show {
         border-color: #1E5943;
         box-shadow: 0 4px 12px rgba(30, 89, 67, 0.15);
     }
+
     .filter-label {
-        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-        color: #1E5943; margin-bottom: 4px; display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1E5943;
+        margin-bottom: 4px;
+        display: block;
     }
 
     /* --- DROPDOWN DE CAMADAS (V3 - CHECKBOX NA DIREITA) --- */
     .layers-dropdown-menu {
-        padding: 10px; min-width: 220px; border-radius: 12px !important;
-        border: 1px solid #f0f0f0 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        padding: 10px;
+        min-width: 220px;
+        border-radius: 12px !important;
+        border: 1px solid #f0f0f0 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
     }
+
     .layer-option {
-        display: flex; align-items: center; justify-content: space-between; /* Joga o check pra direita */
-        padding: 8px 10px; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+        width: 100%;
     }
-    .layer-option:hover { background-color: #f8f9fa; }
+
+    .layer-option:hover {
+        background-color: #f8f9fa;
+    }
+
     .layer-option input[type="checkbox"] {
-        order: 2; /* Checkbox vai pro final */
-        margin-left: 10px; width: 18px; height: 18px; accent-color: #1E5943; cursor: pointer;
+        order: 2;
+        margin-left: 10px;
+        width: 18px;
+        height: 18px;
+        accent-color: #1E5943;
+        cursor: pointer;
     }
-    .layer-option-label { 
-        order: 1; /* Texto fica no começo */
-        flex: 1; font-weight: 500; color: #343a40; display: flex; align-items: center; 
+
+    .layer-option-label {
+        order: 1;
+        flex: 1;
+        font-weight: 500;
+        color: #343a40;
+        display: flex;
+        align-items: center;
     }
+
     .layer-icon-small {
-        width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
-        border-radius: 6px; margin-right: 8px; font-size: 0.9rem;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        margin-right: 8px;
+        font-size: 0.9rem;
     }
+
     /* Cores dos ícones */
-    .bg-success-soft { background-color: #d1e7dd; color: #198754; }
-    .bg-warning-soft { background-color: #fff3cd; color: #ffc107; }
-    .bg-primary-soft { background-color: #cfe2ff; color: #0d6efd; }
-    .bg-danger-soft { background-color: #f8d7da; color: #dc3545; }
+    .bg-success-soft {
+        background-color: #d1e7dd;
+        color: #198754;
+    }
+
+    .bg-warning-soft {
+        background-color: #fff3cd;
+        color: #ffc107;
+    }
+
+    .bg-primary-soft {
+        background-color: #cfe2ff;
+        color: #0d6efd;
+    }
+
+    .bg-danger-soft {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
 
     /* --- MAPA CONTAINER --- */
     .map-card-container {
-        position: relative; border-radius: 16px; overflow: hidden; border: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: 72vh; min-height: 500px;
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        height: 72vh;
+        min-height: 500px;
     }
-    #map { height: 100%; width: 100%; z-index: 1; }
+
+    #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+    }
 
     /* --- PAINEL LATERAL (MODERNO) --- */
     #details-panel {
         position: absolute;
-        top: 20px; right: 20px; z-index: 405; width: 320px; max-width: calc(100% - 40px);
+        top: 20px;
+        right: 20px;
+        z-index: 405;
+        width: 320px;
+        max-width: calc(100% - 40px);
         background-color: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
@@ -84,30 +164,80 @@
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
         border-radius: 16px !important;
         padding: 20px !important;
-        opacity: 0; transform: translateX(50px); pointer-events: none;
+        opacity: 0;
+        transform: translateX(50px);
+        pointer-events: none;
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     #details-panel.show {
-        opacity: 1 !important; transform: translateX(0) !important;
-        pointer-events: auto !important; display: block !important;
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+        display: block !important;
     }
-    #details-content p { margin-bottom: 0.5rem; line-height: 1.5; }
-    #details-content strong { color: #1E5943; font-weight: 600; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; }
+
+    #details-content p {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    #details-content strong {
+        color: #1E5943;
+        font-weight: 600;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 4px;
+    }
 
     /* --- OUTROS CONTROLES --- */
     .map-coords-display {
-        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 400;
-        background: rgba(33, 37, 41, 0.8); color: #fff; padding: 6px 12px; border-radius: 20px;
-        font-size: 0.75rem; font-family: monospace; pointer-events: none;
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 400;
+        background: rgba(33, 37, 41, 0.8);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-family: monospace;
+        pointer-events: none;
     }
-    .leaflet-control-layers { display: none !important; }
-    .leaflet-bar { border: none !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
-    .leaflet-bar a { background-color: rgba(255,255,255,0.9) !important; color: #1E5943 !important; backdrop-filter: blur(5px); }
-    .leaflet-bar a:hover { background-color: #1E5943 !important; color: #fff !important; }
-    .leaflet-pane.mask-pane { z-index: 350; }
+
+
+
+    .leaflet-bar {
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .leaflet-bar a {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        color: #1E5943 !important;
+        backdrop-filter: blur(5px);
+    }
+
+    .leaflet-bar a:hover {
+        background-color: #1E5943 !important;
+        color: #fff !important;
+    }
+
+    .leaflet-pane.mask-pane {
+        z-index: 350;
+    }
+
     .leaflet-draw-toolbar {
         display: flex;
         gap: 8px;
@@ -117,12 +247,12 @@
     .leaflet-draw-toolbar a {
         background: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(5px);
-        border: 1px solid rgba(0,0,0,0.1) !important;
-        color: #1E5943 !important; /* Texto verde */
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-        border-radius: 12px !important; /* Bordas arredondadas iguais aos outros painéis */
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        color: #1E5943 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border-radius: 12px !important;
         width: auto !important;
-        height: 36px !important; /* Um pouco mais alto pra caber bem */
+        height: 36px !important;
         line-height: 34px !important;
         padding: 0 12px !important;
         font-family: "Poppins", sans-serif !important;
@@ -134,45 +264,53 @@
         justify-content: center !important;
     }
 
-    /* Efeito Hover */
     .leaflet-draw-toolbar a:hover {
         background-color: #1E5943 !important;
         color: #fff !important;
         border-color: #1E5943 !important;
     }
-    /* Quando passa o mouse, o ícone também fica branco */
+
     .leaflet-draw-toolbar a:hover::before {
         color: #fff !important;
     }
 
-    /* --- OS ÍCONES (::before) --- */
     .leaflet-draw-toolbar a::before {
         display: inline-block !important;
-        font-family: 'bootstrap-icons' !important; /* Usa a fonte do Bootstrap */
+        font-family: 'bootstrap-icons' !important;
         font-style: normal;
         font-weight: normal;
         font-variant: normal;
         text-transform: none;
         line-height: 1;
-        margin-right: 6px !important; /* Espaço entre ícone e texto */
+        margin-right: 6px !important;
         font-size: 1.1rem !important;
-        color: #1E5943; /* Ícone verde por padrão */
-        background: none !important; /* Remove imagem padrão do Leaflet */
+        color: #1E5943;
+        background: none !important;
     }
 
-    /* Ícone para desenhar ÁREA (Polygon) -> bi-vector-pen (\F60E) */
-    .leaflet-draw-draw-polygon::before { content: "\f3e8"; }
-    
-    /* Ícone para desenhar RETÂNGULO -> bi-bounding-box (\F1C9) */
-    .leaflet-draw-draw-rectangle::before { content: "\f584"; }
-    
-    /* Ícone para desenhar PONTO (Árvore) -> bi-tree-fill (\F5C4) */
-    .leaflet-draw-draw-marker::before { content: "\f5e1"; }
+    .leaflet-draw-draw-polygon::before {
+        content: "\f3e8";
+    }
 
-    /* --- OS TEXTOS (::after) --- */
-    .leaflet-draw-draw-polygon::after { content: "Adicionar Área"; }
-    .leaflet-draw-draw-rectangle::after { content: "Adicionar Retângulo"; }
-    .leaflet-draw-draw-marker::after { content: "Adicionar Árvore"; }
+    .leaflet-draw-draw-rectangle::before {
+        content: "\f584";
+    }
+
+    .leaflet-draw-draw-marker::before {
+        content: "\f5e1";
+    }
+
+    .leaflet-draw-draw-polygon::after {
+        content: "Adicionar Área";
+    }
+
+    .leaflet-draw-draw-rectangle::after {
+        content: "Adicionar Retângulo";
+    }
+
+    .leaflet-draw-draw-marker::after {
+        content: "Adicionar Árvore";
+    }
 </style>
 
 <div class="page-header-flex">
@@ -191,14 +329,51 @@
             <span class="filter-label">Exibir Camadas</span>
             <div class="dropdown">
                 <button class="filter-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                    <span><i class="bi bi-layers-fill me-2" style="color: #1E5943;"></i>Selecionar...</span>
+                    <i class="bi bi-layers-fill me-2" style="color: #1E5943;"></i>
+                    <span id="layer-button-text">Selecionar...</span>
                 </button>
                 <ul class="dropdown-menu layers-dropdown-menu dropdown-menu-end">
-                    <li><label class="layer-option"><span class="layer-option-label"><span class="layer-icon-small bg-success-soft"><i class="bi bi-tree-fill"></i></span>Árvores</span><input type="checkbox" checked data-layer="arvores"></label></li>
-                    <li><label class="layer-option"><span class="layer-option-label"><span class="layer-icon-small bg-warning-soft"><i class="bi bi-file-earmark-text-fill"></i></span>Solicitações</span><input type="checkbox" checked data-layer="solicitacoes"></label></li>
-                    <li><label class="layer-option"><span class="layer-option-label"><span class="layer-icon-small bg-primary-soft"><i class="bi bi-bounding-box"></i></span>Áreas Planejadas</span><input type="checkbox" checked data-layer="areas"></label></li>
+                    <li>
+                        <label class="layer-option">
+                            <span class="layer-option-label">
+                                <span class="layer-icon-small bg-success-soft"><i class="bi bi-tree-fill"></i></span>Árvores
+                            </span>
+                            <input type="checkbox" checked data-layer="arvores">
+                        </label>
+                    </li>
+                    <li>
+                        <label class="layer-option">
+                            <span class="layer-option-label">
+                                <span class="layer-icon-small bg-danger-soft"><i class="bi bi-exclamation-triangle-fill"></i></span>Denúncias
+                            </span>
+                            <input type="checkbox" checked data-layer="denuncias">
+                        </label>
+                    </li>
+                    <li>
+                        <label class="layer-option">
+                            <span class="layer-option-label">
+                                <span class="layer-icon-small bg-warning-soft"><i class="bi bi-lightbulb-fill"></i></span>Sugestões
+                            </span>
+                            <input type="checkbox" checked data-layer="sugestoes">
+                        </label>
+                    </li>
+                    <li>
+                        <label class="layer-option">
+                            <span class="layer-option-label">
+                                <span class="layer-icon-small bg-primary-soft"><i class="bi bi-bounding-box"></i></span>Áreas Planejadas
+                            </span>
+                            <input type="checkbox" checked data-layer="areas">
+                        </label>
+                    </li>
                     <li><hr class="dropdown-divider my-2"></li>
-                    <li><label class="layer-option"><span class="layer-option-label"><span class="layer-icon-small bg-danger-soft"><i class="bi bi-thermometer-half"></i></span>Mapa de Calor</span><input type="checkbox" data-layer="calor"></label></li>
+                    <li>
+                        <label class="layer-option">
+                            <span class="layer-option-label">
+                                <span class="layer-icon-small bg-danger-soft"><i class="bi bi-thermometer-half"></i></span>Mapa de Calor
+                            </span>
+                            <input type="checkbox" data-layer="calor">
+                        </label>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -217,7 +392,7 @@
             <div class="text-muted small fst-italic">Selecione um item no mapa...</div>
         </div>
     </div>
-    
+
     <div id="coords-display" class="map-coords-display">
         <i class="bi bi-crosshair me-1"></i> Lat: -- | Lon: --
     </div>
@@ -232,48 +407,62 @@
             </div>
             <div class="modal-body pt-4">
                 <form id="area-form">
-                    <div class="mb-3"><label class="form-label fw-bold small text-muted text-uppercase">Nome da Área</label>{{ form_area.nome }}</div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label fw-bold small text-muted text-uppercase">Tipo</label>{{ form_area.tipo }}</div>
-                        <div class="col-md-6 mb-3"><label class="form-label fw-bold small text-muted text-uppercase">Status</label>{{ form_area.status }}</div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Nome da Área</label>
+                        {{ form_area.nome }}
                     </div>
-                     <div class="mb-3"><label class="form-label fw-bold small text-muted text-uppercase">Espécies Previstas</label>{{ form_area.especies }}</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Tipo</label>
+                            {{ form_area.tipo }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
+                            {{ form_area.status }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Espécies Previstas</label>
+                        {{ form_area.especies }}
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-principal-acao" id="saveAreaButton"><i class="bi bi-check-lg me-1"></i> Salvar</button>
-                <button type="button" class="btn btn-danger-outline d-none ms-auto" id="deleteAreaButton"><i class="bi bi-trash me-1"></i> Excluir</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="addTreeModal" tabindex="-1" aria-hidden="true">
+<!-- Modal Nova Árvore -->
+<div class="modal fade" id="treeFormModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" style="color: #1E5943;"><i class="bi bi-tree-fill me-2"></i>Nova Árvore</h5>
+                <h5 class="modal-title fw-bold" id="modalTitleTree" style="color: #1E5943;">
+                    <i class="bi bi-tree-fill me-2"></i>Nova Árvore
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-4">
                 <form id="add-tree-form">
-                    <input type="hidden" id="tree-lat" name="latitude"><input type="hidden" id="tree-lon" name="longitude">
+                    <input type="hidden" id="tree-lat" name="latitude">
+                    <input type="hidden" id="tree-lon" name="longitude">
                     <div class="mb-4">
                         <label class="form-label fw-bold small text-muted text-uppercase">Qual a espécie?</label>
                         <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
                             <option value="" selected disabled>Busque pelo nome popular...</option>
                             {% for especie in especies_catalogo %}
-                                <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
+                            <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-bold small text-muted text-uppercase">Estado de Saúde</label>
                         <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="saude" id="saude1" value="BOA" checked><label class="btn btn-outline-success" for="saude1">Boa</label>
-                            <input type="radio" class="btn-check" name="saude" id="saude2" value="MEDIA"><label class="btn btn-outline-warning" for="saude2">Média</label>
-                            <input type="radio" class="btn-check" name="saude" id="saude3" value="RUIM"><label class="btn btn-outline-danger" for="saude3">Ruim</label>
+                            <input type="radio" class="btn-check" name="saude" id="saude1" value="BOA" checked>
+                            <label class="btn btn-outline-success" for="saude1">Boa</label>
+                            <input type="radio" class="btn-check" name="saude" id="saude2" value="MEDIA">
+                            <label class="btn btn-outline-warning" for="saude2">Média</label>
+                            <input type="radio" class="btn-check" name="saude" id="saude3" value="RUIM">
+                            <label class="btn btn-outline-danger" for="saude3">Ruim</label>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -290,11 +479,14 @@
     </div>
 </div>
 
+<!-- Modal Confirmar Exclusão de Árvore -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow" style="border-radius: 16px;">
             <div class="modal-body text-center p-4">
-                <div class="mb-3 text-danger"><i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i></div>
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
+                </div>
                 <h5 class="fw-bold mb-2">Tem certeza?</h5>
                 <p class="text-muted small mb-4">Você vai apagar a árvore #<span id="tree-id-placeholder"></span>. Isso não tem volta!</p>
                 <div class="d-flex gap-2 justify-content-center">
@@ -306,11 +498,14 @@
     </div>
 </div>
 
+<!-- Modal Confirmar Exclusão de Área -->
 <div class="modal fade" id="deleteAreaConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow" style="border-radius: 16px;">
             <div class="modal-body text-center p-4">
-                <div class="mb-3 text-danger"><i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i></div>
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
+                </div>
                 <h5 class="fw-bold mb-2">Excluir Área?</h5>
                 <p class="text-muted small mb-4">Tem certeza que deseja apagar esta área planejada? Esta ação não tem volta.</p>
                 <div class="d-flex gap-2 justify-content-center">

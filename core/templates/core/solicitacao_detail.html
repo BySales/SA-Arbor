@@ -9,13 +9,13 @@
         margin-bottom: 1rem;
     }
     .btn-outline-principal {
-    color: #1E5943;
-    border-color: #1E5943;
-}
-.btn-outline-principal:hover {
-    background-color: #1E5943;
-    color: white;
-}
+        color: #1E5943;
+        border-color: #1E5943;
+    }
+    .btn-outline-principal:hover {
+        background-color: #1E5943;
+        color: white;
+    }
     .feedback-recusa { background-color: #ffecec; border-left: 4px solid #dc3545; color: #842029; }
     .feedback-sucesso { background-color: #e8f5e9; border-left: 4px solid #198754; color: #0f5132; }
     
@@ -60,12 +60,12 @@
 
                     <dt class="col-sm-4">Tipo:</dt>
                     <dd class="col-sm-8">
-    {% if solicitacao.tipo == 'DENUNCIA' %}
-        <span class="tag tag-denuncia">Denúncia</span>
-    {% else %}
-        <span class="tag tag-sugestao">Sugestão</span>
-    {% endif %}
-</dd>
+                        {% if solicitacao.tipo == 'DENUNCIA' %}
+                            <span class="tag tag-denuncia">Denúncia</span>
+                        {% else %}
+                            <span class="tag tag-sugestao">Sugestão</span>
+                        {% endif %}
+                    </dd>
 
                     <dt class="col-sm-4">Detalhe:</dt>
                     <dd class="col-sm-8">{{ solicitacao.get_categoria_display|default:"-" }}</dd>
@@ -140,48 +140,130 @@
             </div>
         </div>
         {% endif %}
-
     </div>
 
     <div class="col-lg-4">
-        <div class="card sticky-top" style="top: 20px; z-index: 0;"> <div class="card-body p-3">
+        <div class="card sticky-top" style="top: 20px; z-index: 0;"> 
+            <div class="card-body p-3">
                 <h5 class="form-section-title mb-3">Localização da Solicitação</h5>
                 <div id="map-viewer" class="map-container-form"></div>
                 
                 {% if solicitacao.latitude and solicitacao.longitude %}
                 <div class="mt-3 text-center">
-                     <a href="https://www.google.com/maps/search/?api=1&query={{ solicitacao.latitude|stringformat:'f' }},{{ solicitacao.longitude|stringformat:'f' }}" target="_blank" class="btn btn-outline-principal w-100">
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ solicitacao.latitude|stringformat:'f' }},{{ solicitacao.longitude|stringformat:'f' }}" target="_blank" class="btn btn-outline-principal w-100">
                         <i class="bi bi-geo-alt-fill me-1"></i> Abrir no Google Maps
                     </a>
                 </div>
                 {% endif %}
-            </div>
+
+                <div class="mt-3 pt-3 border-top">
+                    {% if user != solicitacao.cidadao %}
+                        <p class="text-muted small">
+                            Seja avisado sobre qualquer mudança nesta solicitação.
+                        </p>
+                        
+                        <button id="btn-interesse" 
+                                class="btn {% if user in solicitacao.interessados.all %}btn-outline-danger{% else %}btn-outline-principal{% endif %} w-100" 
+                                data-url="{% url 'toggle_interesse_api' solicitacao.pk %}">
+                            
+                            {% if user in solicitacao.interessados.all %}
+                                <i class="bi bi-bell-slash-fill me-1"></i> Deixar de seguir
+                            {% else %}
+                                <i class="bi bi-bell-fill me-1"></i> Tenho Interesse (Seguir)
+                            {% endif %}
+                        </button>
+
+                    {% else %}
+                        <p class="text-muted small">
+                            <i class="bi bi-info-circle-fill me-1"></i> Você é o autor desta solicitação e já receberá todas as notificações.
+                        </p>
+                    {% endif %}
+
+                    <div class="mt-2 text-center text-muted small" id="contador-interesse-container">
+                        <span id="contador-interesse">{{ solicitacao.interessados.count }}</span> 
+                        outra{% if solicitacao.interessados.count != 1 %}s{% endif %} 
+                        pessoa{% if solicitacao.interessados.count != 1 %}s{% endif %} 
+                        {% if solicitacao.interessados.count == 1 %}está interessada.{% else %}estão interessadas.{% endif %}
+                    </div>
+                </div>
+                </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- 1. LÓGICA DO MAPA (O TEU CÓDIGO ORIGINAL) ---
     {% if solicitacao.latitude and solicitacao.longitude %}
         const lat = {{ solicitacao.latitude|stringformat:"f" }};
         const lon = {{ solicitacao.longitude|stringformat:"f" }};
-        // Mapa estático (sem zoom/arrastar pra focar só no pino)
         const map = L.map('map-viewer', {
-            zoomControl: false,
-            dragging: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false,
-            touchZoom: false
+            zoomControl: false, dragging: false, scrollWheelZoom: false,
+            doubleClickZoom: false, touchZoom: false
         }).setView([lat, lon], 13);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-             attribution: '&copy; OpenStreetMap'
+            attribution: '© OpenStreetMap'
         }).addTo(map);
         
         L.marker([lat, lon]).addTo(map);
+
     {% else %}
         document.getElementById('map-viewer').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted rounded border">Sem localização marcada.</div>';
     {% endif %}
+
+
+    // --- 2. LÓGICA DO BOTÃO DE INTERESSE (O NOSSO "MOTOR") ---
+    const btnInteresse = document.getElementById('btn-interesse');
+    
+    if (btnInteresse) {
+        btnInteresse.addEventListener('click', function() {
+            const url = this.dataset.url;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const contadorContainer = document.getElementById('contador-interesse-container');
+                    const novoCount = data.count;
+
+                    // Atualiza o contador
+                    if (novoCount === 0) {
+                        contadorContainer.innerHTML = '<span id="contador-interesse">0</span> outras pessoas estão interessadas.';
+                    } else if (novoCount === 1) {
+                        contadorContainer.innerHTML = '<span id="contador-interesse">1</span> outra pessoa está interessada.';
+                    } else {
+                        contadorContainer.innerHTML = `<span id="contador-interesse">${novoCount}</span> outras pessoas estão interessadas.`;
+                    }
+
+                    // Troca o visual do botão
+                    if (data.interessado === true) {
+                        btnInteresse.innerHTML = '<i class="bi bi-bell-slash-fill me-1"></i> Deixar de seguir';
+                        btnInteresse.classList.remove('btn-outline-principal');
+                        btnInteresse.classList.add('btn-outline-danger');
+                    } else {
+                        btnInteresse.innerHTML = '<i class="bi bi-bell-fill me-1"></i> Tenho Interesse (Seguir)';
+                        btnInteresse.classList.add('btn-outline-principal');
+                        btnInteresse.classList.remove('btn-outline-danger');
+                    }
+                } else {
+                    console.error('Erro na API:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro no Fetch:', error);
+            });
+        });
+    }
 });
 </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-// Arquivo: static/core/js/mapa.js (VERSÃO FINAL COMPLETA V4.2)
+// Arquivo: static/core/js/mapa.js (VERSÃO MESTRE V4.6 - Contém TODAS as correções)
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -56,14 +56,47 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!mapContainer) return;
 
     const analisarAreaUrl = mapContainer.dataset.analisarUrl;
-    const solicitacaoFocoId_antigo = getJsonData('solicitacao-foco-id');
     const focoSolicitacao = getJsonData('foco-solicitacao-data');
     const areaFocoId = getJsonData('area-foco-id');
 
     const map = L.map('map', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    
+    // ======================================================
+    // 🔥 CORREÇÃO: MAPA "COLORIDO" (VOYAGER)
+    // ======================================================
+    
+    // 1. O "Padrão" (Estilo Google, com cores)
+    const mapaPadrao = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, 
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    });
+
+    // 2. O "Satélite" (Estilo Google Earth)
+    const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    // 3. O "Modo Noturno"
+    const mapaNoturno = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, 
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    });
+
+    // 4. Bota o "Padrão" (Voyager) como o default
+    mapaPadrao.addTo(map);
+
+    // 5. Cria o "Cardápio" de mapas (o botão de trocar)
+    const baseMaps = {
+        "Padrão": mapaPadrao,
+        "Satélite": mapaSatelite,
+        "Noturno": mapaNoturno
+    };
+    
+    // 6. Bota o botão de trocar no canto superior direito
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+    // ======================================================
+
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     const gpsControl = L.Control.extend({
@@ -83,15 +116,18 @@ document.addEventListener('DOMContentLoaded', function() {
     map.addControl(new gpsControl());
     map.on('locationfound', e => { if (marker) marker.setLatLng(e.latlng); else marker = L.marker(e.latlng).addTo(map); });
 
+    let markersDb = {}; 
+
     // ======================================================
     // 3. REFERÊNCIAS AOS MODAIS E ELEMENTOS DA UI
     // ======================================================
+    // 🔥 CORREÇÃO: "GERENTES" dos modais definidos 1 vez
     const areaModalEl = document.getElementById('areaFormModal');
     const areaModal = areaModalEl ? new bootstrap.Modal(areaModalEl) : null;
     const modalTitle = document.getElementById('modalTitle');
     const deleteAreaButton = document.getElementById('deleteAreaButton');
     
-    const addTreeModalEl = document.getElementById('addTreeModal');
+    const addTreeModalEl = document.getElementById('treeFormModal');
     const addTreeModal = addTreeModalEl ? new bootstrap.Modal(addTreeModalEl) : null;
     
     const deleteConfirmModalEl = document.getElementById('deleteConfirmModal');
@@ -106,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailsContent = document.getElementById('details-content');
     document.getElementById('close-details-btn')?.addEventListener('click', () => detailsPanel.classList.remove('show'));
     
-    // Fecha painel ao clicar no mapa vazio
     map.on('click', () => detailsPanel.classList.remove('show'));
 
     const coordsDisplay = document.getElementById('coords-display');
@@ -133,7 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const ghostIcon = createCustomIcon('marker-fantasma', '<i class="bi bi-pin-fill"></i>');
 
     const camadaArvores = L.markerClusterGroup();
-    const camadaSolicitacoes = L.layerGroup();
+    // 🔥 CORREÇÃO: Camadas divididas
+    const camadaDenuncias = L.layerGroup();
+    const camadaSugestoes = L.layerGroup();
     const camadaAreas = L.layerGroup();
     let camadaHeatmap = null;
 
@@ -151,20 +188,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailsPanel.classList.add('show');
             });
             camadaArvores.addLayer(marker);
+            markersDb[`arvore_${arvore.id}`] = marker; 
         }
     });
 
     solicitacoesData.forEach(sol => {
         if (sol.lat && sol.lon) {
-            const icon = (sol.tipo_codigo === 'DENUNCIA') ? alertIcon : suggestionIcon;
+            // 🔥 CORREÇÃO: Lógica do Título/Ícone Dinâmico
+            const isDenuncia = sol.tipo_codigo === 'DENUNCIA';
+            const icon = isDenuncia ? alertIcon : suggestionIcon;
+            
             const marker = L.marker([sol.lat, sol.lon], { icon: icon });
+            
             marker.on('click', (event) => {
                 L.DomEvent.stop(event);
-                detailsTitle.innerHTML = `<i class="bi bi-file-earmark-text-fill text-warning me-2"></i> Solicitação #${sol.id}`;
+                
+                const iconClass = isDenuncia ? 'bi-exclamation-triangle-fill text-danger' : 'bi-lightbulb-fill text-warning';
+                const titleText = sol.tipo_display || 'Solicitação'; 
+                
+                detailsTitle.innerHTML = `<i class="bi ${iconClass} me-2"></i> ${titleText} #${sol.id}`;
                 detailsContent.innerHTML = `<span class="badge bg-secondary mb-2">${sol.status}</span><p class="small">${sol.descricao || '-'}</p><a href="/solicitacoes/${sol.id}/" class="btn btn-secondary-custom btn-sm w-100 mt-2">Ver Detalhes</a>`;
                 detailsPanel.classList.add('show');
             });
-            camadaSolicitacoes.addLayer(marker);
+
+            // 🔥 CORREÇÃO: Adiciona na camada certa
+            if (isDenuncia) {
+                camadaDenuncias.addLayer(marker);
+            } else {
+                camadaSugestoes.addLayer(marker);
+            }
+            markersDb[`solicitacao_${sol.id}`] = marker; 
         }
     });
 
@@ -179,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     detailsPanel.classList.add('show');
                 });
                 camadaAreas.addLayer(layer);
+                markersDb[`area_${area.id}`] = layer; 
             } catch (e) { console.error(e); }
         }
     });
@@ -188,18 +242,56 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     map.addLayer(camadaArvores);
-    map.addLayer(camadaSolicitacoes);
+    // 🔥 CORREÇÃO: Adiciona as camadas divididas
+    map.addLayer(camadaDenuncias);
+    map.addLayer(camadaSugestoes);
     map.addLayer(camadaAreas);
 
     // ======================================================
     // 5. CONTROLES EXTERNOS
     // ======================================================
+    
+    // 🔥 CORREÇÃO: Lógica do botão de camadas inteligente
+    const layerButtonText = document.getElementById('layer-button-text');
+
+    function updateLayerButtonText() {
+        if (!layerButtonText) return;
+
+        const checkedLabels = [];
+        document.querySelectorAll('.layer-option input[type="checkbox"]:checked').forEach(cb => {
+            const label = cb.closest('.layer-option').querySelector('.layer-option-label').textContent.trim();
+            checkedLabels.push(label);
+        });
+
+        if (checkedLabels.length === 0) {
+            layerButtonText.textContent = 'Nenhuma camada';
+        } else if (checkedLabels.length > 2) {
+            layerButtonText.textContent = `${checkedLabels.length} camadas visíveis`;
+        } else {
+            layerButtonText.textContent = checkedLabels.join(', ');
+        }
+    }
+
     document.querySelectorAll('.layer-option input[type="checkbox"]').forEach(cb => {
         cb.addEventListener('change', function() {
-            const layer = { 'arvores': camadaArvores, 'solicitacoes': camadaSolicitacoes, 'areas': camadaAreas, 'calor': camadaHeatmap }[this.dataset.layer];
+            // 🔥 CORREÇÃO: Mapa de camadas atualizado
+            const layerMap = { 
+                'arvores': camadaArvores, 
+                'denuncias': camadaDenuncias,
+                'sugestoes': camadaSugestoes,
+                'areas': camadaAreas, 
+                'calor': camadaHeatmap 
+            };
+            const layer = layerMap[this.dataset.layer];
+            
             if (layer) this.checked ? map.addLayer(layer) : map.removeLayer(layer);
+
+            updateLayerButtonText();
         });
     });
+    
+    updateLayerButtonText(); // Roda no início
+
 
     const canvasRenderer = L.canvas({ padding: 1 });
     let mascaraCinza = null, cidadesGlobais = [];
@@ -245,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
     L.drawLocal.draw.toolbar.buttons.rectangle = 'Desenhar retângulo';
     const drawControl = new L.Control.Draw({
         position: 'topleft',
-        edit: false, // <--- 🔥 DESLIGA A BARRA DE EDIÇÃO/EXCLUSÃO 🔥
+        edit: false, 
         draw: {
             polygon: { allowIntersection: false, showArea: true },
             rectangle: { shapeOptions: { clickable: false } },
@@ -266,7 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('tree-lon').value = c.lng.toFixed(6);
             const form = document.getElementById('add-tree-form'); if (form) form.reset();
             if (typeof $ !== 'undefined' && $.fn.select2) $('#tree-especie').val(null).trigger('change');
-            new bootstrap.Modal(document.getElementById('addTreeModal')).show();
+            
+            // 🔥 CORREÇÃO: Chama o "Gerente Original"
+            if (addTreeModal) addTreeModal.show();
+            
             document.getElementById('addTreeModal').addEventListener('hidden.bs.modal', () => { if (drawnItems.hasLayer(layer)) drawnItems.removeLayer(layer); }, { once: true });
         } else {
             temporaryLayer = layer;
@@ -275,9 +370,15 @@ document.addEventListener('DOMContentLoaded', function() {
             popup.querySelector('#btn-save-draw').onclick = () => {
                 editingAreaId = null; document.getElementById('area-form').reset();
                 document.getElementById('modalTitle').textContent = 'Nova Área';
-                document.getElementById('deleteAreaButton').classList.add('d-none');
+                if (deleteAreaButton) {
+    deleteAreaButton.classList.add('d-none');
+}
                 if (typeof $ !== 'undefined' && $.fn.select2) $('#id_especies').val(null).trigger('change');
-                new bootstrap.Modal(document.getElementById('areaFormModal')).show(); map.closePopup();
+
+                // 🔥 CORREÇÃO: Chama o "Gerente Original"
+                if (areaModal) areaModal.show();
+                
+                map.closePopup();
             };
             popup.querySelector('#btn-cancel-draw').onclick = () => { drawnItems.removeLayer(layer); map.closePopup(); };
             layer.bindPopup(popup).openPopup();
@@ -288,17 +389,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // 7. INICIALIZAÇÃO E GLOBAIS
     // ======================================================
     iniciarCidades().then(() => {
+        
+        // 🔥 CORREÇÃO: Lógica do "GPS Fantasma"
         if (focoSolicitacao) {
-            const ghostMarker = L.marker([focoSolicitacao.lat, focoSolicitacao.lon], { icon: ghostIcon, zIndexOffset: 1000 }).addTo(map)
-                .bindPopup(`<b>${focoSolicitacao.tipo_display}</b><br>${focoSolicitacao.status}`).openPopup();
-            map.setView([focoSolicitacao.lat, focoSolicitacao.lon], 18);
+            const realMarker = markersDb[`solicitacao_${focoSolicitacao.id}`];
+            if (realMarker) {
+                map.setView([focoSolicitacao.lat, focoSolicitacao.lon], 18);
+                setTimeout(() => {
+                    realMarker.fire('click');
+                }, 500);
+            } else {
+                const ghostMarker = L.marker([focoSolicitacao.lat, focoSolicitacao.lon], { icon: ghostIcon, zIndexOffset: 1000 }).addTo(map)
+                    .bindPopup(`
+                        <b>${focoSolicitacao.tipo_display}</b><br>
+                        <span class="badge bg-secondary">${focoSolicitacao.status}</span>
+                        <p class="small mt-2 mb-2">${focoSolicitacao.descricao.substring(0, 50)}...</p>
+                        <a href="/solicitacoes/${focoSolicitacao.id}/" class="btn btn-secondary-custom btn-sm w-100">Ver Detalhes</a>
+                    `);
+                map.setView([focoSolicitacao.lat, focoSolicitacao.lon], 18);
+                setTimeout(() => {
+                    ghostMarker.openPopup();
+                }, 500); 
+            }
+        } else if (areaFocoId) {
+            const realArea = markersDb[`area_${areaFocoId}`];
+            if (realArea) {
+                map.fitBounds(realArea.getBounds());
+                 setTimeout(() => {
+                    realArea.fire('click');
+                }, 500);
+            }
         }
     });
 
     window.deleteTree = function(id) {
         document.getElementById('tree-id-placeholder').textContent = id;
         document.getElementById('confirm-delete-btn').dataset.treeId = id;
-        new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+        
+        // 🔥 CORREÇÃO: Chama o "Gerente Original"
+        if (deleteConfirmModal) deleteConfirmModal.show();
     }
 
     window.openEditModal = function(id) {
@@ -309,7 +438,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const f = document.getElementById('area-form');
             f.elements['nome'].value = d.nome; f.elements['tipo'].value = d.tipo; f.elements['status'].value = d.status;
             if (typeof $ !== 'undefined' && $.fn.select2) $('#id_especies').val(d.especies).trigger('change');
-            new bootstrap.Modal(document.getElementById('areaFormModal')).show();
+            
+            // 🔥 CORREÇÃO: Chama o "Gerente Original"
+            if (areaModal) areaModal.show();
+
         }).catch(() => showToast('Erro', 'Falha ao carregar área.', true));
     }
 
@@ -318,14 +450,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const fd = new FormData(document.getElementById('add-tree-form'));
         if (!fd.get('especie')) return showToast('Erro', 'Selecione uma espécie.', true);
         fetch('/api/instancias/nova/', { method: 'POST', headers: {'X-CSRFToken': csrftoken}, body: fd }).then(r=>r.json()).then(d=>{
-            if(d.status==='ok') { bootstrap.Modal.getInstance(document.getElementById('addTreeModal')).hide(); showToast('Sucesso', d.message); window.location.reload(); }
+            // 🔥 CORREÇÃO: Chama o "Gerente Original" pra fechar
+            if(d.status==='ok') { if (addTreeModal) addTreeModal.hide(); showToast('Sucesso', d.message); window.location.reload(); }
             else showToast('Erro', d.message||'Falha.', true);
         });
     });
 
+    // 🔥 CORREÇÃO: APAGAR ÁRVORE SEM RELOAD
     document.getElementById('confirm-delete-btn')?.addEventListener('click', function() {
-        fetch(`/api/arvores/${this.dataset.treeId}/delete/`, { method: 'DELETE', headers: {'X-CSRFToken': csrftoken} }).then(r=>r.json()).then(d=>{
-            if(d.status==='ok') { showToast('Sucesso', d.message); window.location.reload(); } else showToast('Erro', d.message, true);
+        const treeId = this.dataset.treeId; 
+        if (!treeId) return;
+
+        fetch(`/api/arvores/${treeId}/delete/`, { method: 'DELETE', headers: {'X-CSRFToken': csrftoken} })
+        .then(r=>r.json())
+        .then(d=>{
+            if(d.status==='ok') { 
+                const markerToRemove = markersDb[`arvore_${treeId}`];
+                if (markerToRemove) {
+                    camadaArvores.removeLayer(markerToRemove);
+                }
+                delete markersDb[`arvore_${treeId}`];
+
+                if (deleteConfirmModal) deleteConfirmModal.hide();
+                detailsPanel.classList.remove('show');
+
+                showToast('Sucesso', d.message); 
+            } else { 
+                showToast('Erro', d.message, true); 
+            }
         });
     });
 
@@ -335,38 +487,51 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = editingAreaId ? `/api/areas/${editingAreaId}/` : "/api/salvar_area/", method = editingAreaId ? 'PUT' : 'POST';
         const body = { form_data: obj }; if(!editingAreaId && temporaryLayer) body.geometry = temporaryLayer.toGeoJSON().geometry;
         fetch(url, { method: method, headers: {'Content-Type':'application/json', 'X-CSRFToken':csrftoken}, body: JSON.stringify(body) }).then(r=>r.json()).then(d=>{
-             if(d.status==='ok') { showToast('Sucesso', d.message); window.location.reload(); } else showToast('Erro', d.message||'Falha.', true);
+             if(d.status==='ok') { 
+                if (areaModal) areaModal.hide();
+                showToast('Sucesso', d.message); 
+                window.location.reload(); 
+             } else {
+                showToast('Erro', d.message||'Falha.', true);
+             }
         });
     });
 
-    // 🔥 NOVO LISTENER DE DELETAR ÁREA (SEM ALERT) 🔥
+    // 🔥 CORREÇÃO: APAGAR ÁREA SEM RELOAD
     if (confirmDeleteAreaBtn) {
         confirmDeleteAreaBtn.addEventListener('click', function() {
             if (editingAreaId) {
-                 fetch(`/api/areas/${editingAreaId}/`, { method: 'DELETE', headers: { 'X-CSRFToken': csrftoken } })
-                 .then(r => r.json())
-                 .then(data => {
-                     if (data.status === 'ok') {
-                         showToast('Sucesso', 'Área removida.');
-                         if (deleteAreaConfirmModal) deleteAreaConfirmModal.hide();
-                         if (areaModal) areaModal.hide();
-                         window.location.reload();
-                     } else {
-                         showToast('Erro', 'Falha ao remover.', true);
-                     }
-                 })
-                 .catch(() => showToast('Erro', 'Erro de conexão.', true));
+                const areaId = editingAreaId;
+                 fetch(`/api/areas/${areaId}/`, { method: 'DELETE', headers: { 'X-CSRFToken': csrftoken } })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        showToast('Sucesso', 'Área removida.');
+                        
+                        const areaToRemove = markersDb[`area_${areaId}`];
+                        if (areaToRemove) {
+                            camadaAreas.removeLayer(areaToRemove);
+                        }
+                        delete markersDb[`area_${areaId}`];
+
+                        if (deleteAreaConfirmModal) deleteAreaConfirmModal.hide();
+                        if (areaModal) areaModal.hide();
+                        detailsPanel.classList.remove('show');
+                        
+                    } else {
+                        showToast('Erro', 'Falha ao remover.', true);
+                    }
+                })
+                .catch(() => showToast('Erro', 'Erro de conexão.', true));
             }
         });
     }
 
-    // Botão "Excluir" no modal de edição -> abre o de confirmação
+    // 🔥 CORREÇÃO: Chama o "Gerente Original"
     if (deleteAreaButton) {
         deleteAreaButton.addEventListener('click', function() {
              if (deleteAreaConfirmModal) {
-                 // Opcional: esconder o modal de edição pra focar na confirmação
-                 // if (areaModal) areaModal.hide(); 
-                 deleteAreaConfirmModal.show();
+                deleteAreaConfirmModal.show();
              }
         });
     }

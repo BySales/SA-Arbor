@@ -33,40 +33,41 @@
   </head>
   <body class="app-body">
     <div class="app-container">
+        
         <nav class="sidebar">
-            <div>
-                <div class="sidebar-header">
-                    <div class="sidebar-logo">
-                        <img src="{% static 'core/img/arvore-logo-verde.png' %}" alt="Logo Arbor" style="width: 48px;">
-                        <span class="sidebar-logo-text">Arbor</span>
-                    </div>
-                </div>
-                <ul class="sidebar-menu">
-                    <li class="menu-header"><span>Início</span></li>
-                    
-                    <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
-                    <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
-                    <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
+          <div>
+              <div class="sidebar-header">
+                  <div class="sidebar-logo">
+                      <img src="{% static 'core/img/arvore-logo-verde.png' %}" alt="Logo Arbor" style="width: 48px;">
+                      <span class="sidebar-logo-text">Arbor</span>
+                  </div>
+              </div>
+              <ul class="sidebar-menu">
+                  <li class="menu-header"><span>Início</span></li>
+                  
+                  <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="bi bi-house-door-fill"></i><span class="menu-text"> Página Inicial</span></a></li>
+                  <li><a href="{% url 'mapa' %}" class="{% if request.resolver_match.url_name == 'mapa' %}active{% endif %}"><i class="bi bi-map-fill"></i><span class="menu-text"> Mapa Interativo</span></a></li>
+                  <li><a href="{% url 'solicitacao_list' %}" class="{% if 'solicitacao' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-file-earmark-text-fill"></i><span class="menu-text"> Solicitações</span></a></li>
 
-                    {% if user.is_staff %}
-                    <li><a href="{% url 'planejamentos' %}" class="{% if pagina == 'planejamentos' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
-                    <li><a href="{% url 'relatorios' %}" class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
-                    {% endif %}
+                  {% if user.is_staff %}
+                  <li><a href="{% url 'planejamentos' %}" class="{% if pagina == 'planejamentos' %}active{% endif %}"><i class="bi bi-clipboard2-data-fill"></i><span class="menu-text"> Planejamentos</span></a></li>
+                  <li><a href="{% url 'relatorios' %}" class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"><i class="bi bi-graph-up-arrow"></i><span class="menu-text"> Relatórios</span></a></li>
+                  {% endif %}
 
-                    {% if user.is_staff %}
-                    <li class="menu-header"><span>Cadastros</span></li>
-                    <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Espécies</span></a></li>
-                    <li><a href="{% url 'equipe_list' %}" class="{% if 'equipe' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
-                    {% endif %}
-                </ul>
-            </div>
+                  {% if user.is_staff %}
+                  <li class="menu-header"><span>Cadastros</span></li>
+                  <li><a href="{% url 'especie_list' %}" class="{% if 'especie' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tree-fill"></i><span class="menu-text"> Espécies</span></a></li>
+                  <li><a href="{% url 'equipe_list' %}" class="{% if 'equipe' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people-fill"></i><span class="menu-text"> Equipes</span></a></li>
+                  {% endif %}
+              </ul>
+          </div>
 
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-header"><span>Ajustes</span></li>
-                    <li><a href="{% url 'configuracoes' %}"><i class="bi bi-gear-fill"></i><span class="menu-text"> Configurações</span></a></li>
-                </ul>
-            </div>
+          <div class="sidebar-footer">
+              <ul class="sidebar-menu">
+                  <li class="menu-header"><span>Ajustes</span></li>
+                  <li><a href="{% url 'configuracoes' %}"><i class="bi bi-gear-fill"></i><span class="menu-text"> Configurações</span></a></li>
+              </ul>
+          </div>
         </nav>
 
         <main class="main-content">
@@ -83,10 +84,40 @@
                 </div>
             
                 <div class="header-actions">
-                    <a href="#" class="header-icon-btn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notificações">
-                        <i class="bi bi-bell"></i>
-                    </a>
-            
+                    
+                    <div class="dropdown">
+                        <a href="#" class="header-icon-btn dropdown-toggle" id="dropdownNotificacoes" data-bs-toggle="dropdown" aria-expanded="false" title="Notificações">
+                            <i class="bi bi-bell"></i>
+                            
+                            {% if notificacoes_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em;">
+                                {{ notificacoes_count }}
+                                <span class="visually-hidden">notificações não lidas</span>
+                            </span>
+                            {% endif %}
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownNotificacoes" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                            <li class="px-3 py-2">
+                                <strong class="d-block">Notificações</strong>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            {% for n in notificacoes_nao_lidas %}
+                                <li>
+                                    <a class="dropdown-item" href="{% if n.solicitacao %}{% url 'solicitacao_detail' n.solicitacao.pk %}{% else %}#{% endif %}" style="white-space: normal; font-size: 0.9em;">
+                                        <small class="text-muted d-block">{{ n.data_criacao|timesince }} atrás</small>
+                                        {{ n.mensagem }}
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li><span class="dropdown-item-text text-muted text-center small">Nenhuma notificação nova.</span></li>
+                            {% endfor %}
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small" href="#">Ver todas (Em breve)</a></li>
+                        </ul>
+                    </div>
                     <div class="dropdown profile-dropdown">
                         <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{{ user.profile.imagem.url }}" alt="Foto do Perfil" width="40" height="40" class="rounded-circle">
@@ -118,7 +149,7 @@
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
                                 {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button typebutton" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
                     {% endif %}
@@ -134,28 +165,69 @@
     {% block scripts %}{% endblock %}
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- 1. ATIVA TOOLTIPS (JÁ TINHA) ---
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-              return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
+      document.addEventListener('DOMContentLoaded', function() {
+          // --- 1. ATIVA TOOLTIPS (JÁ TINHA) ---
+          var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+          var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+          })
 
-            // --- 2. AUTO-FECHAR NOTIFICAÇÕES (NOVO) ---
-            var alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(function(alert) {
-                setTimeout(function() {
-                    // Usa o próprio Bootstrap pra fechar com estilo (fade out)
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 3000); // 5 segundos
-            });
-        });
+          // --- 2. AUTO-FECHAR MENSAGENS (O TEU SCRIPT ANTIGO) ---
+          var alerts = document.querySelectorAll('.alert-dismissible');
+          alerts.forEach(function(alert) {
+              setTimeout(function() {
+                  var bsAlert = new bootstrap.Alert(alert);
+                  bsAlert.close();
+              }, 3000);
+          });
+          
+          // ======================================================
+          // 🔥 BLOCO 3: A "ARMADILHA" DO SINO
+          // ======================================================
+          
+          // 1. Pega o "Sino" (o link que abre o dropdown)
+          var sinoDropdown = document.getElementById('dropdownNotificacoes');
+          
+          if (sinoDropdown) {
+              // 2. Pega o "evento" do Bootstrap: "quando o dropdown começar a abrir"
+              sinoDropdown.addEventListener('show.bs.dropdown', function () {
+                  
+                  // 3. Acha a "bolinha" vermelha (o badge)
+                  var badge = sinoDropdown.querySelector('.badge');
+                  
+                  // 4. Se a bolinha existir...
+                  if (badge) {
+                      // 5. SOME COM ELA IMEDIATAMENTE! (pro usuário ver)
+                      badge.remove();
+                      
+                      // 6. CHAMA O "DEDURADOR" (API) pra avisar o backend
+                      fetch("{% url 'api_marcar_lidas' %}", {
+                          method: 'POST',
+                          headers: {
+                              'X-Requested-With': 'XMLHttpRequest',
+                              // Não precisa do CSRF Token por causa do @csrf_exempt
+                          },
+                      })
+                      .then(response => response.json())
+                      .then(data => {
+                          if (data.status !== 'ok') {
+                              console.error('Erro ao marcar notificações como lidas.');
+                          }
+                      })
+                      .catch(error => console.error('Erro no Fetch da API:', error));
+                  }
+              });
+          }
+          // ======================================================
+          // FIM DO BLOCO 3
+          // ======================================================
+      });
     </script>
+    
     <style>
     /* =================================================================
-       FORÇANDO A BARRA NOS DROPDOWNS NORMAIS
-       ================================================================= */
+        FORÇANDO A BARRA NOS DROPDOWNS NORMAIS
+        ================================================================= */
     html body .dropdown-menu.show {
         border-radius: 12px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
@@ -180,40 +252,33 @@
     }
 
     /* =================================================================
-       SELECT2 - O INIMIGO NÚMERO 1
-       ================================================================= */
+        SELECT2 - O INIMIGO NÚMERO 1
+        ================================================================= */
 
     /* 1. Matando o foco nativo azul do navegador em TUDO */
     *:focus, .select2-container *:focus {
         outline: none !important;
-        /* box-shadow: none !important;  <-- Cuidado com esse, pode matar sombras que a gente quer */
     }
 
-    /* 2. O Campo Select2 (Estado Normal) */
+    /* (Resto do teu CSS do Select2... tudo certo) */
     html body .select2-container--default .select2-selection--single,
     html body .select2-container--default .select2-selection--multiple {
         border-radius: 8px !important;
         border: 1px solid #ced4da !important;
-        min-height: 45px !important; /* Força altura mínima */
+        min-height: 45px !important;
         height: auto !important;
         padding: 5px 0 !important;
         display: flex !important;
         align-items: center !important;
-        background-image: none !important; /* Mata gradientes padrão */
+        background-image: none !important;
     }
-
-    /* 3. O Campo Select2 (QUANDO FOCADO/ABERTO) - AQUI É A GUERRA DO AZUL */
-    /* Usando seletor de atributo pra aumentar especificidade */
     html body .select2-container--default.select2-container--focus .select2-selection--single,
     html body .select2-container--default.select2-container--open .select2-selection--single,
     html body span.select2-container--focus span.select2-selection--single {
         border-color: #1E5943 !important;
-        /* A sombra verde exata do seu tema */
         box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.25) !important; 
         outline: 0 !important;
     }
-
-    /* 4. A seta do dropdown */
     html body .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 100% !important;
         top: 0 !important;
@@ -221,27 +286,23 @@
     }
     html body .select2-container--default .select2-selection--single .select2-selection__arrow b {
         border-color: #888 transparent transparent transparent !important;
-        border-width: 6px 5px 0 5px !important; /* Seta um pouco maior */
+        border-width: 6px 5px 0 5px !important;
     }
     html body .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
         border-color: transparent transparent #888 transparent !important;
         border-width: 0 5px 6px 5px !important;
     }
-
-    /* 5. O Dropdown Flutuante (A lista que abre) */
     html body .select2-dropdown, 
     html body .select2-dropdown--above,
     html body .select2-dropdown--below {
-        border: 0px solid transparent !important; /* Remove borda padrão feia */
+        border: 0px solid transparent !important;
         border-radius: 12px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.18) !important;
         padding: 8px !important;
         overflow: hidden !important;
-        z-index: 99999 !important; /* Garante que fica em cima de modais */
+        z-index: 99999 !important;
         background-color: #fff !important;
     }
-
-    /* 6. Itens da Lista */
     html body .select2-results__option {
         padding: 10px 15px !important;
         border-radius: 8px !important;
@@ -250,22 +311,16 @@
         color: #495057 !important;
         transition: all 0.1s ease !important;
     }
-
-    /* 7. Item com Hover/Foco (O verde clarinho) */
     html body .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: #e6f3eb !important; /* Verde bem suave */
-        color: #1E5943 !important;            /* Texto verde escuro */
+        background-color: #e6f3eb !important;
+        color: #1E5943 !important;
         font-weight: 500 !important;
     }
-
-    /* 8. Item Selecionado (O cinza) */
     html body .select2-container--default .select2-results__option[aria-selected=true] {
         background-color: #f8f9fa !important;
         color: #212529 !important;
-        font-weight: 600 !important;
+        font-weight: 600 !importan
     }
-
-    /* 9. Campo de busca dentro do dropdown */
     html body .select2-search--dropdown {
         padding: 8px !important;
     }
@@ -275,7 +330,6 @@
         padding: 8px 12px !important;
         outline: none !important;
     }
-    /* Foco no campo de busca interno */
     html body .select2-search--dropdown .select2-search__field:focus {
         border-color: #1E5943 !important;
         box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.25) !important;
