@@ -5,118 +5,117 @@
         <h2>Painel de Controle</h2>
         
                 {% if is_staff_dashboard %}
-            <p class="text-muted">Visão geral do sistema.</p>
+            <p class="text-muted">Visão geral do sistema</p>
         {% else %}
-            <p class="text-muted">Seu resumo pessoal.</p>
+            <p class="text-muted">Seu resumo pessoal</p>
         {% endif %}
     </div>
 
     <div class="row">
-        
-                        <div class="col-xl-3 col-md-6 mb-4">
-            <a href="{% url 'mapa' %}" class="card-link">
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <a href="{% url 'mapa' %}" class="card-link">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <div class="card-icon primary">
+                        <i class="bi bi-tree-fill"></i>
+                    </div>
+                    <div class="card-title-dashboard">Árvores Mapeadas</div>
+                    <div class="card-number">{{ instancias_count }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {% if is_staff_dashboard %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="card-link">
                 <div class="card shadow h-100">
                     <div class="card-body">
-                        <div class="card-icon primary">
-                            <i class="bi bi-tree-fill"></i>
+                        <div class="card-icon danger">
+                            <i class="bi bi-file-earmark-text-fill"></i>
                         </div>
-                        <div class="card-title-dashboard">Árvores Mapeadas</div>
-                        <div class="card-number">{{ instancias_count }}</div>
+                        <div class="card-title-dashboard">Solicitações em Aberto</div>
+                        <div class="card-number">{{ solicitacoes_abertas_count }}</div>
                     </div>
                 </div>
             </a>
         </div>
 
-                        
-        {% if is_staff_dashboard %}
-                                    <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'solicitacao_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <div class="card-icon danger">
-                                <i class="bi bi-file-earmark-text-fill"></i>
-                            </div>
-                            <div class="card-title-dashboard">Solicitações em Aberto</div>
-                            <div class="card-number">{{ solicitacoes_abertas_count }}</div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'equipe_list' %}" class="card-link">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <div class="card-icon info">
+                            <i class="bi bi-people-fill"></i>
                         </div>
+                        <div class="card-title-dashboard">Equipes Cadastradas</div>
+                        <div class="card-number">{{ equipes_count }}</div>
                     </div>
-                </a>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'equipe_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <div class="card-icon info">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                            <div class="card-title-dashboard">Equipes Cadastradas</div>
-                            <div class="card-number">{{ equipes_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'especie_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <div class="card-icon success">
-                                <i class="bi bi-collection-fill"></i>
-                            </div>
-                            <div class="card-title-dashboard">Espécies no Catálogo</div>
-                            <div class="card-number">{{ especies_count }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        
-        {% else %}
-                                    <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'solicitacao_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <div class="card-icon danger">
-                                <i class="bi bi-file-earmark-text-fill"></i>
-                            </div>
-                            <div class="card-title-dashboard">Minhas Solicitações Abertas</div>
-                             <div class="card-number">{{ minhas_solicitacoes_abertas }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'solicitacao_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                            <div class="card-icon info">
-                                <i class="bi bi-clock-history"></i>
-                            </div>
-                            <div class="card-title-dashboard">Minhas em Andamento</div>
-                            <div class="card-number">{{ minhas_solicitacoes_andamento }}</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="{% url 'solicitacao_list' %}" class="card-link">
-                    <div class="card shadow h-100">
-                        <div class="card-body">
-                              <div class="card-icon success">
-                                <i class="bi bi-check-circle-fill"></i>
-                            </div>
-                            <div class="card-title-dashboard">Minhas Finalizadas</div>
-                         <div class="card-number">{{ minhas_solicitacoes_finalizadas }}</div>
-                        </div>
-                    </div>
-                </a>
                 </div>
+            </a>
+        </div>
 
-        {% endif %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'especie_list' %}" class="card-link">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <div class="card-icon success">
+                            <i class="bi bi-collection-fill"></i>
+                        </div>
+                        <div class="card-title-dashboard">Espécies no Catálogo</div>
+                        <div class="card-number">{{ especies_count }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    
+    {% else %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="card-link">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <div class="card-icon danger">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <div class="card-title-dashboard">Minhas Solicitações Abertas</div>
+                        <div class="card-number">{{ minhas_solicitacoes_abertas }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
 
-    </div>     <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="card-link">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <div class="card-icon info">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="card-title-dashboard">Minhas em Andamento</div>
+                        <div class="card-number">{{ minhas_solicitacoes_andamento }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="card-link">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                         <div class="card-icon success">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="card-title-dashboard">Minhas Finalizadas</div>
+                     <div class="card-number">{{ minhas_solicitacoes_finalizadas }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    {% endif %}
+
+</div>    <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -132,7 +131,7 @@
                     <div class="list-group list-group-flush">
                         
                                                                         {% for solicitacao in ultimas_solicitacoes %}
-                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <div>
                                         <p class="mb-0 fw-bold">{{ solicitacao.descricao|truncatewords:12 }}</p>

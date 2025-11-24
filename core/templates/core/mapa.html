@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-    /* --- NOVO CABEÇALHO FLEX --- */
+    /* --- CABEÇALHO FLEX --- */
     .page-header-flex {
         display: flex;
         justify-content: space-between;
@@ -24,7 +24,7 @@
         align-items: center;
     }
 
-    /* --- FILTROS (ESTILO LOJA) --- */
+    /* --- FILTROS --- */
     .filter-select,
     .filter-dropdown-btn {
         background-color: #fff;
@@ -58,7 +58,7 @@
         display: block;
     }
 
-    /* --- DROPDOWN DE CAMADAS (V3 - CHECKBOX NA DIREITA) --- */
+    /* --- DROPDOWN DE CAMADAS --- */
     .layers-dropdown-menu {
         padding: 10px;
         min-width: 220px;
@@ -111,26 +111,11 @@
         font-size: 0.9rem;
     }
 
-    /* Cores dos ícones */
-    .bg-success-soft {
-        background-color: #d1e7dd;
-        color: #198754;
-    }
-
-    .bg-warning-soft {
-        background-color: #fff3cd;
-        color: #ffc107;
-    }
-
-    .bg-primary-soft {
-        background-color: #cfe2ff;
-        color: #0d6efd;
-    }
-
-    .bg-danger-soft {
-        background-color: #f8d7da;
-        color: #dc3545;
-    }
+    /* CORES DOS ÍCONES */
+    .bg-success-soft { background-color: #d1e7dd; color: #198754; }
+    .bg-warning-soft { background-color: #fff3cd; color: #ffc107; }
+    .bg-primary-soft { background-color: #cfe2ff; color: #0d6efd; }
+    .bg-danger-soft { background-color: #f8d7da; color: #dc3545; }
 
     /* --- MAPA CONTAINER --- */
     .map-card-container {
@@ -149,7 +134,7 @@
         z-index: 1;
     }
 
-    /* --- PAINEL LATERAL (MODERNO) --- */
+    /* --- PAINEL LATERAL --- */
     #details-panel {
         position: absolute;
         top: 20px;
@@ -177,28 +162,12 @@
         display: block !important;
     }
 
-    #details-content p {
-        margin-bottom: 0.5rem;
-        line-height: 1.5;
-    }
+    #details-content p { margin-bottom: 0.5rem; line-height: 1.5; }
+    #details-content strong { color: #1E5943; font-weight: 600; }
 
-    #details-content strong {
-        color: #1E5943;
-        font-weight: 600;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        border-radius: 4px;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; }
 
     /* --- OUTROS CONTROLES --- */
     .map-coords-display {
@@ -216,34 +185,15 @@
         pointer-events: none;
     }
 
+    /* LEAFLET OVERRIDES */
+    .leaflet-bar { border: none !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; }
+    .leaflet-bar a { background-color: rgba(255, 255, 255, 0.9) !important; color: #1E5943 !important; backdrop-filter: blur(5px); }
+    .leaflet-bar a:hover { background-color: #1E5943 !important; color: #fff !important; }
+    .leaflet-pane.mask-pane { z-index: 350; }
 
-
-    .leaflet-bar {
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .leaflet-bar a {
-        background-color: rgba(255, 255, 255, 0.9) !important;
-        color: #1E5943 !important;
-        backdrop-filter: blur(5px);
-    }
-
-    .leaflet-bar a:hover {
-        background-color: #1E5943 !important;
-        color: #fff !important;
-    }
-
-    .leaflet-pane.mask-pane {
-        z-index: 350;
-    }
-
-    .leaflet-draw-toolbar {
-        display: flex;
-        gap: 8px;
-    }
-
-    /* Estilo base para TODOS os botões */
+    /* LEAFLET DRAW TOOLBAR */
+    .leaflet-draw-toolbar-actions, .leaflet-draw-toolbar-top { display: flex; gap: 8px; }
+    
     .leaflet-draw-toolbar a {
         background: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(5px);
@@ -259,7 +209,7 @@
         font-size: 13px !important;
         font-weight: 600 !important;
         white-space: nowrap;
-        display: flex !important;
+        display: flex;
         align-items: center !important;
         justify-content: center !important;
     }
@@ -270,9 +220,7 @@
         border-color: #1E5943 !important;
     }
 
-    .leaflet-draw-toolbar a:hover::before {
-        color: #fff !important;
-    }
+    .leaflet-draw-toolbar a:hover::before { color: #fff !important; }
 
     .leaflet-draw-toolbar a::before {
         display: inline-block !important;
@@ -288,36 +236,25 @@
         background: none !important;
     }
 
-    .leaflet-draw-draw-polygon::before {
-        content: "\f3e8";
-    }
+    .leaflet-draw-draw-polygon::before { content: "\f3e8"; }
+    .leaflet-draw-draw-rectangle::before { content: "\f584"; }
+    .leaflet-draw-draw-marker::before { content: "\f5e1"; }
+    .leaflet-draw-draw-polygon::after { content: "Adicionar Área"; }
+    .leaflet-draw-draw-rectangle::after { content: "Adicionar Retângulo"; }
+    .leaflet-draw-draw-marker::after { content: "Adicionar Árvore"; }
 
-    .leaflet-draw-draw-rectangle::before {
-        content: "\f584";
-    }
-
-    .leaflet-draw-draw-marker::before {
-        content: "\f5e1";
-    }
-
-    .leaflet-draw-draw-polygon::after {
-        content: "Adicionar Área";
-    }
-
-    .leaflet-draw-draw-rectangle::after {
-        content: "Adicionar Retângulo";
-    }
-
-    .leaflet-draw-draw-marker::after {
-        content: "Adicionar Árvore";
-    }
+    /* 🔥 SEGURANÇA VISUAL: Esconde toolbar se não for staff */
+    {% if not user.is_staff %}
+        .leaflet-draw-toolbar { display: none !important; }
+    {% endif %}
 </style>
 
 <div class="page-header-flex">
     <div class="header-title">
-        <h2 class="mb-0 fw-bold" style="color: #212529;">Mapa Interativo</h2>
-        <p class="text-muted mb-0">Gestão visual inteligente.</p>
+        <h2 class="mb-0" style="color: #212529;">Mapa Interativo</h2>
+        <p class="text-muted mb-0">Gestão visual inteligente</p>
     </div>
+    
     <div class="header-filters">
         <div>
             <span class="filter-label">Visualizando Cidade</span>
@@ -325,18 +262,28 @@
                 <option selected disabled>Carregando...</option>
             </select>
         </div>
+
         <div>
             <span class="filter-label">Exibir Camadas</span>
             <div class="dropdown">
-                <button class="filter-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <button 
+                    class="filter-dropdown-btn dropdown-toggle" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    data-bs-auto-close="outside" 
+                    aria-expanded="false">
                     <i class="bi bi-layers-fill me-2" style="color: #1E5943;"></i>
                     <span id="layer-button-text">Selecionar...</span>
                 </button>
+                
                 <ul class="dropdown-menu layers-dropdown-menu dropdown-menu-end">
                     <li>
                         <label class="layer-option">
                             <span class="layer-option-label">
-                                <span class="layer-icon-small bg-success-soft"><i class="bi bi-tree-fill"></i></span>Árvores
+                                <span class="layer-icon-small bg-success-soft">
+                                    <i class="bi bi-tree-fill"></i>
+                                </span>
+                                Árvores
                             </span>
                             <input type="checkbox" checked data-layer="arvores">
                         </label>
@@ -344,7 +291,10 @@
                     <li>
                         <label class="layer-option">
                             <span class="layer-option-label">
-                                <span class="layer-icon-small bg-danger-soft"><i class="bi bi-exclamation-triangle-fill"></i></span>Denúncias
+                                <span class="layer-icon-small bg-danger-soft">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </span>
+                                Denúncias
                             </span>
                             <input type="checkbox" checked data-layer="denuncias">
                         </label>
@@ -352,7 +302,10 @@
                     <li>
                         <label class="layer-option">
                             <span class="layer-option-label">
-                                <span class="layer-icon-small bg-warning-soft"><i class="bi bi-lightbulb-fill"></i></span>Sugestões
+                                <span class="layer-icon-small bg-warning-soft">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                </span>
+                                Sugestões
                             </span>
                             <input type="checkbox" checked data-layer="sugestoes">
                         </label>
@@ -360,7 +313,10 @@
                     <li>
                         <label class="layer-option">
                             <span class="layer-option-label">
-                                <span class="layer-icon-small bg-primary-soft"><i class="bi bi-bounding-box"></i></span>Áreas Planejadas
+                                <span class="layer-icon-small bg-primary-soft">
+                                    <i class="bi bi-bounding-box"></i>
+                                </span>
+                                Áreas Planejadas
                             </span>
                             <input type="checkbox" checked data-layer="areas">
                         </label>
@@ -369,7 +325,10 @@
                     <li>
                         <label class="layer-option">
                             <span class="layer-option-label">
-                                <span class="layer-icon-small bg-danger-soft"><i class="bi bi-thermometer-half"></i></span>Mapa de Calor
+                                <span class="layer-icon-small bg-danger-soft">
+                                    <i class="bi bi-thermometer-half"></i>
+                                </span>
+                                Mapa de Calor
                             </span>
                             <input type="checkbox" data-layer="calor">
                         </label>
@@ -385,9 +344,17 @@
 
     <div id="details-panel">
         <div class="d-flex justify-content-between align-items-start mb-3">
-            <h6 id="details-title" class="mb-0 fw-bold" style="color: #1E5943; line-height: 1.4;">Detalhes</h6>
-            <button id="close-details-btn" type="button" class="btn-close btn-sm flex-shrink-0 ms-2" aria-label="Close"></button>
+            <h6 id="details-title" class="mb-0 fw-bold" style="color: #1E5943; line-height: 1.4;">
+                Detalhes
+            </h6>
+            <button 
+                id="close-details-btn" 
+                type="button" 
+                class="btn-close btn-sm flex-shrink-0 ms-2" 
+                aria-label="Close">
+            </button>
         </div>
+        
         <div id="details-content" class="custom-scrollbar pe-2" style="max-height: 65vh; overflow-y: auto;">
             <div class="text-muted small fst-italic">Selecione um item no mapa...</div>
         </div>
@@ -398,125 +365,143 @@
     </div>
 </div>
 
-<div class="modal fade" id="areaFormModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalTitle" style="color: #1E5943;">Nova Área</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-4">
-                <form id="area-form">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Nome da Área</label>
-                        {{ form_area.nome }}
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Tipo</label>
-                            {{ form_area.tipo }}
+{% if user.is_staff %}
+
+    <div class="modal fade" id="areaFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalTitle" style="color: #1E5943;">
+                        Nova Área
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <form id="area-form">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Nome da Área</label>
+                            {{ form_area.nome }}
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
-                            {{ form_area.status }}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Tipo</label>
+                                {{ form_area.tipo }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
+                                {{ form_area.status }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Espécies Previstas</label>
-                        {{ form_area.especies }}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Nova Árvore -->
-<div class="modal fade" id="treeFormModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalTitleTree" style="color: #1E5943;">
-                    <i class="bi bi-tree-fill me-2"></i>Nova Árvore
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-4">
-                <form id="add-tree-form">
-                    <input type="hidden" id="tree-lat" name="latitude">
-                    <input type="hidden" id="tree-lon" name="longitude">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Qual a espécie?</label>
-                        <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
-                            <option value="" selected disabled>Busque pelo nome popular...</option>
-                            {% for especie in especies_catalogo %}
-                            <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Estado de Saúde</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="saude" id="saude1" value="BOA" checked>
-                            <label class="btn btn-outline-success" for="saude1">Boa</label>
-                            <input type="radio" class="btn-check" name="saude" id="saude2" value="MEDIA">
-                            <label class="btn btn-outline-warning" for="saude2">Média</label>
-                            <input type="radio" class="btn-check" name="saude" id="saude3" value="RUIM">
-                            <label class="btn btn-outline-danger" for="saude3">Ruim</label>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Espécies Previstas</label>
+                            {{ form_area.especies }}
                         </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-danger-outline me-auto d-none" id="deleteAreaButton">
+                        <i class="bi bi-trash-fill me-1"></i> Apagar
+                    </button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-principal-acao px-4" id="saveAreaButton">Salvar Área</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="treeFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalTitleTree" style="color: #1E5943;">
+                        <i class="bi bi-tree-fill me-2"></i>Nova Árvore
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <form id="add-tree-form">
+                        <input type="hidden" id="tree-lat" name="latitude">
+                        <input type="hidden" id="tree-lon" name="longitude">
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Qual a espécie?</label>
+                            <select class="form-select form-control-custom" id="tree-especie" name="especie" required style="width: 100%;">
+                                <option value="" selected disabled>Busque pelo nome popular...</option>
+                                {% for especie in especies_catalogo %}
+                                    <option value="{{ especie.id }}">{{ especie.nome_popular }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Estado de Saúde</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="saude" id="saude1" value="BOA" checked>
+                                <label class="btn btn-outline-success" for="saude1">Boa</label>
+                                
+                                <input type="radio" class="btn-check" name="saude" id="saude2" value="MEDIA">
+                                <label class="btn btn-outline-warning" for="saude2">Média</label>
+                                
+                                <input type="radio" class="btn-check" name="saude" id="saude3" value="RUIM">
+                                <label class="btn btn-outline-danger" for="saude3">Ruim</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Observações</label>
+                            <textarea class="form-control form-control-custom" id="tree-observacoes" name="observacoes" rows="2" placeholder="Algo a mais sobre esta árvore?"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-principal-acao px-4" id="submitNewTree">Plantada!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Observações</label>
-                        <textarea class="form-control form-control-custom" id="tree-observacoes" name="observacoes" rows="2" placeholder="Algo a mais sobre esta árvore?"></textarea>
+                    <h5 class="fw-bold mb-2">Tem certeza?</h5>
+                    <p class="text-muted small mb-4">
+                        Você vai apagar a árvore #<span id="tree-id-placeholder"></span>. Isso não tem volta!
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">Não, espera</button>
+                        <button type="button" class="btn btn-danger flex-grow-1" id="confirm-delete-btn">Sim, apagar</button>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-principal-acao px-4" id="submitNewTree">Plantada!</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Confirmar Exclusão de Árvore -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
-            <div class="modal-body text-center p-4">
-                <div class="mb-3 text-danger">
-                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="fw-bold mb-2">Tem certeza?</h5>
-                <p class="text-muted small mb-4">Você vai apagar a árvore #<span id="tree-id-placeholder"></span>. Isso não tem volta!</p>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">Não, espera</button>
-                    <button type="button" class="btn btn-danger flex-grow-1" id="confirm-delete-btn">Sim, apagar</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Confirmar Exclusão de Área -->
-<div class="modal fade" id="deleteAreaConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
-            <div class="modal-body text-center p-4">
-                <div class="mb-3 text-danger">
-                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="fw-bold mb-2">Excluir Área?</h5>
-                <p class="text-muted small mb-4">Tem certeza que deseja apagar esta área planejada? Esta ação não tem volta.</p>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger flex-grow-1" id="confirm-delete-area-btn">Sim, Excluir</button>
+    <div class="modal fade" id="deleteAreaConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Excluir Área?</h5>
+                    <p class="text-muted small mb-4">
+                        Tem certeza que deseja apagar esta área planejada?
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger flex-grow-1" id="confirm-delete-area-btn">Sim, Excluir</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
+{% endif %}
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
 {{ arvores_data|json_script:"arvores-data-json" }}
@@ -529,5 +514,10 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Variáveis globais de controle
+    const isUserStaff = "{{ user.is_staff|yesno:'true,false' }}" === "true";
+    const currentUserId = {{ request.user.id|default:"null" }};
+</script>
 <script src="{% static 'core/js/mapa.js' %}"></script>
 {% endblock %}

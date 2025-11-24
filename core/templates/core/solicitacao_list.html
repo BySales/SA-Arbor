@@ -3,12 +3,14 @@
 {% block content %}
     
     {% if user.is_staff or user.is_superuser %}
-        {# VISÃO DO ADMINISTRADOR #}
+        {# =============================================== #}
+        {# VISÃO DO ADMINISTRADOR (STAFF)                  #}
+        {# =============================================== #}
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="mb-0">Painel de Controle</h2>
-                <p class="text-muted mb-0">Uma rápida olhada no que está acontecendo.</p>
+                <h2 class="mb-0">Solicitações</h2>
+                <p class="text-muted mb-0">Central de controle administrativo.</p>
             </div>
              <div class="d-flex align-items-center">
                 <a href="{% url 'solicitacao_create' %}" class="btn btn-primary btn-principal-acao me-3">
@@ -25,14 +27,93 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=EM_ABERTO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ABERTO' %}card-status-active-danger{% endif %}"><div class="card-body"><div class="card-icon danger mb-2"><i class="bi bi-exclamation-octagon"></i></div><div class="card-title-dashboard text-danger">Solicitações em Aberto</div><div class="card-number">{{ abertas_count }}</div></div></div></a></div>
-            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=EM_ANDAMENTO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ANDAMENTO' %}card-status-active-warning{% endif %}"><div class="card-body"><div class="card-icon warning-soft mb-2"><i class="bi bi-hourglass-split"></i></div><div class="card-title-dashboard text-warning">Em Andamento</div><div class="card-number">{{ andamento_count }}</div></div></div></a></div>
-            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=FINALIZADO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'FINALIZADO' %}card-status-active-success{% endif %}"><div class="card-body"><div class="card-icon success mb-2"><i class="bi bi-check2-circle"></i></div><div class="card-title-dashboard text-success">Finalizadas</div><div class="card-number">{{ finalizadas_count }}</div></div></div></a></div>
-            <div class="col-xl-3 col-md-6 mb-3"><a href="{% url 'solicitacao_list' %}?status=RECUSADO" class="text-decoration-none"><div class="card h-100 card-status-hover {% if status_selecionado == 'RECUSADO' %}card-status-active-dark{% endif %}"><div class="card-body"><div class="card-icon dark-soft mb-2"><i class="bi bi-slash-circle"></i></div><div class="card-title-dashboard text-dark">Recusadas</div><div class="card-number">{{ recusadas_count }}</div></div></div></a></div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}{% if status_selecionado != 'EM_ABERTO' %}?status=EM_ABERTO{% endif %}" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ABERTO' %}card-status-active-danger{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon danger mb-2"><i class="bi bi-exclamation-octagon"></i></div>
+                            <div class="card-title-dashboard text-danger">Solicitações em Aberto</div>
+                            <div class="card-number">{{ abertas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}{% if status_selecionado != 'EM_ANDAMENTO' %}?status=EM_ANDAMENTO{% endif %}" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'EM_ANDAMENTO' %}card-status-active-warning{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon warning-soft mb-2"><i class="bi bi-hourglass-split"></i></div>
+                            <div class="card-title-dashboard text-warning">Em Andamento</div>
+                            <div class="card-number">{{ andamento_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}{% if status_selecionado != 'FINALIZADO' %}?status=FINALIZADO{% endif %}" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'FINALIZADO' %}card-status-active-success{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon success mb-2"><i class="bi bi-check2-circle"></i></div>
+                            <div class="card-title-dashboard text-success">Finalizadas</div>
+                            <div class="card-number">{{ finalizadas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <a href="{% url 'solicitacao_list' %}{% if status_selecionado != 'RECUSADO' %}?status=RECUSADO{% endif %}" class="text-decoration-none">
+                    <div class="card h-100 card-status-hover {% if status_selecionado == 'RECUSADO' %}card-status-active-dark{% endif %}">
+                        <div class="card-body">
+                            <div class="card-icon dark-soft mb-2"><i class="bi bi-slash-circle"></i></div>
+                            <div class="card-title-dashboard text-dark">Recusadas</div>
+                            <div class="card-number">{{ recusadas_count }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-lg-8">
+    {% else %}
+        
+        {# =============================================== #}
+        {# VISÃO DO USUÁRIO COMUM                          #}
+        {# =============================================== #}
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-0">
+                    {% if user.profile.ver_todas_solicitacoes %}
+                        Solicitações da Comunidade
+                    {% else %}
+                        Minhas Solicitações
+                    {% endif %}
+                </h2>
+                <p class="text-muted mb-0">Acompanhe o andamento dos chamados.</p>
+            </div>
+            
+            <a href="{% url 'solicitacao_create' %}" class="btn btn-principal-acao">
+                <i class="bi bi-plus-circle-fill me-1"></i>
+                <span>Nova Solicitação</span>
+            </a>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="filter-pills">
+                    <a href="{% url 'solicitacao_list' %}" class="{% if not status_selecionado %}active{% endif %}">Todos</a>
+                    <a href="?status=EM_ABERTO" class="{% if status_selecionado == 'EM_ABERTO' %}active{% endif %}">Em Aberto</a>
+                    <a href="?status=EM_ANDAMENTO" class="{% if status_selecionado == 'EM_ANDAMENTO' %}active{% endif %}">Em Andamento</a>
+                    <a href="?status=FINALIZADO" class="{% if status_selecionado == 'FINALIZADO' %}active{% endif %}">Finalizadas</a>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-lg-{% if user.is_staff %}8{% else %}12{% endif %}">
+            
+            {% if user.is_staff %}
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h4 class="mb-0">
@@ -63,122 +144,99 @@
                         </div>
                     </form>
                 </div>
-                
-                {% for solicitacao in solicitacoes %}
-                    <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
-                                <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
-                            </div>
-                            <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
+            {% endif %}
+            
+            {% for solicitacao in solicitacoes %}
+                <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
+                            <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
                         </div>
-                        <div class="card-body">
-                            <p class="card-metadata">
-                                <i class="bi bi-person"></i> 
-                                <strong>Cidadão:</strong> {{ solicitacao.cidadao.username }}
-                                <span class="mx-2 text-muted">|</span>
-                                <i class="bi bi-geo-alt"></i>
-                                <strong>Cidade:</strong> {{ solicitacao.cidade.nome|default:"N/A" }}
-                            </p>
+                        <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <p class="card-metadata">
+                            <i class="bi bi-person"></i> 
+                            <strong>Autor:</strong> 
+                            {% if solicitacao.cidadao == user or user.is_staff %}
+                                {{ solicitacao.cidadao.username }} {% else %}
+                                <span class="fst-italic text-muted">Vizinho Anônimo</span> {% endif %}
                             
-                            <p class="mb-2"><strong>Descrição:</strong></p>
-                            <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
-                                <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
+                            <span class="mx-2 text-muted">|</span>
+                            
+                            <i class="bi bi-geo-alt"></i>
+                            <strong>Cidade:</strong> {{ solicitacao.cidade.nome|default:"N/A" }}
+                        </p>
+                        
+                        <p class="mb-2"><strong>Descrição:</strong></p>
+                        <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
+                            <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
+                        </div>
+                        <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
+
+                        {% if solicitacao.imagens.all %}
+                            <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
+                            <div class="d-flex flex-wrap">
+                                {% for imagem_obj in solicitacao.imagens.all %}
+                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                        <img src="{{ imagem_obj.imagem.url }}" class="img-fluid rounded img-thumbnail-solicitacao">
+                                    </a>
+                                {% endfor %}
                             </div>
-                            <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
-
-                            {% if solicitacao.imagens.all %}
-                                <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
-                                <div class="d-flex flex-wrap">
-                                    {% for imagem_obj in solicitacao.imagens.all %}
-                                        <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2"><img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao"></a>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="card-footer bg-white d-flex justify-content-end align-items-center">
-                            {% if solicitacao.latitude and solicitacao.longitude %}<a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2"><i class="bi bi-geo-alt-fill"></i> Ver no Mapa</a>{% endif %}
-                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i> Ver Detalhes</a>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="alert alert-warning">Nenhuma solicitação encontrada para os filtros selecionados.</div>
-                {% endfor %}
-
-                <nav aria-label="Navegação das solicitações" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if solicitacoes.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1&{{ request.GET.urlencode | cut:'page=' }}">&laquo; Primeira</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Anterior</a></li>
                         {% endif %}
-                        <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="True">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
-                        {% if solicitacoes.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Próxima</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}&{{ request.GET.urlencode | cut:'page=' }}">Última &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card mb-3"><div class="card-header">Status das Solicitações</div><div class="card-body"><canvas id="statusChart"></canvas></div></div>
-                <div class="card mb-3"><div class="card-header">Tipos de Solicitação</div><div class="card-body"><canvas id="tiposChart"></canvas></div></div>
-                <div class="card mb-3"><div class="card-header">Atividade na Última Semana</div><div class="card-body"><canvas id="recenteChart"></canvas></div></div>
-                <div class="card mb-3"><div class="card-header">Carga de Trabalho por Equipe</div><div class="card-body"><canvas id="equipesChart"></canvas></div></div>
-            </div>
-        </div>
-
-    {% else %}
-        {# VISÃO DO USUÁRIO COMUM #}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Minhas Solicitações</h2>
-            <a href="{% url 'solicitacao_create' %}" class="btn btn-primary">Criar Nova Solicitação</a>
-        </div>
-        
-        {% for solicitacao in solicitacoes %}
-            <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
-                        <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
                     </div>
-                    <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
+                    
+                    <div class="card-footer bg-white d-flex justify-content-end align-items-center">
+                        {% if solicitacao.latitude and solicitacao.longitude %}
+                            <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2 rounded-pill">
+                                <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
+                            </a>
+                        {% endif %}
+                        
+                        {% if solicitacao.cidadao == user or user.is_staff %}
+                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm rounded-pill">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </a>
+                        {% else %}
+                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm rounded-pill">
+                                <i class="bi bi-eye"></i> Detalhes
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="card-metadata">
-                        <i class="bi bi-geo-alt"></i>
-                        <strong>Cidade:</strong> {{ solicitacao.cidade.nome|default:"N/A" }}
-                    </p>
-                    <p class="mb-2"><strong>Descrição:</strong></p>
-                    <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
-                        <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
-                    </div>
-                    <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
-                    {% if solicitacao.imagens.all %}
-                        <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
-                        <div class="d-flex flex-wrap">
-                            {% for imagem_obj in solicitacao.imagens.all %}<a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2"><img src="{{ imagem_obj.imagem.url }}" alt="Imagem da Solicitação" class="img-fluid rounded img-thumbnail-solicitacao"></a>{% endfor %}
-                        </div>
+            {% empty %}
+                <div class="alert alert-warning text-center p-5">
+                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                    Nenhuma solicitação encontrada com os filtros atuais.
+                </div>
+            {% endfor %}
+
+            <nav aria-label="Navegação" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if solicitacoes.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page=1&{{ request.GET.urlencode | cut:'page=' }}">&laquo; Primeira</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Anterior</a></li>
                     {% endif %}
-                </div>
-                <div class="card-footer bg-white d-flex justify-content-end align-items-center">
-                    {% if solicitacao.latitude and solicitacao.longitude %}<a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2"><i class="bi bi-geo-alt-fill"></i> Ver no Mapa</a>{% endif %}
-                    <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i> Editar</a>
-                </div>
-            </div>
-        {% empty %}
-            <div class="alert alert-warning">Você ainda não criou nenhuma solicitação.</div>
-        {% endfor %}
+                    <li class="page-item disabled"><a class="page-link" href="#">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
+                    {% if solicitacoes.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}&{{ request.GET.urlencode | cut:'page=' }}">Próxima</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.paginator.num_pages }}&{{ request.GET.urlencode | cut:'page=' }}">Última &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
 
-        <nav aria-label="Navegação das solicitações" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if solicitacoes.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a></li>{% endif %}
-                <li class="page-item disabled"><a class="page-link" href="#">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</a></li>
-                {% if solicitacoes.has_next %}<li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a></li>{% endif %}
-            </ul>
-        </nav>
-    {% endif %}
+        {% if user.is_staff %}
+        <div class="col-lg-4">
+            <div class="card mb-3"><div class="card-header">Status das Solicitações</div><div class="card-body"><canvas id="statusChart"></canvas></div></div>
+            <div class="card mb-3"><div class="card-header">Tipos de Solicitação</div><div class="card-body"><canvas id="tiposChart"></canvas></div></div>
+            <div class="card mb-3"><div class="card-header">Atividade na Última Semana</div><div class="card-body"><canvas id="recenteChart"></canvas></div></div>
+            <div class="card mb-3"><div class="card-header">Carga de Trabalho por Equipe</div><div class="card-body"><canvas id="equipesChart"></canvas></div></div>
+        </div>
+        {% endif %}
+    </div>
 
     <script>
         function toggleDescricao(solicitacaoId) {
@@ -198,54 +256,53 @@
                 if (textP.scrollHeight <= container.clientHeight) {
                     const solicitacaoId = container.id.split('-')[2];
                     const lerMaisBtn = document.getElementById('ler-mais-' + solicitacaoId);
-                    if (lerMaisBtn) {
-                        lerMaisBtn.style.display = 'none';
-                    }
+                    if (lerMaisBtn) lerMaisBtn.style.display = 'none';
                     container.style.maxHeight = 'none';
                     container.classList.add('expandida');
                 }
             });
         });
     </script>
+    
+    {% if user.is_staff %}
+    <script>
+        const ctxStatus = document.getElementById('statusChart');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Em Aberto', 'Em Andamento', 'Finalizadas', 'Recusadas'],
+                datasets: [{ data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}, {{ recusadas_count }}], backgroundColor: ['#dc3545', '#ffc107', '#198754', '#212529'] }]
+            }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+        });
 
-    {% if user.is_staff or user.is_superuser %}
-        <script>
-            const ctxStatus = document.getElementById('statusChart');
-            new Chart(ctxStatus, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Em Aberto', 'Em Andamento', 'Finalizadas', 'Recusadas'],
-                    datasets: [{ data: [{{ abertas_count }}, {{ andamento_count }}, {{ finalizadas_count }}, {{ recusadas_count }}], backgroundColor: ['#dc3545', '#ffc107', '#198754', '#212529'] }]
-                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
-            });
+        const ctxTipos = document.getElementById('tiposChart');
+        new Chart(ctxTipos, {
+            type: 'pie',
+            data: {
+                labels: ['Denúncias', 'Sugestões'],
+                datasets: [{ data: [{{ denuncias_count }}, {{ sugestoes_count }}], backgroundColor: ['#f8d7da', '#d1e7dd'] }]
+            }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+        });
 
-            const ctxTipos = document.getElementById('tiposChart');
-            new Chart(ctxTipos, {
-                type: 'pie',
-                data: {
-                    labels: ['Denúncias', 'Sugestões'],
-                    datasets: [{ data: [{{ denuncias_count }}, {{ sugestoes_count }}], backgroundColor: ['#f8d7da', '#d1e7dd'] }]
-                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
-            });
+        const ctxRecente = document.getElementById('recenteChart');
+        new Chart(ctxRecente, {
+            type: 'bar',
+            data: {
+                labels: {{ datas_recente_labels|safe }},
+                datasets: [{ label: 'Novas Solicitações', data: {{ contagem_recente_data|safe }}, backgroundColor: 'rgba(0, 123, 255, 0.7)' }]
+            }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
 
-            const ctxRecente = document.getElementById('recenteChart');
-            new Chart(ctxRecente, {
-                type: 'bar',
-                data: {
-                    labels: {{ datas_recente_labels|safe }},
-                    datasets: [{ label: 'Novas Solicitações', data: {{ contagem_recente_data|safe }}, backgroundColor: 'rgba(0, 123, 255, 0.7)' }]
-                }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-
-            const ctxEquipes = document.getElementById('equipesChart');
-            new Chart(ctxEquipes, {
-                type: 'bar',
-                data: {
-                    labels: {{ equipes_labels|safe }},
-                    datasets: [{ label: 'Solicitações Ativas', data: {{ equipes_contagem|safe }}, backgroundColor: ['#6f42c1', '#fd7e14', '#20c997', '#0dcaf0'] }]
-                },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        </script>
+        const ctxEquipes = document.getElementById('equipesChart');
+        new Chart(ctxEquipes, {
+            type: 'bar',
+            data: {
+                labels: {{ equipes_labels|safe }},
+                datasets: [{ label: 'Solicitações Ativas', data: {{ equipes_contagem|safe }}, backgroundColor: ['#6f42c1', '#fd7e14', '#20c997', '#0dcaf0'] }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    </script>
     {% endif %}
+
 {% endblock %}

@@ -262,7 +262,7 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['imagem', 'cidade_principal', 'cidades_secundarias']
+        fields = ['imagem', 'cidade_principal', 'cidades_secundarias', 'ver_todas_solicitacoes']
         widgets = {
             'imagem': forms.FileInput(attrs={'class': 'form-control-custom'}),
             'cidade_principal': forms.Select(attrs={'class': 'form-select form-control-custom'}),

@@ -1833,53 +1833,12 @@ img.member-avatar:not([style*="display: none"]) + .member-avatar-placeholder {
 /* ========================================================================== */
 
 /* Estilo geral da barra de ferramentas */
-.leaflet-draw-toolbar {
-  display: flex;
-  gap: 8px;
-}
 
 /* Estilo base para TODOS os botões */
-.leaflet-draw-toolbar a {
-  background: #fff !important;
-  border: 1px solid #ccc !important;
-  color: #333 !important;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1) !important;
-  border-radius: 50px !important;
-  width: auto !important;
-  height: 30px !important;
-  line-height: 28px !important;
-  padding: 0 10px !important;
-  font-family: "Poppins", sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  white-space: nowrap;
-}
+
 
 /* Esconde o pseudo-elemento que usávamos para ícones */
-.leaflet-draw-toolbar a:before {
-  display: none !important;
-}
 
-/* ADICIONA O TEXTO EM CADA BOTÃO USANDO O SELETOR CORRETO E UNIFICADO */
-.leaflet-draw-toolbar a.leaflet-draw-draw-polygon::after {
-  content: "Nova Área";
-}
-
-.leaflet-draw-toolbar a.leaflet-draw-draw-rectangle::after {
-  content: "Novo Retângulo";
-}
-
-.leaflet-draw-toolbar a.leaflet-draw-draw-marker::after {
-  content: "Nova Árvore";
-}
-
-/* Estilo para quando o mouse passa por cima ou o botão está ativo */
-.leaflet-draw-toolbar a:hover,
-.leaflet-draw-toolbar a.leaflet-draw-toolbar-button-enabled {
-  background-color: #f4f4f4 !important;
-  border-color: #999 !important;
-  color: #000 !important;
-}
 
 /* ========================================================================== */
 /* --- REMOVENDO A "MOLDURA" CINZA DOS CONTROLES DE DESENHO --- */

@@ -571,23 +571,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ======================================================
-    // 6. MAPA LEAFLET (TURBINADO 🚀)
+    // 6. MAPA LEAFLET (TURBINADO 🚀) - VISUAL ORIGINAL
     // ======================================================
     let map = null;
     let marker = null;
-    let cityLayer = null; // Camada pra desenhar o limite da cidade
-    let cidadesGeoData = {}; // Vai guardar os GeoJSONs das cidades
+    let cityLayer = null; 
+    let cidadesGeoData = {}; 
 
     const mapContainer = document.getElementById('map-picker');
     const coordsDisplayText = document.getElementById('coords-display-text');
-    const cidadeSelect = document.getElementById('id_cidade'); // Precisa desse elemento
+    const cidadeSelect = document.getElementById('id_cidade'); 
 
     if (mapContainer && latInput && lonInput) {
+        // 1. Inicia o Mapa
         map = L.map('map-picker', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            maxZoom: 19
         }).addTo(map);
-        L.control.zoom({ position: 'bottomright' }).addTo(map); // Bota o zoom embaixo na direita
+        
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // 🔥 O ÍCONE ORIGINAL (Do jeito que você gosta)
+        const pinIcon = L.divIcon({
+            className: 'custom-marker-icon',
+            html: '<div style="font-size: 2rem; color: #dc3545; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));"><i class="bi bi-geo-alt-fill"></i></div>',
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+        });
 
         // --- 6.1. BUSCA POR ENDEREÇO ---
         if (L.Control.Geocoder) {
@@ -600,10 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .on('markgeocode', function(e) {
                 const bbox = e.geocode.bbox;
                 const poly = L.polygon([
-                    bbox.getSouthEast(),
-                    bbox.getNorthEast(),
-                    bbox.getNorthWest(),
-                    bbox.getSouthWest()
+                    bbox.getSouthEast(), bbox.getNorthEast(), bbox.getNorthWest(), bbox.getSouthWest()
                 ]);
                 map.fitBounds(poly.getBounds());
             })
@@ -618,105 +627,110 @@ document.addEventListener('DOMContentLoaded', function() {
                 container.innerHTML = '<a href="#" title="Minha Localização" role="button" style="width: 30px; height: 30px; line-height: 30px; text-align: center; font-size: 18px; display: block; background: white;"><i class="bi bi-crosshair"></i></a>';
                 container.onclick = function(e) {
                     e.preventDefault();
-                    if (navigator.geolocation) {
-                         map.locate({setView: true, maxZoom: 16});
-                    } else {
-                        alert("Geolocalização não suportada pelo seu navegador.");
-                    }
+                    if (navigator.geolocation) { map.locate({setView: true, maxZoom: 16}); } 
+                    else { alert("Geolocalização não suportada."); }
                     return false;
                 }
                 return container;
             }
         });
         map.addControl(new gpsControl());
-        // Escuta quando o mapa acha a localização
+
+        // Função auxiliar para atualizar o texto das coordenadas
+        function updateCoords(lat, lon) {
+            if (coordsDisplayText) coordsDisplayText.innerHTML = `<strong>Local:</strong> Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
+        }
+
+        // Função centralizada para posicionar o marcador (Evita código duplicado)
+        function placeMarker(lat, lng) {
+            const latlng = [lat, lng];
+            
+            if (marker) {
+                // Se o pino já existe, só move ele
+                marker.setLatLng(latlng);
+            } else {
+                // Se não existe, cria um novo com o SEU ÍCONE e DRAGGABLE
+                marker = L.marker(latlng, {icon: pinIcon, draggable: true}).addTo(map);
+                
+                // Garante que se arrastar, atualiza os inputs
+                marker.on('dragend', function(e) {
+                    const pos = marker.getLatLng();
+                    latInput.value = pos.lat.toFixed(6);
+                    lonInput.value = pos.lng.toFixed(6);
+                    updateCoords(pos.lat, pos.lng);
+                });
+            }
+            
+            // Atualiza os inputs escondidos
+            latInput.value = lat.toFixed(6);
+            lonInput.value = lng.toFixed(6);
+            updateCoords(lat, lng);
+        }
+
+        // Escuta GPS encontrado
         map.on('locationfound', function(e) {
-             if (marker) marker.setLatLng(e.latlng);
-             else marker = L.marker(e.latlng).addTo(map);
-             latInput.value = e.latlng.lat.toFixed(6);
-             lonInput.value = e.latlng.lng.toFixed(6);
-             updateCoords(e.latlng.lat, e.latlng.lng);
+            placeMarker(e.latlng.lat, e.latlng.lng);
         });
         map.on('locationerror', function(e) { alert(e.message); });
 
-
-        function updateCoords(lat, lon) {
-            if (coordsDisplayText) coordsDisplayText.innerHTML = `<strong>Local:</strong> Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        // --- 6.3. CARREGAMENTO INICIAL (MODO EDIÇÃO) ---
+        // Essa é a parte que "lembra" onde o pino estava
+        if (latInput.value && lonInput.value) {
+            try {
+                const lat = parseFloat(latInput.value.replace(',', '.'));
+                const lon = parseFloat(lonInput.value.replace(',', '.'));
+                
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    map.setView([lat, lon], 16);
+                    placeMarker(lat, lon); // Usa o seu pino original
+                }
+            } catch (e) { console.error("Erro ao carregar coordenadas:", e); }
         }
 
-        // --- 6.3. DESENHAR LIMITE DA CIDADE ---
-        // Primeiro, busca os dados das cidades na API
+        // --- 6.4. DESENHAR LIMITE DA CIDADE ---
         fetch('/api/cidades-geo/')
             .then(r => r.json())
             .then(data => {
                 if (data.cidades) {
-                    data.cidades.forEach(c => {
-                        cidadesGeoData[c.nome] = c.geom; 
-                    });
-                    // 🔥 A CORREÇÃO TÁ AQUI:
-                    // Assim que os dados chegam, a gente força a atualização do mapa
-                    // pra ele pegar a cidade que já veio selecionada no form.
+                    data.cidades.forEach(c => { cidadesGeoData[c.nome] = c.geom; });
                     atualizarMapaCidade();
                 }
             })
-            .catch(err => console.error("Erro ao carregar cidades:", err));
+            .catch(err => console.error("Erro cidades:", err));
 
-            function atualizarMapaCidade() {
-            // Garante que tudo que a gente precisa existe antes de tentar usar
+        function atualizarMapaCidade() {
             if (!cidadeSelect || !map || Object.keys(cidadesGeoData).length === 0) return;
             
             const cidadeNome = cidadeSelect.options[cidadeSelect.selectedIndex].text;
-            
-            // Se por acaso o texto for "Selecione a cidade...", a gente ignora
             if (cidadeNome === "Selecione a cidade...") return;
 
             const geom = cidadesGeoData[cidadeNome];
 
             if (geom) {
-                if (cityLayer) map.removeLayer(cityLayer); 
+                if (cityLayer) map.removeLayer(cityLayer);
                 
                 cityLayer = L.geoJSON(geom, {
                     style: { color: '#1E5943', weight: 2, fillOpacity: 0.1 },
                     interactive: false
                 }).addTo(map);
                 
-                // Só dá zoom na cidade se NÃO tiver um pino já marcado (pra não tirar o foco do usuário se ele estiver editando)
-                if (!latInput.value || !lonInput.value) {
+                // Só dá zoom na cidade se NÃO tiver pino marcado (pra não perder o foco da edição)
+                if (!latInput.value || !lonInput.value || latInput.value === '') {
                      map.fitBounds(cityLayer.getBounds());
                 }
-                // 🔥 FORÇA O REDESENHO DO MAPA (CORRIGE O MAPA CINZA)
                 map.invalidateSize();
             }
         }
 
-        // Escuta quando o usuário muda a cidade na Etapa 1
         if (cidadeSelect) {
             cidadeSelect.addEventListener('change', atualizarMapaCidade);
         }
 
-        if (latInput.value && lonInput.value) {
-            try {
-                const lat = parseFloat(latInput.value.replace(',', '.'));
-                const lon = parseFloat(lonInput.value.replace(',', '.'));
-                if (!isNaN(lat) && !isNaN(lon)) {
-                    const latlng = [lat, lon];
-                    map.setView(latlng, 18);
-                    marker = L.marker(latlng).addTo(map);
-                    updateCoords(lat, lon);
-                }
-            } catch (e) { console.error(e); }
-        }
-
+        // --- 6.5. CLIQUE NO MAPA ---
         map.on('click', function(e) {
-            const { lat, lng } = e.latlng;
-            latInput.value = lat.toFixed(6);
-            lonInput.value = lng.toFixed(6);
-            if (marker) marker.setLatLng(e.latlng);
-            else marker = L.marker(e.latlng).addTo(map);
-            updateCoords(lat, lng);
+            placeMarker(e.latlng.lat, e.latlng.lng);
         });
     }
-
     // ======================================================
     // 7. CONTADOR DE CARACTERES
     // ======================================================

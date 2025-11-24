@@ -1,4 +1,4 @@
-// Arquivo: static/core/js/mapa.js (VERSÃO MESTRE V4.6 - Contém TODAS as correções)
+// Arquivo: static/core/js/mapa.js
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const map = L.map('map', { zoomControl: false }).setView([-24.0965, -46.6212], 13);
     
     // ======================================================
-    // 🔥 CORREÇÃO: MAPA "COLORIDO" (VOYAGER)
+    // MAPA "COLORIDO" (VOYAGER)
     // ======================================================
     
     // 1. O "Padrão" (Estilo Google, com cores)

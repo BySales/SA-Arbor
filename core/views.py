@@ -37,26 +37,20 @@ def solicitacao_list(request):
     periodo = request.GET.get('periodo', 'total')
     status = request.GET.get('status')
     ordenar = request.GET.get('ordenar')
-    # ======================================================
-    # 1. PEGA O NOVO FILTRO DE CIDADE DA URL
     cidade_id = request.GET.get('cidade')
-    # ======================================================
 
-    # --- Lógica de Filtros ---
-    # Otimizamos a busca já incluindo a cidade e o cidadão
+    # --- 1. Busca Base Otimizada ---
     solicitacoes_base = Solicitacao.objects.select_related('cidade', 'cidadao').all()
 
     if status:
         solicitacoes_base = solicitacoes_base.filter(status=status)
 
-    # ======================================================
-    # 2. APLICA O FILTRO DE CIDADE NA BUSCA PRINCIPAL
     if cidade_id:
         solicitacoes_base = solicitacoes_base.filter(cidade__id=cidade_id)
-    # ======================================================
 
-    # O resto da lógica de filtro de período e dashboard continua a mesma...
+    # --- 2. Filtros de Data (Dashboard) ---
     dashboard_qs = Solicitacao.objects.all()
+    # (Mantive sua lógica de dashboard intocada aqui para os cards de cima)
     if periodo == 'hoje':
         dashboard_qs = dashboard_qs.filter(data_criacao__date=date.today())
     elif periodo == 'semana':
@@ -66,6 +60,7 @@ def solicitacao_list(request):
         um_mes_atras = date.today() - timedelta(days=30)
         dashboard_qs = dashboard_qs.filter(data_criacao__date__gte=um_mes_atras)
 
+    # --- 3. Filtros de Data (Lista Principal) ---
     solicitacoes_filtradas = solicitacoes_base
     if periodo == 'hoje':
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date=date.today())
@@ -76,11 +71,28 @@ def solicitacao_list(request):
         um_mes_atras = date.today() - timedelta(days=30)
         solicitacoes_filtradas = solicitacoes_base.filter(data_criacao__date__gte=um_mes_atras)
 
+    # =================================================================
+    # 🔥 AQUI ESTÁ A MÁGICA DO TOGGLE (COMUNIDADE VS PESSOAL) 🔥
+    # =================================================================
     if request.user.is_superuser or request.user.is_staff:
+        # Se é chefe, vê tudo sempre.
         solicitacoes_query = solicitacoes_filtradas
     else:
-        solicitacoes_query = solicitacoes_filtradas.filter(cidadao=request.user)
+        # Se é usuário comum, verifica a preferência no Perfil
+        ver_tudo = False
+        # Verifica se o perfil existe e se a opção está marcada
+        if hasattr(request.user, 'profile') and request.user.profile.ver_todas_solicitacoes:
+            ver_tudo = True
+        
+        if ver_tudo:
+            # Modo Fofoca: Vê tudo (O template vai esconder os nomes)
+            solicitacoes_query = solicitacoes_filtradas
+        else:
+            # Modo Privado: Vê só as dele (Padrão)
+            solicitacoes_query = solicitacoes_filtradas.filter(cidadao=request.user)
+    # =================================================================
 
+    # --- 4. Ordenação ---
     if ordenar == 'data_asc':
         solicitacoes_ordenadas = solicitacoes_query.order_by('data_criacao')
     elif ordenar == 'tipo':
@@ -88,36 +100,54 @@ def solicitacao_list(request):
     else:
         solicitacoes_ordenadas = solicitacoes_query.order_by('-data_criacao')
 
+    # --- 5. Paginação ---
     paginator = Paginator(solicitacoes_ordenadas, 5) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # ... (Cálculos do Dashboard continuam iguais) ...
+    # --- 6. Cálculos do Dashboard (Estatísticas) ---
+    # Nota: Esses counts continuam globais para o Admin, 
+    # mas você pode querer filtrar para o usuário comum se quiser que os cards mostrem só os dados dele.
+    # Por enquanto, mantive a lógica original que conta do 'dashboard_qs' (Global).
+    
     abertas_count = dashboard_qs.filter(status='EM_ABERTO').count()
     andamento_count = dashboard_qs.filter(status='EM_ANDAMENTO').count()
     finalizadas_count = dashboard_qs.filter(status='FINALIZADO').count()
     recusadas_count = dashboard_qs.filter(status='RECUSADO').count()
     denuncias_count = dashboard_qs.filter(tipo='DENUNCIA').count()
     sugestoes_count = dashboard_qs.filter(tipo='SUGESTAO').count()
+    
+    # Dados para Gráficos
     ultimos_7_dias = [date.today() - timedelta(days=i) for i in range(6, -1, -1)]
     solicitacoes_por_dia = (Solicitacao.objects.filter(data_criacao__date__in=ultimos_7_dias).annotate(dia=TruncDate('data_criacao')).values('dia').annotate(total=Count('id')).order_by('dia'))
     dados_recente = {dia_obj['dia']: dia_obj['total'] for dia_obj in solicitacoes_por_dia}
     datas_recente_labels = [dia.strftime('%d/%m') for dia in ultimos_7_dias]
     contagem_recente_data = [dados_recente.get(dia, 0) for dia in ultimos_7_dias]
+    
     solicitacoes_em_andamento = Solicitacao.objects.filter(status='EM_ANDAMENTO')
     equipes_data = (solicitacoes_em_andamento.exclude(equipe_delegada__isnull=True).values('equipe_delegada__nome').annotate(total=Count('id')).order_by('-total'))
     equipes_labels = [item['equipe_delegada__nome'] for item in equipes_data]
     equipes_contagem = [item['total'] for item in equipes_data]
 
-    # ======================================================
-    # 3. BUSCA AS CIDADES PERMITIDAS PARA MONTAR O MENU DO FILTRO
+    # --- 7. Cidades para Filtro ---
     profile = request.user.profile
     cidades_ids = []
     if profile.cidade_principal:
         cidades_ids.append(profile.cidade_principal.id)
     cidades_ids.extend(profile.cidades_secundarias.all().values_list('id', flat=True))
     cidades_para_filtro = CidadePermitida.objects.filter(id__in=set(cidades_ids)).order_by('nome')
-    # ======================================================
+
+    # --- 8. Contexto Final ---
+    # Se for usuário comum, vamos recalcular os cards para mostrar SÓ OS DELE
+    # (Opcional: Se quiser que os cards de cima mostrem números globais, pode apagar esse bloco if/else abaixo)
+    if not request.user.is_staff and not request.user.is_superuser:
+        # Filtra os contadores para mostrar apenas o contexto do usuário
+        meus_cards_qs = dashboard_qs.filter(cidadao=request.user)
+        # Atualiza as variáveis que vão para os cards coloridos
+        abertas_count = meus_cards_qs.filter(status='EM_ABERTO').count()
+        andamento_count = meus_cards_qs.filter(status='EM_ANDAMENTO').count()
+        finalizadas_count = meus_cards_qs.filter(status='FINALIZADO').count()
+        recusadas_count = meus_cards_qs.filter(status='RECUSADO').count()
 
     context = {
         'solicitacoes': page_obj,
@@ -128,20 +158,21 @@ def solicitacao_list(request):
         'periodo_selecionado': periodo,
         'status_selecionado': status,
         'ordenar_selecionado': ordenar,
-        # ======================================================
-        # 4. MANDA AS NOVAS INFORMAÇÕES PARA O TEMPLATE
         'cidades_para_filtro': cidades_para_filtro,
         'cidade_selecionada': cidade_id,
-        # ======================================================
         'denuncias_count': denuncias_count,
         'sugestoes_count': sugestoes_count,
         'datas_recente_labels': json.dumps(datas_recente_labels),
         'contagem_recente_data': json.dumps(contagem_recente_data),
         'equipes_labels': json.dumps(equipes_labels),
         'equipes_contagem': json.dumps(equipes_contagem),
+        
+        # Variáveis extras para o dashboard pessoal (home) se precisar
+        'minhas_solicitacoes_abertas': abertas_count,
+        'minhas_solicitacoes_andamento': andamento_count,
+        'minhas_solicitacoes_finalizadas': finalizadas_count,
     }
     return render(request, 'core/solicitacao_list.html', context)
-
 
 @login_required
 def solicitacao_create(request):
@@ -438,6 +469,7 @@ def equipe_create(request):
 @user_passes_test(lambda u: u.is_staff, login_url='home')
 def equipe_update(request, pk):
     equipe = get_object_or_404(Equipe, pk=pk)
+    
     if request.method == 'POST':
         form = EquipeForm(request.POST, instance=equipe)
         if form.is_valid():
@@ -446,7 +478,30 @@ def equipe_update(request, pk):
             return redirect('equipe_list')
     else:
         form = EquipeForm(instance=equipe)
-    return render(request, 'core/equipe_form.html', {'form': form, 'titulo': f'Editar Equipe: {equipe.nome}'})
+    
+    # --- 🔥 NOVIDADE: BUSCAR DADOS EXTRAS PARA O PAINEL LATERAL ---
+    
+    # 1. Pega a tarefa que tá rolando AGORA (Status Em Andamento)
+    tarefa_atual = Solicitacao.objects.filter(
+        equipe_delegada=equipe, 
+        status='EM_ANDAMENTO'
+    ).order_by('-data_criacao').first() # Pega a mais recente
+    
+    # 2. Pega as últimas 3 que eles resolveram (Status Finalizado)
+    historico_tarefas = Solicitacao.objects.filter(
+        equipe_delegada=equipe, 
+        status='FINALIZADO'
+    ).order_by('-data_finalizacao')[:3]
+
+    context = {
+        'form': form, 
+        'titulo': f'Editar Equipe: {equipe.nome}',
+        # Manda as novidades pro template
+        'tarefa_atual': tarefa_atual,
+        'historico_tarefas': historico_tarefas,
+        'equipe': equipe
+    }
+    return render(request, 'core/equipe_form.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_staff, login_url='home')
@@ -598,7 +653,18 @@ def mapa_view(request):
         longitude__isnull=False,
         status__in=['EM_ABERTO', 'EM_ANDAMENTO'] 
     )
-    solicitacoes_data = [{"id": solicitacao.id, "tipo_display": solicitacao.get_tipo_display(), "tipo_codigo": solicitacao.tipo, "status": solicitacao.get_status_display(), "descricao": solicitacao.descricao, "lat": solicitacao.latitude, "lon": solicitacao.longitude} for solicitacao in solicitacoes_com_coords]
+    solicitacoes_data = [{
+    "id": solicitacao.id, 
+    "tipo_display": solicitacao.get_tipo_display(), 
+    "tipo_codigo": solicitacao.tipo, 
+    "status": solicitacao.get_status_display(), 
+    "descricao": solicitacao.descricao, 
+    "lat": solicitacao.latitude, 
+    "lon": solicitacao.longitude,
+    # 🔥 ADICIONA ESSAS DUAS LINHAS AQUI:
+    "cidadao_id": solicitacao.cidadao.id,
+    "cidadao_nome": solicitacao.cidadao.username
+} for solicitacao in solicitacoes_com_coords]
     
     # 3. Busca as ÁREAS (como antes)
     areas_salvas = Area.objects.filter(geom__isnull=False)

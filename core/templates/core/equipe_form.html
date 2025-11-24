@@ -1,90 +1,293 @@
 {% extends 'core/base_app.html' %}
+{% load static %}
 
 {% block content %}
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">{{ titulo }}</h2>
-    <a href="{% url 'equipe_list' %}" class="btn btn-secondary-custom">
-        <i class="bi bi-arrow-left me-1"></i>
-        Voltar ao Painel
-    </a>
-</div>
+<style>
+    /* --- ESTILOS GERAIS DO FORMULÁRIO --- */
+    .input-group-text { background-color: #f8f9fa; }
+    
+    /* Inputs arredondados */
+    .form-control-custom { 
+        border-left: 0; 
+        box-shadow: none !important; 
+        border-radius: 10px;
+    }
+    .form-control-custom:focus { border-color: #ced4da; }
 
-<form method="POST">
-    {% csrf_token %}
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
+    /* Botões Pílula */
+    .btn-principal-acao { 
+        background-color: #1E5943; 
+        border: 1px solid #1E5943; 
+        color: white; 
+        border-radius: 50px; 
+        padding: 10px 30px; 
+        font-weight: 600; 
+        transition: all 0.3s ease; 
+    }
+    .btn-principal-acao:hover { 
+        background-color: #143d2e; 
+        border-color: #143d2e; 
+        color: white; 
+        transform: translateY(-1px); 
+    }
+    
+    .btn-secondary-custom { 
+        background-color: #f8f9fa; 
+        color: #495057; 
+        border: 1px solid #ced4da; 
+        border-radius: 50px; 
+        padding: 8px 25px; 
+        font-weight: 600; 
+        transition: all 0.3s ease; 
+        text-decoration: none; 
+        display: inline-flex; 
+        align-items: center; 
+    }
+    .btn-secondary-custom:hover { 
+        background-color: #e9ecef; 
+        color: #212529; 
+        border-color: #adb5bd; 
+    }
 
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
+    /* --- ESTILO DOS CARDS DE MEMBROS (SELEÇÃO) --- */
+    .member-checkbox-wrapper input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.nome.id_for_label }}" class="form-label fw-bold">{{ form.nome.label }}</label>
-                        {{ form.nome }}
-                        {% if form.nome.help_text %}
-                            <small class="form-text text-muted">{{ form.nome.help_text }}</small>
-                        {% endif %}
-                        {% for error in form.nome.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
+    .member-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+    }
+
+    .member-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border-color: #1E5943;
+    }
+
+    /* --- LÓGICA DO ÍCONE (CORREÇÃO DO BUG) --- */
+    
+    /* Estado Padrão (Não Clicado) */
+    .member-card .uncheck-icon { display: block; }
+    .member-card .check-icon { display: none; }
+
+    /* Estado Selecionado (Clicado) */
+    .member-checkbox-wrapper input[type="checkbox"]:checked + label {
+        border-color: #1E5943;
+        background-color: rgba(30, 89, 67, 0.05) !important;
+        box-shadow: 0 0 0 1px #1E5943;
+    }
+
+    /* Quando clicado: Esconde o vazio, mostra o cheio */
+    .member-checkbox-wrapper input[type="checkbox"]:checked + label .uncheck-icon {
+        display: none !important;
+    }
+    .member-checkbox-wrapper input[type="checkbox"]:checked + label .check-icon {
+        display: block !important;
+        color: #1E5943 !important; /* Garante a cor verde */
+    }
+
+    .avatar-icon { 
+        background-color: rgba(30, 89, 67, 0.1); 
+        color: #1E5943; 
+        width: 40px; 
+        height: 40px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
+
+    /* --- ESTILOS DO PAINEL LATERAL (LIVE/HISTÓRICO) --- */
+    @keyframes pulse-green {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+    }
+    .live-indicator {
+        width: 10px; height: 10px; background-color: #198754; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse-green 2s infinite;
+    }
+    .activity-card { border-left: 4px solid #e9ecef; transition: all 0.2s; }
+    .activity-card:hover { border-left-color: #1E5943; background-color: #f8fff9; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">
+                {% if form.instance.pk %}Editar Equipe{% else %}Nova Equipe{% endif %}
+            </h2>
+            <p class="text-muted mb-0">Gerencie as equipes do seu sistema</p>
+        </div>
+        <a href="{% url 'equipe_list' %}" class="btn btn-secondary-custom">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        <div class="row g-4">
+            
+            <div class="col-lg-4">
+                
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-secondary mb-3">Dados da Equipe</h5>
+                        <div class="mb-4">
+                            <label for="{{ form.nome.id_for_label }}" class="form-label fw-bold text-dark small text-uppercase">
+                                Nome de Identificação <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nome }}
+                            {% if form.nome.help_text %}
+                                <div class="form-text mt-2">{{ form.nome.help_text }}</div>
+                            {% endif %}
+                            {% if form.nome.errors %}<div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="alert alert-light border d-flex align-items-center p-2" role="alert">
+                            <i class="bi bi-info-circle-fill me-2 text-muted fs-5"></i>
+                            <small class="text-muted" style="line-height: 1.2;">Crie nomes curtos e objetivos (ex: "Zona Norte", "Poda Rápida").</small>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.membros.id_for_label }}" class="form-label fw-bold">{{ form.membros.label }}</label>
-                        {{ form.membros }}
-                        {% if form.membros.help_text %}
-                            <small class="form-text text-muted">{{ form.membros.help_text }}</small>
-                        {% endif %}
-                        {% for error in form.membros.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ error }}
+                {% if form.instance.pk %}
+                    
+                    {% if tarefa_atual %}
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; border-left: 5px solid #198754 !important;">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-success mb-0 d-flex align-items-center">
+                                    <span class="live-indicator"></span> EM ATENDIMENTO
+                                </h6>
+                                <a href="{% url 'solicitacao_detail' pk=tarefa_atual.pk %}" class="text-decoration-none small text-muted hover-link" title="Ver Detalhes" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>
                             </div>
-                        {% endfor %}
+                            
+                            <h6 class="fw-bold text-dark mb-1">Solicitação #{{ tarefa_atual.id }}</h6>
+                            <p class="small text-muted mb-2">{{ tarefa_atual.descricao|truncatechars:60 }}</p>
+                            
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="badge bg-light text-dark border me-2">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i> {{ tarefa_atual.cidade.nome }}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.75rem;">
+                                    Iniciado há {{ tarefa_atual.data_criacao|timesince }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: #f8f9fa; border: 1px dashed #dee2e6 !important;">
+                        <div class="card-body p-4 text-center">
+                            <i class="bi bi-cup-hot text-muted fs-3 mb-2 d-block opacity-50"></i>
+                            <span class="text-muted small fw-bold">Equipe disponível no momento.</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                            <h6 class="fw-bold text-secondary mb-0">Últimas Resoluções</h6>
+                        </div>
+                        <div class="card-body p-4">
+                            {% if historico_tarefas %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for sol in historico_tarefas %}
+                                        <a href="{% url 'solicitacao_detail' pk=sol.pk %}" class="text-decoration-none" target="_blank">
+                                            <div class="activity-card p-2 rounded bg-white">
+                                                <div class="d-flex">
+                                                    <div class="activity-icon bg-success bg-opacity-10 text-success me-3">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="mb-0 small fw-bold text-dark text-truncate" style="max-width: 200px;">
+                                                            {{ sol.descricao|truncatewords:5 }}
+                                                        </p>
+                                                        <small class="text-muted" style="font-size: 0.7rem;">
+                                                            Concluído em {{ sol.data_finalizacao|date:"d/m/Y" }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted small mb-0 text-center py-2">Nenhuma solicitação finalizada ainda.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                {% endif %}
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-secondary mb-0">Selecionar Membros</h5>
+                            <span class="badge bg-light text-dark border rounded-pill px-3">Apenas Staff</span>
+                        </div>
+                        
+                        <div class="row row-cols-1 row-cols-md-2 g-3">
+                            {% for checkbox in form.membros %}
+                            <div class="col">
+                                <div class="member-checkbox-wrapper h-100">
+                                    {{ checkbox.tag }}
+                                    
+                                    <label class="form-check-label member-card w-100 h-100 p-3 bg-white d-flex align-items-center" for="{{ checkbox.id_for_label }}">
+                                        <div class="avatar-icon me-3">
+                                            <i class="bi bi-person-fill fs-5"></i>
+                                        </div>
+                                        
+                                        <div>
+                                            <span class="d-block fw-bold text-dark">{{ checkbox.choice_label }}</span>
+                                            <span class="small text-muted" style="font-size: 0.75rem;">Membro Habilitado</span>
+                                        </div>
+                                        
+                                        <div class="ms-auto">
+                                            <i class="bi bi-circle text-muted uncheck-icon fs-4"></i>
+                                            <i class="bi bi-check-circle-fill check-icon fs-4"></i>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if not form.membros.field.queryset %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-person-x fs-1 mb-2 d-block opacity-50"></i>
+                                Nenhum usuário 'staff' disponível.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer bg-white border-0 pt-0 pb-4 pe-4 text-end">
+                        <hr class="mb-4">
+                        <a href="{% url 'equipe_list' %}" class="btn btn-secondary-custom me-2">Cancelar</a>
+                        <button type="submit" class="btn btn-principal-acao">
+                            <i class="bi bi-check-lg me-2"></i> Salvar Equipe
+                        </button>
                     </div>
                 </div>
             </div>
-
         </div>
-        <div class="card-footer text-end bg-light">
-            <a href="{% url 'equipe_list' %}" class="btn btn-secondary-custom me-2">Cancelar</a>
-            <button type="submit" class="btn btn-principal-acao">
-                <i class="bi bi-check-circle-fill me-1"></i>
-                Salvar
-            </button>
-        </div>
-    </div>
-</form>
-{% endblock %}
+    </form>
+</div>
 
-{% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Adiciona a classe 'form-control' para o campo de nome
-    const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
-    if (nomeInput) {
-        nomeInput.classList.add('form-control', 'form-control-custom');
-    }
-
-    // Ativa o Select2 para o campo de seleção de membros
-    const membrosSelect = $('#{{ form.membros.id_for_label }}');
-    if (membrosSelect.length) {
-        membrosSelect.select2({
-            placeholder: "Selecione um ou mais membros",
-            allowClear: true,
-            width: '100%',
-            language: "pt-BR" // Opcional: se você tiver o arquivo de tradução
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        // Estiliza o input de nome
+        const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
+        if (nomeInput) {
+            nomeInput.classList.add('form-control', 'form-control-custom');
+            nomeInput.placeholder = "Digite o nome da equipe...";
+        }
+    });
 </script>
-{% endblock scripts %}
+{% endblock %}

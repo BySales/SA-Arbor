@@ -174,3 +174,6 @@ ACCOUNT_USERNAME_REQUIRED = False       # Torna o campo 'username' opcional
 ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1'] # CORRIGIDO: usa 'password1'
 ACCOUNT_SESSION_REMEMBER = True         # Permite que o usuário continue logado
 ACCOUNT_EMAIL_VERIFICATION = 'optional' # Não força a verificação de e-mail no começo
+
+SESSION_COOKIE_AGE = 86400 
+CSRF_COOKIE_AGE = 86400

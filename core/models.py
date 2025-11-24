@@ -207,7 +207,8 @@ class CidadePermitida(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     imagem = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
-    
+    ver_todas_solicitacoes = models.BooleanField(default=False, verbose_name="Ver solicitações da comunidade")
+        
     # LINHA PRINCIPAL - A cidade onde o cara mora
     cidade_principal = models.ForeignKey(
         CidadePermitida, 

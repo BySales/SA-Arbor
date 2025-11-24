@@ -1,18 +1,86 @@
 {% extends 'core/base_app.html' %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-header">
-            <h3>Tem certeza?</h3>
-        </div>
-        <div class="card-body">
-            <p>Você está prestes a deletar permanentemente a solicitação: <strong>"{{ object }}"</strong>.</p>
-            <p>Esta ação não pode ser desfeita.</p>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="card border-0 shadow-sm" style="max-width: 500px; width: 100%; border-radius: 12px;">
+        <div class="card-body p-5 text-center">
+            
+            <div class="mb-4">
+                <div class="avatar-icon bg-danger bg-opacity-10 text-danger mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; border-radius: 50%;">
+                    <i class="bi bi-trash3-fill fs-1"></i>
+                </div>
+            </div>
+
+            <h3 class="fw-bold text-dark mb-3">Excluir Solicitação?</h3>
+            <p class="text-muted mb-4">
+                Você está prestes a remover permanentemente o registro: <br>
+                <span class="fw-bold text-dark fs-5">"{{ object }}"</span>
+            </p>
+
+            <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-warning-emphasis d-flex align-items-center p-3 mb-4" style="border-radius: 10px; text-align: left;">
+                <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                <div>
+                    <small class="fw-bold d-block">Atenção!</small>
+                    <small>Esta ação não pode ser desfeita. Todos os dados e imagens vinculados serão perdidos.</small>
+                </div>
+            </div>
+
             <form method="POST">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Sim, quero deletar</button>
-                <a href="{% url 'solicitacao_update' pk=object.pk %}" class="btn btn-secondary">Cancelar</a>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger-custom btn-lg">
+                        <i class="bi bi-x-circle me-2"></i> Sim, quero deletar
+                    </button>
+                    
+                    <a href="{% url 'solicitacao_update' pk=object.pk %}" class="btn btn-secondary-custom btn-lg">
+                        Cancelar
+                    </a>
+                </div>
             </form>
         </div>
     </div>
+</div>
+
+<style>
+    /* Estilos Locais para garantir a identidade visual */
+    
+    /* Botão de Perigo (Vermelho Redondinho) */
+    .btn-danger-custom {
+        background-color: #dc3545;
+        border: 1px solid #dc3545;
+        color: white;
+        border-radius: 50px; /* PÍLULA */
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-danger-custom:hover {
+        background-color: #bb2d3b;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    /* Botão Cancelar (Cinza Redondinho) */
+    .btn-secondary-custom {
+        background-color: #f1f3f5;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        border-radius: 50px; /* PÍLULA */
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-secondary-custom:hover {
+        background-color: #e9ecef;
+        color: #212529;
+        border-color: #ced4da;
+    }
+</style>
 {% endblock %}
