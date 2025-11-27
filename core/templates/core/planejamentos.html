@@ -12,9 +12,6 @@
 <div class="row mb-4">
     <div class="col-lg-4 col-md-6 mb-3">
         <div class="card h-100">
-            {# ====================================================== #}
-            {# AJUSTE FINAL DE ALINHAMENTO COM 'gap' e 'lh-1' #}
-            {# ====================================================== #}
             <div class="card-body d-flex flex-column justify-content-center align-items-center text-center gap-2">
                 <div class="card-icon success">
                     <i class="bi bi-tree"></i>
@@ -78,7 +75,11 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <div class="alert alert-success text-center"><i class="bi bi-check-circle h4"></i><p class="mb-0 mt-2">Todos os agentes estão alocados!</p></div>
+                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center py-5">
+                        <i class="bi bi-check-circle text-success display-4 mb-3"></i>
+                        <h6 class="fw-bold text-dark">Equipe Completa!</h6>
+                        <p class="text-muted small mb-0">Todos os agentes técnicos já estão alocados em alguma equipe.</p>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -95,8 +96,10 @@
 <div class="row">
     <div class="col-12 mb-4">
         <div class="card">
-            <div class="card-header"><h6 class="m-0"><i class="bi bi-fire text-danger me-2"></i>Mapa de Calor de Denúncias</h6></div>
-            <div class="card-body"><div id="heatmap-container" style="height: 450px; border-radius: 8px;"></div></div>
+            <div class="card-header"><h6 class="m-0"><i class="bi bi-fire text-danger me-2"></i>Heatmap de Denúncias</h6></div>
+            <div class="card-body">
+                <div id="heatmap-novo" style="height: 450px; border-radius: 8px;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -122,7 +125,7 @@
                 {% if especies_nao_utilizadas %}
                     <p class="small text-muted">Espécies do catálogo que ainda não foram plantadas.</p>
                     <ul class="list-group list-group-flush">
-                        {% for especie in especies_nao_utilizadas|slice:":5" %} {# Mostra só as 5 primeiras para não poluir #}
+                        {% for especie in especies_nao_utilizadas|slice:":5" %} 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 {{ especie.nome_popular }}
                                 <a href="{% url 'especie_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></a>
@@ -130,9 +133,10 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <div class="alert alert-success text-center">
-                        <i class="bi bi-check-circle h4"></i>
-                        <p class="mb-0 mt-2">Parabéns! Todas as espécies do catálogo já foram utilizadas!</p>
+                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center py-5">
+                        <i class="bi bi-check-circle text-success h1 mb-3"></i>
+                        <h6 class="fw-bold text-dark">Catálogo Completo!</h6>
+                        <p class="text-muted small mb-0">Todas as espécies cadastradas já foram utilizadas em algum plantio.</p>
                     </div>
                 {% endif %}
             </div>
@@ -144,6 +148,7 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    
     // --- GRÁFICO DE CARGA DE TRABALHO POR EQUIPE ---
     const ctxCargaEquipes = document.getElementById('cargaEquipesChart');
     if (ctxCargaEquipes) {
@@ -162,60 +167,63 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1 // Garante que o eixo Y só mostre números inteiros
-                        }
-                    }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
                 }
             }
         });
     }
 
-    // --- MAPA DE CALOR ---
-    const heatmapContainer = document.getElementById('heatmap-container');
+    // --- MAPA DE CALOR (TURBINADO E SUAVE) ---
+    const heatmapContainer = document.getElementById('heatmap-novo');
     if (heatmapContainer) {
-        // 1. Inicia o mapa
-        const map = L.map('heatmap-container', { zoomControl: true }).setView([-24.0965, -46.6212], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        console.log("Carregando Heatmap Suave...");
+
+        // 1. Inicia o mapa SEM ZOOM CONTROL
+        const map = L.map('heatmap-novo', { zoomControl: false }).setView([-24.0965, -46.6212], 12);
+        
+        // Visual CARTO VOYAGER
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO',
+            maxZoom: 19
         }).addTo(map);
 
-        // 2. Busca os dados na nossa nova API
+        // 2. Busca os dados de CALOR
         fetch("{% url 'api_heatmap_denuncias' %}")
             .then(response => response.json())
             .then(coordenadas => {
                 if (coordenadas.length > 0) {
-                    // 3. Cria a camada de calor com os dados recebidos
                     L.heatLayer(coordenadas, {
-                        radius: 25,
-                        blur: 15,
-                        maxZoom: 18,
+                        radius: 25,      // Voltei para um tamanho padrão (não borra tanto)
+                        blur: 15,        // Desfoque médio
+                        maxZoom: 17,     // 🔥 AQUI O SEGREDO: Aumentei o zoom máximo. 
+                                         // Isso faz a cor ficar menos intensa quando visto de longe.
+                        minOpacity: 0.3, // Mais transparência
+                        gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'} 
                     }).addTo(map);
                 }
             })
-            .catch(error => console.error('Erro ao buscar dados para o heatmap:', error));
+            .catch(error => console.error('Erro no Heatmap:', error));
             
-        // Bônus: Centraliza o mapa nas cidades do usuário
+        // 3. AUTO-ZOOM NA CIDADE
         fetch("{% url 'api_cidades_geo' %}")
             .then(response => response.json())
             .then(data => {
                 if(data.cidades && data.cidades.length > 0) {
                     const group = L.featureGroup();
+                    
                     data.cidades.forEach(cidade => {
-                        L.geoJSON(cidade.geom).addTo(group);
+                        L.geoJSON(cidade.geom, {
+                            style: { color: '#1E5943', weight: 2, fillOpacity: 0.0, dashArray: '5, 10' },
+                            interactive: false
+                        }).addTo(group);
                     });
+                    
                     map.fitBounds(group.getBounds().pad(0.1));
                 }
-            });
+            })
+            .catch(error => console.error('Erro ao focar cidade:', error));
     }
 
     // --- GRÁFICO DE ESPÉCIES ---
@@ -234,11 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
-                }
+                plugins: { legend: { position: 'right' } }
             }
         });
     }

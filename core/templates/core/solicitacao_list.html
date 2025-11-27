@@ -147,10 +147,13 @@
             {% endif %}
             
             {% for solicitacao in solicitacoes %}
-                <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %}">
+                <div class="card card-solicitacao mb-3 {% if solicitacao.tipo == 'DENUNCIA' %}card-denuncia{% else %}card-sugestao{% endif %} clickable-card"
+                     data-url="{% url 'solicitacao_detail' pk=solicitacao.pk %}"
+                     style="cursor: pointer; transition: transform 0.2s;">
+                    
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
+                            <h6 class="mb-0 text-dark fw-bold">{{ solicitacao.get_tipo_display }} #{{ solicitacao.id }}</h6>
                             <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ solicitacao.data_criacao|date:"d/m/Y \à\s H:i" }}</small>
                         </div>
                         <span class="badge status-badge status-{{ solicitacao.status|lower }}">{{ solicitacao.get_status_display }}</span>
@@ -161,8 +164,10 @@
                             <i class="bi bi-person"></i> 
                             <strong>Autor:</strong> 
                             {% if solicitacao.cidadao == user or user.is_staff %}
-                                {{ solicitacao.cidadao.username }} {% else %}
-                                <span class="fst-italic text-muted">Vizinho Anônimo</span> {% endif %}
+                                {{ solicitacao.cidadao.username }}
+                            {% else %}
+                                <span class="fst-italic text-muted">Vizinho Anônimo</span>
+                            {% endif %}
                             
                             <span class="mx-2 text-muted">|</span>
                             
@@ -174,13 +179,13 @@
                         <div id="desc-container-{{ solicitacao.id }}" class="descricao-container">
                             <p id="desc-text-{{ solicitacao.id }}" class="mb-0">{{ solicitacao.descricao }}</p>
                         </div>
-                        <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
+                        <a id="ler-mais-{{ solicitacao.id }}" href="javascript:void(0);" onclick="event.stopPropagation(); toggleDescricao({{ solicitacao.id }})" class="ler-mais-btn">Ler mais</a>
 
                         {% if solicitacao.imagens.all %}
                             <p class="mt-3 mb-2"><strong>Imagens:</strong></p>
                             <div class="d-flex flex-wrap">
                                 {% for imagem_obj in solicitacao.imagens.all %}
-                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2">
+                                    <a href="{{ imagem_obj.imagem.url }}" target="_blank" class="me-2 mb-2" onclick="event.stopPropagation();">
                                         <img src="{{ imagem_obj.imagem.url }}" class="img-fluid rounded img-thumbnail-solicitacao">
                                     </a>
                                 {% endfor %}
@@ -190,17 +195,17 @@
                     
                     <div class="card-footer bg-white d-flex justify-content-end align-items-center">
                         {% if solicitacao.latitude and solicitacao.longitude %}
-                            <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2 rounded-pill">
+                            <a href="{% url 'mapa' %}?solicitacao_id={{ solicitacao.id }}" class="btn btn-outline-info btn-sm me-2 rounded-pill z-index-top">
                                 <i class="bi bi-geo-alt-fill"></i> Ver no Mapa
                             </a>
                         {% endif %}
                         
                         {% if solicitacao.cidadao == user or user.is_staff %}
-                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm rounded-pill">
+                            <a href="{% url 'solicitacao_update' pk=solicitacao.pk %}" class="btn btn-primary btn-sm rounded-pill z-index-top">
                                 <i class="bi bi-pencil-square"></i> Editar
                             </a>
                         {% else %}
-                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm rounded-pill">
+                            <a href="{% url 'solicitacao_detail' pk=solicitacao.pk %}" class="btn btn-secondary btn-sm rounded-pill z-index-top">
                                 <i class="bi bi-eye"></i> Detalhes
                             </a>
                         {% endif %}
@@ -250,7 +255,9 @@
                 linkElement.textContent = 'Ler menos';
             }
         }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. Lógica de Descrição Longa
             document.querySelectorAll('.descricao-container').forEach(container => {
                 const textP = container.querySelector('p');
                 if (textP.scrollHeight <= container.clientHeight) {
@@ -260,6 +267,34 @@
                     container.style.maxHeight = 'none';
                     container.classList.add('expandida');
                 }
+            });
+
+            // 2. 🔥 Lógica do Card Clicável (Sem quebrar botões internos)
+            const cards = document.querySelectorAll('.clickable-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Se clicou em um link, botão ou imagem com zoom, não faz nada (deixa o elemento agir)
+                    if (e.target.closest('a') || e.target.closest('button') || e.target.closest('img')) {
+                        return;
+                    }
+                    // Se clicou no vazio do card, vai pra URL de detalhes
+                    const url = this.getAttribute('data-url');
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+                
+                // Efeito Hover Visual
+                card.addEventListener('mouseenter', () => {
+                   card.style.transform = 'translateY(-3px)';
+                   card.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
+                   card.style.borderColor = '#1E5943';
+                });
+                card.addEventListener('mouseleave', () => {
+                   card.style.transform = 'translateY(0)';
+                   card.style.boxShadow = '';
+                   card.style.borderColor = '';
+                });
             });
         });
     </script>

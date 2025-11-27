@@ -2,84 +2,99 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* --- ESTILOS ESPECÍFICOS --- */
+    .action-btn {
+        border: 1px solid #dee2e6; background: white; color: #495057; border-radius: 50px; padding: 6px 16px; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+    .action-btn:hover { background-color: #f8f9fa; color: #1E5943; border-color: #1E5943; transform: translateY(-2px); }
+    .dropdown-toggle::after { display: none !important; }
+    .btn-options { color: #adb5bd; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; border: none; }
+    .btn-options:hover, .show > .btn-options { background-color: #f1f3f5; color: #1E5943; }
+    
+    /* Item Ativo */
+    .dropdown-item.active-metric { color: #1E5943 !important; font-weight: 700 !important; background-color: #e8f5e9 !important; position: relative; }
+    .dropdown-item.active-metric::after { content: '●'; position: absolute; right: 15px; font-size: 0.8rem; color: #1E5943; }
+    
+    .dropdown-item.active-visual { color: #0d6efd !important; font-weight: 600 !important; background-color: #f0f7ff !important; }
+
+    .dropdown-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #adb5bd; margin-top: 5px; }
+
+    @media print { .sidebar, .header-search, .header-actions, .filter-pills, .actions-group, .btn-options { display: none !important; } .main-content { margin-left: 0 !important; padding: 0 !important; } body { background: white !important; } .card { border: 1px solid #ddd !important; box-shadow: none !important; } }
+</style>
+
 <div class="container-xl">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 page-header">
-        <div>
-            <h2 class="h3 mb-0">Relatórios</h2>
-            <p class="mb-0 text-muted small">Análise de dados e performance da Arbor</p>
+    
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4 page-header">
+        <div><h2 class="h3 mb-0 fw-bold text-dark">Relatórios</h2><p class="mb-0 text-muted small">Análise de dados e performance da Arbor</p></div>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div class="actions-group d-flex gap-2 me-2">
+                <button onclick="window.print()" class="action-btn"><i class="bi bi-printer"></i> Imprimir</button>
+                <button class="action-btn"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</button>
+            </div>
+            <div class="filter-pills">
+                <a href="{% url 'relatorios' %}?periodo=mes" class="{% if periodo_selecionado == 'mes' %}active{% endif %}">Este Mês</a>
+                <a href="{% url 'relatorios' %}?periodo=semana" class="{% if periodo_selecionado == 'semana' %}active{% endif %}">Últimos 7 dias</a>
+                <a href="{% url 'relatorios' %}?periodo=ano" class="{% if periodo_selecionado == 'ano' %}active{% endif %}">Este Ano</a>
+            </div>
         </div>
-<div class="filter-pills">
-    <a href="{% url 'relatorios' %}?periodo=mes" class="{% if periodo_selecionado == 'mes' %}active{% endif %}">Este Mês</a>
-    <a href="{% url 'relatorios' %}?periodo=semana" class="{% if periodo_selecionado == 'semana' %}active{% endif %}">Últimos 7 dias</a>
-    <a href="{% url 'relatorios' %}?periodo=ano" class="{% if periodo_selecionado == 'ano' %}active{% endif %}">Este Ano</a>
-</div>
     </div>
 
     <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card card-kpi card-status-hover h-100">
-                <div class="card-body">
-                    <div class="card-icon primary mb-3"><i class="bi bi-tree"></i></div>
-                    <h6 class="card-title-report text-primary">Total de Árvores</h6>
-                    <h3 class="card-number-report">{{ total_arvores|default:"0" }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card card-kpi card-status-hover h-100">
-                <div class="card-body">
-                    <div class="card-icon info mb-3"><i class="bi bi-diagram-3"></i></div>
-                    <h6 class="card-title-report text-info">Diversidade de Espécies</h6>
-                    <h3 class="card-number-report">{{ diversidade_especies|default:"0" }}</h3>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card card-kpi card-status-hover h-100">
-                <div class="card-body">
-                    <div class="card-icon success mb-3"><i class="bi bi-check2-circle"></i></div>
-                    <h6 class="card-title-report text-success">Finalizadas</h6>
-                    <h3 class="card-number-report">{{ solicitacoes_finalizadas|default:"0" }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card card-kpi card-status-hover h-100">
-                <div class="card-body">
-                    <div class="card-icon danger mb-3"><i class="bi bi-exclamation-octagon"></i></div>
-                    <h6 class="card-title-report text-danger">Em Aberto</h6>
-                    <h3 class="card-number-report">{{ solicitacoes_em_aberto|default:"0" }}</h3>
-                </div>
-            </div>
-        </div>
+        <div class="col-xl-3 col-md-6 mb-4"><div class="card card-kpi card-status-hover h-100"><div class="card-body"><div class="card-icon primary mb-3"><i class="bi bi-tree"></i></div><h6 class="card-title-report text-primary">Total de Árvores</h6><h3 class="card-number-report">{{ total_arvores|default:"0" }}</h3></div></div></div>
+        <div class="col-xl-3 col-md-6 mb-4"><div class="card card-kpi card-status-hover h-100"><div class="card-body"><div class="card-icon info mb-3"><i class="bi bi-diagram-3"></i></div><h6 class="card-title-report text-info">Diversidade</h6><h3 class="card-number-report">{{ diversidade_especies|default:"0" }}</h3></div></div></div>
+        <div class="col-xl-3 col-md-6 mb-4"><div class="card card-kpi card-status-hover h-100"><div class="card-body"><div class="card-icon success mb-3"><i class="bi bi-check2-circle"></i></div><h6 class="card-title-report text-success">Finalizadas</h6><h3 class="card-number-report">{{ solicitacoes_finalizadas|default:"0" }}</h3></div></div></div>
+        <div class="col-xl-3 col-md-6 mb-4"><div class="card card-kpi card-status-hover h-100"><div class="card-body"><div class="card-icon danger mb-3"><i class="bi bi-exclamation-octagon"></i></div><h6 class="card-title-report text-danger">Em Aberto</h6><h3 class="card-number-report">{{ solicitacoes_em_aberto|default:"0" }}</h3></div></div></div>
     </div>
 
     <div class="row">
         <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card card-grafico h-100">
-                <div class="card-header">
-                    <h6 class="m-0 fw-bold text-primary">Saúde das Árvores</h6>
+            <div class="card card-grafico h-100 shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h6 class="m-0 fw-bold text-primary" id="title-chart1">Saúde das Árvores</h6>
+                    <div class="dropdown">
+                        <button class="btn-options dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><h6 class="dropdown-header">Métrica (Dados)</h6></li>
+                            <li><a class="dropdown-item small active-metric" href="#" onclick="updateChart('chart1', {key: 'saude', title: 'Saúde das Árvores'}, this)"><i class="bi bi-activity me-2"></i>Saúde das Árvores</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart1', {key: 'status_solic', title: 'Status dos Chamados'}, this)"><i class="bi bi-clipboard-data me-2"></i>Status dos Chamados</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart1', {key: 'areas_status', title: 'Status dos Projetos'}, this)"><i class="bi bi-bounding-box me-2"></i>Status dos Projetos</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Visualização</h6></li>
+                            <li><a class="dropdown-item small active-visual" href="#" onclick="updateChart('chart1', {type: 'doughnut'}, this)"><i class="bi bi-pie-chart me-2"></i>Rosca</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart1', {type: 'pie'}, this)"><i class="bi bi-pie-chart-fill me-2"></i>Pizza</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart1', {type: 'polarArea'}, this)"><i class="bi bi-brightness-high me-2"></i>Polar</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <div class="chart-container">
-                        <canvas id="graficoSaude"></canvas>
-                    </div>
+                    <div class="chart-container"><canvas id="canvas-chart1"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card card-grafico h-100">
-                <div class="card-header">
-                    <h6 class="m-0 fw-bold text-primary">Top 10 Espécies Mais Comuns</h6>
+            <div class="card card-grafico h-100 shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h6 class="m-0 fw-bold text-primary" id="title-chart2">Top 10 Espécies</h6>
+                    <div class="dropdown">
+                        <button class="btn-options dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><h6 class="dropdown-header">Métrica (Dados)</h6></li>
+                            <li><a class="dropdown-item small active-metric" href="#" onclick="updateChart('chart2', {key: 'especies', title: 'Top 10 Espécies'}, this)">Espécies Mais Comuns</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart2', {key: 'tipos_solic', title: 'Solicitações por Tipo'}, this)">Solicitações por Tipo</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart2', {key: 'equipes_prod', title: 'Produtividade por Equipe'}, this)">Produtividade Equipes</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Visualização</h6></li>
+                            <li><a class="dropdown-item small active-visual" href="#" onclick="updateChart('chart2', {type: 'bar'}, this)"><i class="bi bi-bar-chart-fill me-2"></i>Barras Verticais</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart2', {type: 'bar-horizontal'}, this)"><i class="bi bi-bar-chart-steps me-2"></i>Barras Horizontais</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <div class="chart-container">
-                        <canvas id="graficoTopEspecies"></canvas>
-                    </div>
+                    <div class="chart-container w-100"><canvas id="canvas-chart2"></canvas></div>
                 </div>
             </div>
         </div>
@@ -87,14 +102,25 @@
     
     <div class="row">
         <div class="col-12">
-            <div class="card card-grafico">
-                <div class="card-header">
-                    <h6 class="m-0 fw-bold text-primary">Plantios ao Longo do Tempo</h6>
+            <div class="card card-grafico shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h6 class="m-0 fw-bold text-primary" id="title-chart3">Plantios ao Longo do Tempo</h6>
+                    <div class="dropdown">
+                        <button class="btn-options dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><h6 class="dropdown-header">Métrica (Dados)</h6></li>
+                            <li><a class="dropdown-item small active-metric" href="#" onclick="updateChart('chart3', {key: 'plantios', title: 'Plantios ao Longo do Tempo'}, this)">Histórico de Plantios</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart3', {key: 'resolucoes', title: 'Produtividade (Resoluções)'}, this)">Histórico de Resoluções</a></li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Visualização</h6></li>
+                            <li><a class="dropdown-item small active-visual" href="#" onclick="updateChart('chart3', {type: 'line'}, this)"><i class="bi bi-graph-up me-2"></i>Linha Suave</a></li>
+                            <li><a class="dropdown-item small" href="#" onclick="updateChart('chart3', {type: 'bar'}, this)"><i class="bi bi-bar-chart me-2"></i>Barras</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 280px;">
-                        <canvas id="graficoPlantios"></canvas>
-                    </div>
+                    <div class="chart-container" style="height: 300px;"><canvas id="canvas-chart3"></canvas></div>
                 </div>
             </div>
         </div>
@@ -105,71 +131,129 @@
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // SEUS SCRIPTS DE GRÁFICO CONTINUAM IGUAIS AQUI...
-    // 1. Gráfico de Pizza - SAÚDE
-    var ctxSaude = document.getElementById("graficoSaude").getContext('2d');
-    new Chart(ctxSaude, {
-      type: 'doughnut',
-      data: {
-        labels: JSON.parse('{{ labels_saude|safe }}'),
-        datasets: [{
-          data: JSON.parse('{{ valores_saude|safe }}'),
-          backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'],
-        }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: 'bottom' } }
-      },
-    });
-
-    // 2. Gráfico de Barras - TOP 10 ESPÉCIES
-    var ctxTopEspecies = document.getElementById("graficoTopEspecies").getContext('2d');
-    new Chart(ctxTopEspecies, {
-        type: 'bar',
-        data: {
-            labels: JSON.parse('{{ labels_top_especies|safe }}'),
-            datasets: [{
-                label: "Quantidade",
-                backgroundColor: "#1e5943",
-                hoverBackgroundColor: "#154231",
-                borderColor: "#1e5943",
-                data: JSON.parse('{{ valores_top_especies|safe }}'),
-                borderRadius: 4,
-            }],
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { ticks: { beginAtZero: true, precision: 0 } } }
-        }
-    });
     
-    // 3. Gráfico de Linha - PLANTIOS POR MÊS
-    var ctxPlantios = document.getElementById("graficoPlantios").getContext('2d');
-    new Chart(ctxPlantios, {
-        type: 'line',
-        data: {
-            labels: JSON.parse('{{ labels_plantio|safe }}'),
-            datasets: [{
-                label: "Árvores Plantadas",
-                lineTension: 0.3,
-                backgroundColor: "rgba(30, 89, 67, 0.08)",
-                borderColor: "#1e5943",
-                pointRadius: 4,
-                pointBackgroundColor: "#1e5943",
-                pointBorderColor: "#fff",
-                pointHoverRadius: 6,
-                data: JSON.parse('{{ valores_plantio|safe }}'),
-                fill: true,
-            }],
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { ticks: { beginAtZero: true, precision: 0 } } }
+    // 1. COFRE DE DADOS (SAFE DATA)
+    const REPO = {
+        'saude': { labels: JSON.parse('{{ labels_saude|safe }}'), data: JSON.parse('{{ valores_saude|safe }}'), colors: ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'] },
+        'status_solic': { labels: JSON.parse('{{ labels_status_solic|safe }}'), data: JSON.parse('{{ valores_status_solic|safe }}'), colors: ['#dc3545', '#ffc107', '#198754', '#212529'] },
+        'areas_status': { labels: JSON.parse('{{ labels_areas|safe }}'), data: JSON.parse('{{ valores_areas|safe }}'), colors: ['#4e73df', '#f6c23e', '#1cc88a', '#858796', '#36b9cc'] },
+        'especies': { labels: JSON.parse('{{ labels_top_especies|safe }}'), data: JSON.parse('{{ valores_top_especies|safe }}') },
+        'tipos_solic': { labels: JSON.parse('{{ labels_tipo|safe }}'), data: JSON.parse('{{ valores_tipo|safe }}') },
+        'equipes_prod': { labels: JSON.parse('{{ labels_equipes|safe }}'), data: JSON.parse('{{ valores_equipes|safe }}') },
+        'plantios': { labels: JSON.parse('{{ labels_plantio|safe }}'), data: JSON.parse('{{ valores_plantio|safe }}') },
+        'resolucoes': { labels: JSON.parse('{{ labels_resolucao|safe }}'), data: JSON.parse('{{ valores_resolucao|safe }}') }
+    };
+
+    // 2. MEMÓRIA DE ESTADO (Salva o que está sendo mostrado em cada gráfico)
+    const chartState = {
+        'chart1': { key: 'saude', type: 'doughnut' },
+        'chart2': { key: 'especies', type: 'bar' },
+        'chart3': { key: 'plantios', type: 'line' }
+    };
+    
+    window.activeCharts = {};
+
+    // 3. FUNÇÃO MESTRE DE ATUALIZAÇÃO (CORRIGIDA)
+    window.updateChart = function(chartId, config, clickedEl) {
+        // config pode ter: { key: 'nova_chave', title: 'Novo Título' } OU { type: 'novo_tipo' }
+        
+        // Atualiza Memória (Estado)
+        if (config.key) chartState[chartId].key = config.key;
+        if (config.type) chartState[chartId].type = config.type;
+        if (config.title) document.getElementById('title-' + chartId).textContent = config.title;
+
+        // Atualiza Menu Visual (Active Class)
+        if (clickedEl) {
+            const menuGroup = clickedEl.closest('ul');
+            const targetClass = config.key ? '.active-metric' : '.active-visual';
+            // Remove a classe de todos da mesma categoria
+            menuGroup.querySelectorAll(targetClass).forEach(i => i.classList.remove(targetClass.substring(1)));
+            // Adiciona no clicado
+            clickedEl.classList.add(targetClass.substring(1));
         }
-    });
+
+        // Recupera dados da memória
+        const currentKey = chartState[chartId].key;
+        const currentType = chartState[chartId].type;
+        const sourceData = REPO[currentKey];
+
+        // Destroi gráfico antigo
+        const canvas = document.getElementById('canvas-' + chartId);
+        if (window.activeCharts[chartId]) window.activeCharts[chartId].destroy();
+        const ctx = canvas.getContext('2d');
+
+        // --- TRADUÇÃO DO TIPO (CORREÇÃO PRINCIPAL) ---
+        let chartJsType = currentType;
+        let indexAxis = 'x'; 
+
+        if (currentType === 'bar-horizontal') {
+            chartJsType = 'bar';
+            indexAxis = 'y';
+        }
+
+        // Configura Dataset
+        let datasetConfig = {
+            data: sourceData.data,
+            backgroundColor: sourceData.colors || "#1e5943",
+            borderColor: sourceData.colors ? "#fff" : "#1e5943",
+            borderWidth: 2,
+            hoverOffset: 4
+        };
+
+        // Configura Opções
+        let optionsConfig = {
+            indexAxis: indexAxis,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {}
+        };
+
+        // Ajustes finos
+        if (chartJsType === 'doughnut' || chartJsType === 'pie' || chartJsType === 'polarArea') {
+            datasetConfig.backgroundColor = sourceData.colors;
+            datasetConfig.borderWidth = (chartJsType === 'polarArea') ? 1 : 0;
+            optionsConfig.plugins.legend = { display: true, position: 'bottom' };
+            optionsConfig.scales = {}; // Sem eixos para pizza
+            if (chartJsType === 'doughnut') optionsConfig.cutout = '70%';
+        } 
+        else if (chartJsType === 'bar') {
+            datasetConfig.label = "Quantidade";
+            datasetConfig.borderRadius = 4;
+            datasetConfig.backgroundColor = "#1e5943";
+            datasetConfig.hoverBackgroundColor = "#143d2e";
+            
+            // Eixos para barras
+            if (indexAxis === 'y') {
+                optionsConfig.scales = { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } };
+            } else {
+                optionsConfig.scales = { y: { beginAtZero: true, grid: { borderDash: [2], drawBorder: false } }, x: { grid: { display: false } } };
+            }
+        }
+        else if (chartJsType === 'line') {
+            datasetConfig.label = "Quantidade";
+            datasetConfig.fill = true;
+            datasetConfig.backgroundColor = "rgba(30, 89, 67, 0.05)";
+            datasetConfig.tension = 0.4;
+            datasetConfig.pointRadius = 4;
+            optionsConfig.scales = { y: { beginAtZero: true, grid: { borderDash: [2] } }, x: { grid: { display: false } } };
+        }
+
+        // Renderiza
+        window.activeCharts[chartId] = new Chart(ctx, {
+            type: chartJsType,
+            data: {
+                labels: sourceData.labels,
+                datasets: [datasetConfig]
+            },
+            options: optionsConfig
+        });
+    };
+
+    // 4. INICIALIZAÇÃO (Sem erros agora!)
+    updateChart('chart1', {key: 'saude', type: 'doughnut'});
+    updateChart('chart2', {key: 'especies', type: 'bar'});
+    updateChart('chart3', {key: 'plantios', type: 'line'});
 });
 </script>
 {% endblock %}

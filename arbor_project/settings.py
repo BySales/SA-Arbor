@@ -177,3 +177,5 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional' # Não força a verificação de e-mail 
 
 SESSION_COOKIE_AGE = 86400 
 CSRF_COOKIE_AGE = 86400
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'

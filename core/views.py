@@ -1168,13 +1168,10 @@ def home_view(request):
 @user_passes_test(lambda u: u.is_staff, login_url='home')
 def relatorios_view(request):
     """
-    View para a Central de Relatórios com filtros de período.
+    View para a Central de Relatórios com filtros de período e múltiplos gráficos.
     """
-    # 1. PEGAR O FILTRO DA URL
-    # A gente pega o parâmetro 'periodo'. Se não vier nada, o padrão é 'mes'.
     periodo_selecionado = request.GET.get('periodo', 'mes')
 
-    # 2. CALCULAR A DATA DE INÍCIO BASEADO NO FILTRO
     today = timezone.now().date()
     start_date = None
 
@@ -1182,60 +1179,114 @@ def relatorios_view(request):
         start_date = today - timedelta(days=7)
     elif periodo_selecionado == 'ano':
         start_date = today.replace(month=1, day=1)
-    else: # Padrão é 'mes'
+    else: 
         start_date = today.replace(day=1)
 
-    # --- APLICAR O FILTRO NAS BUSCAS ---
-    # A gente só vai buscar registros cuja data seja MAIOR OU IGUAL (gte) a nossa start_date
-    
-    # KPIs
+    # --- KPIs ---
     solicitacoes_finalizadas = Solicitacao.objects.filter(status='FINALIZADO', data_criacao__gte=start_date).count()
     solicitacoes_em_aberto = Solicitacao.objects.filter(status='EM_ABERTO', data_criacao__gte=start_date).count()
-    
-    # Para os KPIs que não dependem de data, a gente mantém a busca completa
     total_arvores = InstanciaArvore.objects.count()
     diversidade_especies = Especie.objects.count()
 
-    # Gráfico de Saúde (não costuma ser filtrado por data, mas se quisesse, seria InstanciaArvore.objects.filter(data_plantio__gte=start_date)...)
+    # ======================================================
+    # GRÁFICO 1: DISTRIBUIÇÃO (PIZZA/ROSCA)
+    # ======================================================
+    
+    # A: Saúde das Árvores
     dados_saude_query = InstanciaArvore.objects.values('estado_saude').annotate(total=Count('estado_saude')).order_by('estado_saude')
     mapa_saude = dict(InstanciaArvore.ESTADO_SAUDE_CHOICES)
     labels_saude = [mapa_saude.get(item['estado_saude'], 'N/A') for item in dados_saude_query]
     valores_saude = [item['total'] for item in dados_saude_query]
 
-    # Gráfico Top 10 Espécies (baseado em árvores plantadas no período)
+    # B: Status das Solicitações
+    dados_status_solic_query = Solicitacao.objects.filter(data_criacao__gte=start_date) \
+        .values('status').annotate(total=Count('status')).order_by('status')
+    mapa_status = dict(Solicitacao.STATUS_CHOICES)
+    labels_status_solic = [mapa_status.get(item['status'], 'N/A') for item in dados_status_solic_query]
+    valores_status_solic = [item['total'] for item in dados_status_solic_query]
+
+    # C: Status das Áreas (NOVO 🔥) - Visão geral de planejamento
+    dados_areas_query = Area.objects.values('status').annotate(total=Count('status')).order_by('-total')
+    mapa_areas = dict(Area.STATUS_AREA_CHOICES)
+    labels_areas = [mapa_areas.get(item['status'], item['status']) for item in dados_areas_query]
+    valores_areas = [item['total'] for item in dados_areas_query]
+
+    # ======================================================
+    # GRÁFICO 2: RANKING E CATEGORIAS (BARRAS)
+    # ======================================================
+
+    # A: Top 10 Espécies
     top_especies_query = InstanciaArvore.objects.filter(data_plantio__gte=start_date) \
         .values('especie__nome_popular') \
         .annotate(total=Count('id')) \
         .order_by('-total')[:10]
     labels_top_especies = [item['especie__nome_popular'] for item in top_especies_query]
     valores_top_especies = [item['total'] for item in top_especies_query]
-    
-    # Gráfico de Plantios ao Longo do Tempo (já é filtrado por natureza, mas podemos refinar)
-    plantios_por_mes = InstanciaArvore.objects.filter(data_plantio__gte=start_date) \
-        .annotate(mes_plantio=TruncMonth('data_plantio')) \
-        .values('mes_plantio') \
+
+    # B: Solicitações por Tipo
+    dados_tipo_query = Solicitacao.objects.filter(data_criacao__gte=start_date) \
+        .values('tipo').annotate(total=Count('id'))
+    mapa_tipo = dict(Solicitacao.TIPO_CHOICES)
+    labels_tipo = [mapa_tipo.get(item['tipo'], item['tipo']) for item in dados_tipo_query]
+    valores_tipo = [item['total'] for item in dados_tipo_query]
+
+    # C: Produtividade das Equipes (NOVO 🔥) - Quem resolveu mais?
+    equipes_query = Solicitacao.objects.filter(status='FINALIZADO', data_finalizacao__gte=start_date) \
+        .exclude(equipe_delegada__isnull=True) \
+        .values('equipe_delegada__nome') \
         .annotate(total=Count('id')) \
-        .order_by('mes_plantio')
-    labels_plantio = [p['mes_plantio'].strftime('%b/%Y') for p in plantios_por_mes]
+        .order_by('-total')
+    labels_equipes = [item['equipe_delegada__nome'] for item in equipes_query]
+    valores_equipes = [item['total'] for item in equipes_query]
+
+    # ======================================================
+    # GRÁFICO 3: LINHA DO TEMPO
+    # ======================================================
+
+    # A: Plantios
+    plantios_por_mes = InstanciaArvore.objects.filter(data_plantio__gte=start_date) \
+        .annotate(mes=TruncMonth('data_plantio')) \
+        .values('mes').annotate(total=Count('id')).order_by('mes')
+    labels_plantio = [p['mes'].strftime('%b/%Y') for p in plantios_por_mes]
     valores_plantio = [p['total'] for p in plantios_por_mes]
+
+    # B: Resoluções
+    resolucoes_por_mes = Solicitacao.objects.filter(status='FINALIZADO', data_finalizacao__gte=start_date) \
+        .annotate(mes=TruncMonth('data_finalizacao')) \
+        .values('mes').annotate(total=Count('id')).order_by('mes')
+    labels_resolucao = [p['mes'].strftime('%b/%Y') for p in resolucoes_por_mes]
+    valores_resolucao = [p['total'] for p in resolucoes_por_mes]
 
     context = {
         'pagina': 'relatorios',
-        'periodo_selecionado': periodo_selecionado, # <<< Manda o filtro ativo pro template!
+        'periodo_selecionado': periodo_selecionado,
         
-        # KPIs
         'total_arvores': total_arvores,
         'diversidade_especies': diversidade_especies,
         'solicitacoes_finalizadas': solicitacoes_finalizadas,
         'solicitacoes_em_aberto': solicitacoes_em_aberto,
         
-        # Dados dos Gráficos
+        # Gráfico 1
         'labels_saude': json.dumps(labels_saude),
         'valores_saude': json.dumps(valores_saude),
+        'labels_status_solic': json.dumps(labels_status_solic),
+        'valores_status_solic': json.dumps(valores_status_solic),
+        'labels_areas': json.dumps(labels_areas),       # NOVO
+        'valores_areas': json.dumps(valores_areas),     # NOVO
+        
+        # Gráfico 2
         'labels_top_especies': json.dumps(labels_top_especies),
         'valores_top_especies': json.dumps(valores_top_especies),
+        'labels_tipo': json.dumps(labels_tipo),
+        'valores_tipo': json.dumps(valores_tipo),
+        'labels_equipes': json.dumps(labels_equipes),   # NOVO
+        'valores_equipes': json.dumps(valores_equipes), # NOVO
+        
+        # Gráfico 3
         'labels_plantio': json.dumps(labels_plantio),
         'valores_plantio': json.dumps(valores_plantio),
+        'labels_resolucao': json.dumps(labels_resolucao),
+        'valores_resolucao': json.dumps(valores_resolucao),
     }
     
     return render(request, 'core/relatorios.html', context)
@@ -1360,3 +1411,11 @@ def api_marcar_notificacoes_lidas(request):
     
     except Exception as e:
         return JsonResponse({'status': 'erro', 'message': str(e)}, status=500)
+
+
+def sobre_view(request):
+    return render(request, 'core/sobre.html')
+
+def csrf_failure(request, reason=""):
+    # Pode até logar o erro se quiser, mas aqui só mostramos a tela bonita
+    return render(request, 'core/403_csrf.html')

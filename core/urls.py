@@ -14,7 +14,7 @@ from .views import (
     configuracoes_view, equipe_list, equipe_create, equipe_update, equipe_delete, instancia_arvore_create_api,
     search_results_view, planejamentos_view,
     analisar_area_api, recuperar_senha_view, home_view,
-    AreaDeleteView,
+    AreaDeleteView, sobre_view,
     relatorios_view, instancia_arvore_delete_api, api_heatmap_denuncias,
 )
 # O parêntese do 'from .views import' FECHA AQUI
@@ -39,6 +39,7 @@ urlpatterns = [
     path('especies/nova/', especie_create, name='especie_create'),
     path('especies/<int:pk>/editar/', especie_update, name='especie_update'),
     path('especies/<int:pk>/deletar/', especie_delete, name='especie_delete'),
+    path('teste-erro/', views.csrf_failure, name='teste_erro'),
 
     # --- URLs de Equipe ---
     path('equipes/', equipe_list, name='equipe_list'),
@@ -70,6 +71,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('recuperar-senha/', recuperar_senha_view, name='recuperar_senha'),
     path('configuracoes/', configuracoes_view, name='configuracoes'),
+    path('sobre/', sobre_view, name='sobre'),
 
     # --- URL DE RELATÓRIOS ---
     path('relatorios/', relatorios_view, name='relatorios'),
