@@ -149,25 +149,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteModal = new bootstrap.Modal(deleteModalEl);
     const confirmDeleteBtn = document.getElementById('confirmDeleteImageBtn');
 
-    // --- FUNÇÕES ---
+    
 
-    // 1. Abre o modal (COM A ARMA NUCLEAR ANTI-ALERT)
+    
     function openDeleteModal(event) {
         if (event) {
-            // 🔥 ESTES TRÊS COMANDOS MATAM QUALQUER OUTRO SCRIPT NO BOTÃO
+            
             event.preventDefault();
             event.stopPropagation();
-            event.stopImmediatePropagation(); // <--- ESSE É O EXORCISTA
+            event.stopImmediatePropagation(); 
 
-            // Esconde o tooltip pra não bugar
+           
             const tooltip = bootstrap.Tooltip.getInstance(event.currentTarget);
             if (tooltip) tooltip.hide();
         }
         deleteModal.show();
-        return false; // Mais uma garantia pra não deixar nada passar
+        return false; 
     }
 
-    // 2. Executa a remoção (só o modal chama isso)
+   
     function executeImageRemoval() {
         if (imageClearCheckbox) imageClearCheckbox.checked = true;
         const currentPreviewWrapper = imageUploadArea.querySelector('.square-wrapper');
@@ -181,17 +181,17 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteModal.hide();
     }
 
-    // --- CONECTANDO OS EVENTOS ---
+    
 
-    // Conecta o botão "Sim" do modal
+   
     if (confirmDeleteBtn) {
-        // Clona e substitui pra remover qualquer listener antigo que pudesse existir
+        
         const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
         confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
         newConfirmBtn.addEventListener('click', executeImageRemoval);
     }
 
-    // Função de Preview de NOVA imagem
+    
     function showNewImagePreview(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsDataURL(file);
     }
 
-    // Listener do Input de Arquivo
+   
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
@@ -227,26 +227,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 🔥 CONEXÃO DO BOTÃO INICIAL (O QUE TÁ DANDO PROBLEMA) 🔥
-    // Estamos usando uma abordagem diferente aqui pra ter certeza absoluta
+    
+    
     const initialRemoveBtn = document.getElementById('btn-remove-inicial');
-    // Ou tenta pegar pela classe se o ID falhar por algum motivo obscuro
     const anyRemoveBtn = document.querySelector('.remove-image-btn');
 
     if (initialRemoveBtn) {
-        // Remove qualquer listener anterior usando o truque do clone
+       
         const freshBtn = initialRemoveBtn.cloneNode(true);
         initialRemoveBtn.parentNode.replaceChild(freshBtn, initialRemoveBtn);
-        // Usa onclick pra garantir que só tem UM handler
+       
         freshBtn.onclick = openDeleteModal;
-        // Reativa o tooltip porque o clone perdeu
+       
         new bootstrap.Tooltip(freshBtn);
     } else if (anyRemoveBtn) {
-         // Fallback caso o ID não tenha funcionado
          anyRemoveBtn.onclick = openDeleteModal;
     }
 
-    // --- DRAG & DROP (Mantido igual) ---
     if (uploadContainer) {
         ['dragenter', 'dragover'].forEach(evt => {
             uploadContainer.addEventListener(evt, (e) => { e.preventDefault(); uploadContainer.querySelector('label').style.backgroundColor = '#e9ecef'; uploadContainer.querySelector('label').style.borderColor = '#1E5943'; });
@@ -263,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Inicializa outros tooltips da página
     [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).map(el => new bootstrap.Tooltip(el));
 });
 </script>

@@ -3,7 +3,6 @@
 
 {% block content %}
 <style>
-    /* --- ESTILOS ESPECÍFICOS --- */
     .action-btn {
         border: 1px solid #dee2e6; background: white; color: #495057; border-radius: 50px; padding: 6px 16px; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
     }
@@ -26,7 +25,7 @@
 <div class="container-xl">
     
     <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4 page-header">
-        <div><h2 class="h3 mb-0 fw-bold text-dark">Relatórios</h2><p class="mb-0 text-muted small">Análise de dados e performance da Arbor</p></div>
+        <div><h2 class="mb-0">Relatórios</h2><p class="mb-0 text-muted small">Análise de dados e performance da Arbor</p></div>
         <div class="d-flex flex-wrap gap-3 align-items-center">
             <div class="actions-group d-flex gap-2 me-2">
                 <button onclick="window.print()" class="action-btn"><i class="bi bi-printer"></i> Imprimir</button>
@@ -132,7 +131,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     
-    // 1. COFRE DE DADOS (SAFE DATA)
     const REPO = {
         'saude': { labels: JSON.parse('{{ labels_saude|safe }}'), data: JSON.parse('{{ valores_saude|safe }}'), colors: ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'] },
         'status_solic': { labels: JSON.parse('{{ labels_status_solic|safe }}'), data: JSON.parse('{{ valores_status_solic|safe }}'), colors: ['#dc3545', '#ffc107', '#198754', '#212529'] },
@@ -144,7 +142,6 @@ document.addEventListener("DOMContentLoaded", function() {
         'resolucoes': { labels: JSON.parse('{{ labels_resolucao|safe }}'), data: JSON.parse('{{ valores_resolucao|safe }}') }
     };
 
-    // 2. MEMÓRIA DE ESTADO (Salva o que está sendo mostrado em cada gráfico)
     const chartState = {
         'chart1': { key: 'saude', type: 'doughnut' },
         'chart2': { key: 'especies', type: 'bar' },
@@ -153,36 +150,29 @@ document.addEventListener("DOMContentLoaded", function() {
     
     window.activeCharts = {};
 
-    // 3. FUNÇÃO MESTRE DE ATUALIZAÇÃO (CORRIGIDA)
     window.updateChart = function(chartId, config, clickedEl) {
-        // config pode ter: { key: 'nova_chave', title: 'Novo Título' } OU { type: 'novo_tipo' }
         
-        // Atualiza Memória (Estado)
+        
+        
         if (config.key) chartState[chartId].key = config.key;
         if (config.type) chartState[chartId].type = config.type;
         if (config.title) document.getElementById('title-' + chartId).textContent = config.title;
 
-        // Atualiza Menu Visual (Active Class)
         if (clickedEl) {
             const menuGroup = clickedEl.closest('ul');
             const targetClass = config.key ? '.active-metric' : '.active-visual';
-            // Remove a classe de todos da mesma categoria
             menuGroup.querySelectorAll(targetClass).forEach(i => i.classList.remove(targetClass.substring(1)));
-            // Adiciona no clicado
             clickedEl.classList.add(targetClass.substring(1));
         }
 
-        // Recupera dados da memória
         const currentKey = chartState[chartId].key;
         const currentType = chartState[chartId].type;
         const sourceData = REPO[currentKey];
 
-        // Destroi gráfico antigo
         const canvas = document.getElementById('canvas-' + chartId);
         if (window.activeCharts[chartId]) window.activeCharts[chartId].destroy();
         const ctx = canvas.getContext('2d');
 
-        // --- TRADUÇÃO DO TIPO (CORREÇÃO PRINCIPAL) ---
         let chartJsType = currentType;
         let indexAxis = 'x'; 
 
@@ -191,7 +181,6 @@ document.addEventListener("DOMContentLoaded", function() {
             indexAxis = 'y';
         }
 
-        // Configura Dataset
         let datasetConfig = {
             data: sourceData.data,
             backgroundColor: sourceData.colors || "#1e5943",
@@ -200,7 +189,6 @@ document.addEventListener("DOMContentLoaded", function() {
             hoverOffset: 4
         };
 
-        // Configura Opções
         let optionsConfig = {
             indexAxis: indexAxis,
             responsive: true,
@@ -209,7 +197,6 @@ document.addEventListener("DOMContentLoaded", function() {
             scales: {}
         };
 
-        // Ajustes finos
         if (chartJsType === 'doughnut' || chartJsType === 'pie' || chartJsType === 'polarArea') {
             datasetConfig.backgroundColor = sourceData.colors;
             datasetConfig.borderWidth = (chartJsType === 'polarArea') ? 1 : 0;
@@ -223,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
             datasetConfig.backgroundColor = "#1e5943";
             datasetConfig.hoverBackgroundColor = "#143d2e";
             
-            // Eixos para barras
             if (indexAxis === 'y') {
                 optionsConfig.scales = { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } };
             } else {
@@ -239,7 +225,6 @@ document.addEventListener("DOMContentLoaded", function() {
             optionsConfig.scales = { y: { beginAtZero: true, grid: { borderDash: [2] } }, x: { grid: { display: false } } };
         }
 
-        // Renderiza
         window.activeCharts[chartId] = new Chart(ctx, {
             type: chartJsType,
             data: {
@@ -250,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     };
 
-    // 4. INICIALIZAÇÃO (Sem erros agora!)
     updateChart('chart1', {key: 'saude', type: 'doughnut'});
     updateChart('chart2', {key: 'especies', type: 'bar'});
     updateChart('chart3', {key: 'plantios', type: 'line'});

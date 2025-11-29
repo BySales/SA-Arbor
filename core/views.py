@@ -268,7 +268,6 @@ def solicitacao_update(request, pk):
     solicitacao = get_object_or_404(Solicitacao, pk=pk)
     
     # 2. O LEÃO DE CHÁCARA (BOUNCER)
-    # Se o cara não é staff E não é o dono da comanda...
     if not request.user.is_staff and solicitacao.cidadao != request.user:
         messages.error(request, f"Tu não pode mexer na solicitação #{pk}, ela não é tua, parça.")
         return redirect('solicitacao_list')
@@ -299,98 +298,87 @@ def solicitacao_update(request, pk):
             solicitacao_instance = form.save(commit=False)
             
             # ======================================================
-            # 🔥 LÓGICA DO "MENSAGEIRO" (O X9 DAS NOTIFICAÇÕES)
+            # 🔥 LÓGICA DO "MENSAGEIRO" E "CARIMBO"
             # ======================================================
             
-            # 7a. O Mensageiro monta a lista de quem quer saber da fofoca
             destinatarios = set()
-            if solicitacao.cidadao: # O dono
+            if solicitacao.cidadao:
                 destinatarios.add(solicitacao.cidadao)
-            for interessado in solicitacao.interessados.all(): # A galera do "sininho"
+            for interessado in solicitacao.interessados.all():
                 destinatarios.add(interessado)
 
-            # 7b. O Mensageiro vê se o STATUS mudou
+            # 7b. STATUS MUDOU?
             if 'status' in form.changed_data:
-                status_novo = solicitacao_instance.get_status_display() # Pega o valor novo
+                status_novo = solicitacao_instance.get_status_display()
                 mensagem = f"A Solicitação #{solicitacao.id} mudou de status: de '{status_antigo}' para '{status_novo}'."
-                
-                # Manda o papo pra toda a lista
-                for user in destinatarios:
-                    Notificacao.objects.create(
-                        usuario=user,
-                        solicitacao=solicitacao_instance,
-                        mensagem=mensagem
-                    )
 
-            # 7c. O Mensageiro vê se a EQUIPE mudou
+                # 🚀 LÓGICA DE FINALIZAÇÃO (CARIMBO DO STAFF)
+                # Se foi Finalizado ou Recusado, marca a data e QUEM fez
+                if solicitacao_instance.status in ['FINALIZADO', 'RECUSADO']:
+                    solicitacao_instance.data_finalizacao = timezone.now()
+                    solicitacao_instance.resolvido_por = request.user 
+                else:
+                    # Se reabriu o chamado, limpa os carimbos
+                    solicitacao_instance.data_finalizacao = None
+                    solicitacao_instance.resolvido_por = None
+                
+                for user in destinatarios:
+                    Notificacao.objects.create(usuario=user, solicitacao=solicitacao_instance, mensagem=mensagem)
+
+            # 7c. EQUIPE MUDOU?
             if 'equipe_delegada' in form.changed_data:
                 equipe_nova = solicitacao_instance.equipe_delegada
                 mensagem = ""
-                if equipe_nova and equipe_antiga: # Se trocou de uma pra outra
+                if equipe_nova and equipe_antiga:
                     mensagem = f"A Solicitação #{solicitacao.id} foi transferida da equipe '{equipe_antiga.nome}' para '{equipe_nova.nome}'."
-                elif equipe_nova: # Se foi delegada (antes era Nulo)
+                elif equipe_nova:
                     mensagem = f"A Solicitação #{solicitacao.id} foi delegada para a equipe '{equipe_nova.nome}'."
-                else: # Se foi "des-delegada" (ficou Nulo)
+                else:
                     mensagem = f"A Solicitação #{solicitacao.id} foi removida da equipe '{equipe_antiga.nome}'."
                 
                 for user in destinatarios:
-                    Notificacao.objects.create(
-                        usuario=user,
-                        solicitacao=solicitacao_instance,
-                        mensagem=mensagem
-                    )
+                    Notificacao.objects.create(usuario=user, solicitacao=solicitacao_instance, mensagem=mensagem)
 
-            # 7d. O Mensageiro vê se foi RECUSADA (e tem motivo)
+            # 7d. RECUSA COM MOTIVO?
             if 'motivo_recusa' in form.changed_data and solicitacao_instance.status == 'RECUSADO':
                 motivo_curto = solicitacao_instance.motivo_recusa[:70] + '...' if len(solicitacao_instance.motivo_recusa) > 70 else solicitacao_instance.motivo_recusa
                 mensagem = f"A Solicitação #{solicitacao.id} foi recusada. Motivo: '{motivo_curto}'"
                 
                 for user in destinatarios:
-                    Notificacao.objects.create(
-                        usuario=user,
-                        solicitacao=solicitacao_instance,
-                        mensagem=mensagem
-                    )
-            # ======================================================
-            # FIM DO MENSAGEIRO
-            # ======================================================
+                    Notificacao.objects.create(usuario=user, solicitacao=solicitacao_instance, mensagem=mensagem)
 
             # ======================================================
-            # 8. LÓGICA DO CARIMBO AUTOMÁTICO (TUA LÓGICA ANTIGA)
-            # ======================================================
-            if 'status' in form.changed_data and (solicitacao_instance.status == 'FINALIZADO' or solicitacao_instance.status == 'RECUSADO'):
-                solicitacao_instance.data_finalizacao = timezone.now()
-            
-            # ======================================================
-            # 9. LÓGICA DE CRIAÇÃO DA ÁRVORE (TUA LÓGICA ANTIGA)
+            # 9. LÓGICA DE CRIAÇÃO DA ÁRVORE
             # ======================================================
             especie_para_plantar = form.cleaned_data.get('especie_plantada')
+            
+            # Só cria árvore se Finalizou e tem espécie definida
             if solicitacao_instance.status == 'FINALIZADO' and especie_para_plantar:
+                # Cria a árvore no mapa
                 InstanciaArvore.objects.create(
                     especie=especie_para_plantar,
                     latitude=solicitacao_instance.latitude,
                     longitude=solicitacao_instance.longitude,
                     estado_saude='BOA',
-                    data_plantio=timezone.now().date()
+                    data_plantio=timezone.now().date(),
+                    observacoes=f"Origem: Solicitação #{solicitacao_instance.id}"
                 )
 
-            # 10. AGORA SIM! O CHEFE SALVA A COMANDA NO ESTOQUE
+            # 10. AGORA SIM! O CHEFE SALVA TUDO
             solicitacao_instance.save()
             
-            # 11. O CHEFE SALVA AS FOTOS NOVAS
+            # 11. SALVA AS FOTOS NOVAS
             for imagem_file in imagens_novas:
-                ImagemSolicitacao.objects.create(solicitacao=solicitacao, imagem=imagem_file)
+                ImagemSolicitacao.objects.create(solicitacao=solicitacao_instance, imagem=imagem_file)
             
-            # 12. O CHEFE AVISA QUE DEU TUDO CERTO (JSON pro JS)
+            # 12. RETORNO DE SUCESSO
             messages.success(request, f'Solicitação #{solicitacao.id} foi atualizada com sucesso!')
             return JsonResponse({'success': True, 'redirect_url': reverse('solicitacao_list')})
         
         else: # Se o formulário for inválido
-            # 13. O CHEFE AVISA QUE O PEDIDO VEIO ZOADO (JSON pro JS)
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             
-    else: # 14. SE O PEDIDO FOR SÓ PRA VER (GET)
-        # O Chefe só monta o prato (HTML) com o formulário preenchido
+    else: # 14. GET (EXIBIR TELA)
         form = SolicitacaoForm(instance=solicitacao, user=request.user)
     
     context = {

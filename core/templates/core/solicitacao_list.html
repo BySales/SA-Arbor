@@ -3,10 +3,6 @@
 {% block content %}
     
     {% if user.is_staff or user.is_superuser %}
-        {# =============================================== #}
-        {# VISÃO DO ADMINISTRADOR (STAFF)                  #}
-        {# =============================================== #}
-
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="mb-0">Solicitações</h2>
@@ -75,9 +71,6 @@
 
     {% else %}
         
-        {# =============================================== #}
-        {# VISÃO DO USUÁRIO COMUM                          #}
-        {# =============================================== #}
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -269,7 +262,6 @@
                 }
             });
 
-            // 2. 🔥 Lógica do Card Clicável (Sem quebrar botões internos)
             const cards = document.querySelectorAll('.clickable-card');
             cards.forEach(card => {
                 card.addEventListener('click', function(e) {

@@ -3,9 +3,7 @@
 
 {% block content %}
 <style>
-    /* --- ESTILOS DA LISTA DE EQUIPES --- */
     
-    /* Botão Principal (Padrão Pílula) */
     .btn-principal-acao {
         background-color: #1E5943;
         border: 1px solid #1E5943;
@@ -26,7 +24,7 @@
         box-shadow: 0 4px 8px rgba(30, 89, 67, 0.2);
     }
 
-    /* Card da Equipe */
+    
     .card-team {
         border: none;
         border-radius: 16px;
@@ -44,7 +42,7 @@
         padding: 20px 25px;
     }
 
-    /* Efeito de Avatar Empilhado (Stack) */
+   
     .avatar-stack {
         display: flex;
         padding-left: 10px;
@@ -72,7 +70,7 @@
         z-index: 10;
     }
 
-    /* Dropdown de Ações */
+    
     .btn-icon-options {
         color: #adb5bd;
         border-radius: 50%;
@@ -259,7 +257,7 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Inicializa os tooltips do Bootstrap
+        
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);

@@ -17,7 +17,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            user-select: none; /* Pra não deixar selecionar texto e estragar a imersão */
+            user-select: none; 
         }
         .security-card {
             background: white;
@@ -38,7 +38,6 @@
         }
         p { color: #6b7280; margin-bottom: 30px; font-size: 0.9rem; line-height: 1.6; }
         
-        /* --- ESTILO DO FALSO CAPTCHA --- */
         .captcha-container {
             background-color: #f9fafb;
             border: 1px solid #d1d5db;
@@ -85,8 +84,8 @@
             width: 100%;
             border: none;
             transition: all 0.3s;
-            opacity: 0.5; /* Começa apagado */
-            pointer-events: none; /* Começa bloqueado */
+            opacity: 0.5; 
+            pointer-events: none;
             box-shadow: none;
         }
         .btn-verify.active {
@@ -158,33 +157,33 @@
         let isVerified = false;
 
         function startVerification() {
-            if (isVerified) return; // Se já clicou, não faz nada
+            if (isVerified) return; 
 
             const checkbox = document.getElementById('fakeCheckbox');
             const spinner = document.getElementById('loadingSpinner');
             const checkIcon = document.getElementById('checkIcon');
             const btn = document.getElementById('btnVerify');
 
-            // 1. Começa o "Loading" (Finge que tá falando com o servidor)
+            
             checkbox.classList.add('loading');
             spinner.style.display = 'block';
             
-            // 2. Espera 1.5 segundos (O Tempo do Teatro)
+            
             setTimeout(() => {
-                // 3. Finaliza: Tira o loading, põe o check
+                
                 spinner.style.display = 'none';
                 checkbox.classList.remove('loading');
                 checkbox.classList.add('checked');
                 checkIcon.style.display = 'block';
                 
-                // 4. Destrava o botão de baixo
+                
                 btn.classList.add('active');
                 isVerified = true;
                 
-                // Opcional: Desativa o clique no container pra não bugar
+                
                 document.getElementById('captchaArea').style.cursor = 'default';
                 
-            }, 1200); // 1.2 segundos de "análise"
+            }, 1200); 
         }
     </script>
 

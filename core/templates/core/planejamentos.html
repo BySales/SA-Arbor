@@ -6,9 +6,6 @@
     <p class="text-muted">Análise de dados para apoiar as decisões de planejamento</p>
 </div>
 
-{# =================================================================== #}
-{# =================== MÓDULO: O PLACAR DO JOGO ====================== #}
-{# =================================================================== #}
 <div class="row mb-4">
     <div class="col-lg-4 col-md-6 mb-3">
         <div class="card h-100">
@@ -46,9 +43,7 @@
 </div>
 <hr class="my-4">
 
-{# =================================================================== #}
-{# =================== MÓDULO 1: BALANÇO DAS TROPAS ================== #}
-{# =================================================================== #}
+
 <div class="row">
     <div class="col-12"><h4 class="mb-3">Balanço das Equipes</h4></div>
 </div>
@@ -86,9 +81,7 @@
     </div>
 </div>
 
-{# =================================================================== #}
-{# ================= MÓDULO 2: RADAR DE OPORTUNIDADES ================ #}
-{# =================================================================== #}
+
 <hr class="my-4">
 <div class="row">
     <div class="col-12"><h4 class="mb-3">Radar de Oportunidades</h4></div>
@@ -104,9 +97,7 @@
     </div>
 </div>
 
-{# =================================================================== #}
-{# =================== MÓDULO 3: ARSENAL BIOLÓGICO =================== #}
-{# =================================================================== #}
+
 <hr class="my-4">
 <div class="row">
     <div class="col-12"><h4 class="mb-3">Arsenal Biológico (Espécies)</h4></div>
@@ -149,7 +140,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     
-    // --- GRÁFICO DE CARGA DE TRABALHO POR EQUIPE ---
     const ctxCargaEquipes = document.getElementById('cargaEquipesChart');
     if (ctxCargaEquipes) {
         new Chart(ctxCargaEquipes, {
@@ -175,38 +165,32 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- MAPA DE CALOR (TURBINADO E SUAVE) ---
     const heatmapContainer = document.getElementById('heatmap-novo');
     if (heatmapContainer) {
         console.log("Carregando Heatmap Suave...");
 
-        // 1. Inicia o mapa SEM ZOOM CONTROL
         const map = L.map('heatmap-novo', { zoomControl: false }).setView([-24.0965, -46.6212], 12);
         
-        // Visual CARTO VOYAGER
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; CARTO',
             maxZoom: 19
         }).addTo(map);
 
-        // 2. Busca os dados de CALOR
         fetch("{% url 'api_heatmap_denuncias' %}")
             .then(response => response.json())
             .then(coordenadas => {
                 if (coordenadas.length > 0) {
                     L.heatLayer(coordenadas, {
-                        radius: 25,      // Voltei para um tamanho padrão (não borra tanto)
-                        blur: 15,        // Desfoque médio
-                        maxZoom: 17,     // 🔥 AQUI O SEGREDO: Aumentei o zoom máximo. 
-                                         // Isso faz a cor ficar menos intensa quando visto de longe.
-                        minOpacity: 0.3, // Mais transparência
+                        radius: 25,      
+                        blur: 15,        
+                        maxZoom: 17,                        
+                        minOpacity: 0.3, 
                         gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'} 
                     }).addTo(map);
                 }
             })
             .catch(error => console.error('Erro no Heatmap:', error));
             
-        // 3. AUTO-ZOOM NA CIDADE
         fetch("{% url 'api_cidades_geo' %}")
             .then(response => response.json())
             .then(data => {
@@ -226,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error('Erro ao focar cidade:', error));
     }
 
-    // --- GRÁFICO DE ESPÉCIES ---
     const ctxTopEspecies = document.getElementById('topEspeciesChart');
     if(ctxTopEspecies) {
         new Chart(ctxTopEspecies, {

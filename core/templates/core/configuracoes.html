@@ -3,9 +3,9 @@
 
 {% block content %}
 <style>
-    /* --- ESTILOS ESPECÍFICOS DA TELA DE CONFIG --- */
+   
     
-    /* Cards Arredondados */
+   
     .card-configuracoes {
         border: none;
         border-radius: 16px;
@@ -49,7 +49,7 @@
         box-shadow: 0 0 0 0.25rem rgba(30, 89, 67, 0.15);
     }
 
-    /* Botões Pílula (Padrão do Sistema) */
+    
     .btn-principal-acao {
         background-color: #1E5943;
         border: 1px solid #1E5943;
@@ -83,7 +83,7 @@
         border-color: #adb5bd;
     }
 
-    /* Ajuste do Select2 pra ficar bonito */
+    
     .select2-container .select2-selection--multiple {
         min-height: 45px;
         border-radius: 10px;
@@ -250,17 +250,17 @@
             });
         }
 
-        // 2. Injeta classes Bootstrap nos inputs e Toggle Switch
+        
         const inputs = document.querySelectorAll('input[type="text"], input[type="email"], select:not(.select2-hidden-accessible)');
         inputs.forEach(input => {
             input.classList.add('form-control', 'form-control-custom');
         });
 
-        // Garante que o checkbox vire um switch bonito
+        
         const checkInput = document.getElementById('{{ profile_form.ver_todas_solicitacoes.id_for_label }}');
         if(checkInput) checkInput.classList.add('form-check-input');
 
-        // 3. Inicialização do Select2
+        
         if (window.jQuery && window.jQuery.fn.select2) {
             $('#{{ profile_form.cidades_secundarias.id_for_label }}').select2({
                 placeholder: "Selecione cidades adicionais...",

@@ -35,9 +35,7 @@
             </div>
         </div>
         
-        {# ====================================================== #}
-        {# ============ AJUSTE DE ALINHAMENTO DOS BOTÕES ============ #}
-        {# ====================================================== #}
+
         <div class="row g-2 mt-4">
             <div class="col">
                 <a href="{% url 'login' %}" class="btn-secondary-custom text-center w-100">Cancelar</a>
@@ -62,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
-            } else if (e.key === 'Backspace') { // Se for backspace
+            } else if (e.key === 'Backspace') { 
                 if (index > 0) {
                     inputs[index - 1].focus();
                 }
@@ -78,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.value = paste[i];
                 }
             });
-            // Foca no último input preenchido ou no último campo
+            
             const lastInputIndex = Math.min(paste.length -1, inputs.length - 1);
             if(lastInputIndex >= 0) {
                 inputs[lastInputIndex].focus();

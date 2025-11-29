@@ -174,13 +174,13 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-          // --- 1. ATIVA TOOLTIPS (JÁ TINHA) ---
+          
           var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
           var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
           })
 
-          // --- 2. AUTO-FECHAR MENSAGENS (O TEU SCRIPT ANTIGO) ---
+         
           var alerts = document.querySelectorAll('.alert-dismissible');
           alerts.forEach(function(alert) {
               setTimeout(function() {
@@ -189,31 +189,29 @@
               }, 3000);
           });
           
-          // ======================================================
-          // 🔥 BLOCO 3: A "ARMADILHA" DO SINO
-          // ======================================================
           
-          // 1. Pega o "Sino" (o link que abre o dropdown)
+          
+          
           var sinoDropdown = document.getElementById('dropdownNotificacoes');
           
           if (sinoDropdown) {
-              // 2. Pega o "evento" do Bootstrap: "quando o dropdown começar a abrir"
+              
               sinoDropdown.addEventListener('show.bs.dropdown', function () {
                   
-                  // 3. Acha a "bolinha" vermelha (o badge)
+                 
                   var badge = sinoDropdown.querySelector('.badge');
                   
-                  // 4. Se a bolinha existir...
+                  .
                   if (badge) {
-                      // 5. SOME COM ELA IMEDIATAMENTE! (pro usuário ver)
+                      
                       badge.remove();
                       
-                      // 6. CHAMA O "DEDURADOR" (API) pra avisar o backend
+                      
                       fetch("{% url 'api_marcar_lidas' %}", {
                           method: 'POST',
                           headers: {
                               'X-Requested-With': 'XMLHttpRequest',
-                              // Não precisa do CSRF Token por causa do @csrf_exempt
+                              
                           },
                       })
                       .then(response => response.json())
@@ -226,9 +224,7 @@
                   }
               });
           }
-          // ======================================================
-          // FIM DO BLOCO 3
-          // ======================================================
+          
       });
 
       function getCookie(name) {
@@ -237,7 +233,7 @@
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Será que esse cookie começa com o nome que queremos?
+                
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -248,22 +244,19 @@
     }
     </script>
     
-    <style>
-    /* =================================================================
-        FORÇANDO A BARRA NOS DROPDOWNS NORMAIS
-        ================================================================= */
+    <style>     
     html body .dropdown-menu.show {
         border-radius: 12px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
         border: 0px solid transparent !important;
         padding: 8px !important;
-        margin-top: 10px !important; /* Força um espaço do botão */
+        margin-top: 10px !important; 
     }
     html body .dropdown-item {
         border-radius: 8px !important;
         margin-bottom: 2px !important;
     }
-    /* O hover verde */
+    
     html body .dropdown-item:hover, 
     html body .dropdown-item:focus {
         background-color: #f0fdf4 !important;
@@ -274,17 +267,12 @@
         background-color: #1E5943 !important;
         color: #fff !important;
     }
-
-    /* =================================================================
-        SELECT2 - O INIMIGO NÚMERO 1
-        ================================================================= */
-
-    /* 1. Matando o foco nativo azul do navegador em TUDO */
+ 
     *:focus, .select2-container *:focus {
         outline: none !important;
     }
 
-    /* (Resto do teu CSS do Select2... tudo certo) */
+    
     html body .select2-container--default .select2-selection--single,
     html body .select2-container--default .select2-selection--multiple {
         border-radius: 8px !important;

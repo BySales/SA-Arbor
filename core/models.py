@@ -124,6 +124,14 @@ class Solicitacao(models.Model):
         blank=True,
         verbose_name="Usuários Interessados"
     )
+    resolvido_por = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='solicitacoes_resolvidas',
+        verbose_name="Staff Responsável"
+    )
 
     def __str__(self):
         # Atualizamos o __str__ para mostrar a cidade, ajuda a gente
@@ -207,7 +215,7 @@ class CidadePermitida(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     imagem = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
-    ver_todas_solicitacoes = models.BooleanField(default=False, verbose_name="Ver solicitações da comunidade")
+    ver_todas_solicitacoes = models.BooleanField(default=True, verbose_name="Ver solicitações da comunidade")
         
     # LINHA PRINCIPAL - A cidade onde o cara mora
     cidade_principal = models.ForeignKey(

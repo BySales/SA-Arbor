@@ -4,7 +4,6 @@
 {% load l10n %}
 
 <style>
-    /* --- ESTILOS PARA O WIZARD (PASSO A PASSO) --- */
     .progress-bar-container {
         display: flex;
         justify-content: space-between;
@@ -87,7 +86,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- OUTROS AJUSTES VISUAIS --- */
     .map-container-form {
         height: 350px;
         width: 100%;
@@ -110,22 +108,18 @@
         font-size: .875em;
         color: #dc3545;
     }
-    /* Trava redimensionamento de textareas */
     #id_descricao, #id_motivo_recusa {
         resize: none;
     }
-    /* Esconde a opção vazia "Selecione..." da lista após abrir */
     select option[value=""] {
         display: none;
     }
-    /* Estrelinha vermelha para campos obrigatórios */
     .required-label::after {
         content: " *";
         color: #dc3545;
         font-weight: bold;
     }
     
-    /* BOTÕES PÍLULA */
     .btn-principal-acao {
         background-color: #1E5943;
         border: 1px solid #1E5943;
@@ -380,9 +374,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ======================================================
-    // 1. VARIÁVEIS GERAIS
-    // ======================================================
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-button');
@@ -400,9 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalSteps = 2;
     const maxLength = 1000;
 
-    // ======================================================
-    // 2. LÓGICA DO WIZARD
-    // ======================================================
     function updateFormSteps() {
         formSteps.forEach(step => {
             const stepNumber = parseInt(step.id.replace('step-', ''));
@@ -423,7 +411,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateStep(step) {
         if (step === 1) {
             const categoriaSelect = document.getElementById('id_categoria');
-            // 🔥 VALIDAÇÃO: O campo é obrigatório e está sempre visível
             if (categoriaSelect && categoriaSelect.value === '') {
                 alert('Por favor, selecione um detalhe para sua solicitação.');
                 categoriaSelect.focus();
@@ -474,13 +461,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ======================================================
-    // 3. CATEGORIAS E ADMIN FIELDS (CORRIGIDO)
-    // ======================================================
+
     const tipoSelect = document.getElementById('id_tipo');
     const categoriaSelect = document.getElementById('id_categoria');
     
-    // O wrapper ainda existe para alinhamento, mas não escondemos mais
     const categoriaWrapper = document.getElementById('categoria-wrapper');
 
     if (tipoSelect && categoriaSelect && categoriaWrapper) {
@@ -507,7 +491,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoriaAtual = "{{ form.instance.categoria|default:'' }}";
             const valorSelecionadoPeloUsuario = categoriaSelect.value;
 
-            // Salva o valor atual
             const valorParaManter = valorSelecionadoPeloUsuario || categoriaAtual;
 
             categoriaSelect.innerHTML = '<option value="">Selecione um detalhe...</option>';
@@ -533,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
         atualizarCategorias();
     }
 
-    // Lógica Admin (CORRIGIDA PARA MOSTRAR EQUIPE SEMPRE, EXCETO SE RECUSADO)
     {% if user.is_staff or user.is_superuser %}
     const statusSelect = document.getElementById('id_status');
     const equipeWrapper = document.getElementById('equipe-wrapper');
@@ -545,25 +527,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const status = statusSelect.value;
             const categoria = categoriaSelect ? categoriaSelect.value : '';
             
-            // 🔥 EQUIPE: Aparece se NÃO FOR Recusado
             equipeWrapper.style.display = (status !== 'RECUSADO') ? 'block' : 'none';
 
-            // ESPÉCIE: Só Finalizado e Plantio/Troca
             const precisaEspecie = (status === 'FINALIZADO' && (categoria === 'PLANTIO' || categoria === 'TROCA_LOCAL'));
             especieWrapper.style.display = precisaEspecie ? 'block' : 'none';
 
-            // RECUSA: Só Recusado
             motivoRecusaWrapper.style.display = (status === 'RECUSADO') ? 'block' : 'none';
         }
         statusSelect.addEventListener('change', window.toggleAdminFields);
-        // Chama logo no início pra ajustar conforme o status inicial do banco
         window.toggleAdminFields();
     }
     {% endif %}
 
-    // ======================================================
-    // 4. UPLOAD DE IMAGEM
-    // ======================================================
+
     const imageInput = document.getElementById('id_imagens');
     const uploadBox = imageInput ? imageInput.closest('.custom-file-upload') : null;
     const carousel = document.getElementById('image-carousel-preview');
@@ -614,9 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ======================================================
-    // 5. MAPA LEAFLET (PINO CORRIGIDO)
-    // ======================================================
+
     let map = null;
     let marker = null;
     let cityLayer = null;
@@ -632,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // 🔥 ÍCONE DE PINO NÍTIDO (SVG)
+        
         const pinIcon = L.divIcon({
             className: 'custom-pin',
             html: `
@@ -730,9 +704,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ======================================================
-    // 6. CONTADOR DE CARACTERES
-    // ======================================================
+
     if (descTextarea && charCounter) {
         descTextarea.addEventListener('input', () => {
             const len = descTextarea.value.length;
@@ -741,9 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ======================================================
-    // 7. SUBMIT COM CSRF TOKEN
-    // ======================================================
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -818,7 +788,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Inicializa tudo
     updateFormSteps();
     updateCarousel();
 });

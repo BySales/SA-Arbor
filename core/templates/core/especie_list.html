@@ -186,35 +186,29 @@
 
 {% block scripts %}
 <script>
-    // --- FUNÇÕES DE GERENCIAMENTO DE URL (FILTROS) ---
 
-    // Adiciona um novo parâmetro 'tag=ID' na URL atual e recarrega
     function adicionarTagAoFiltro(tagId) {
         const url = new URL(window.location.href);
         url.searchParams.append('tag', tagId);
-        url.searchParams.delete('page'); // Reseta pra página 1 quando filtra
+        url.searchParams.delete('page'); 
         window.location.href = url.toString();
     }
 
-    // Remove um parâmetro 'tag=ID' específico da URL
     function removerTagDoFiltro(tagIdToRemove) {
         const url = new URL(window.location.href);
         const tags = url.searchParams.getAll('tag');
-        url.searchParams.delete('tag'); // Remove todos primeiro
+        url.searchParams.delete('tag'); 
         
-        // Readiciona todos MENOS o que a gente quer remover
         tags.forEach(tagId => {
             if (parseInt(tagId) !== tagIdToRemove) {
                 url.searchParams.append('tag', tagId);
             }
         });
         
-        url.searchParams.delete('page'); // Reseta a página
+        url.searchParams.delete('page'); 
         window.location.href = url.toString();
     }
 
-    // --- PAGINAÇÃO INTELIGENTE VIA JS ---
-    // Intercepta os cliques na paginação pra manter os filtros atuais
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.pagination .page-link[data-page]').forEach(link => {
             link.addEventListener('click', function(e) {

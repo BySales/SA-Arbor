@@ -3,7 +3,6 @@
 
 {% block content %}
 <style>
-    /* --- CABEÇALHO FLEX --- */
     .page-header-flex {
         display: flex;
         justify-content: space-between;
@@ -24,7 +23,6 @@
         align-items: center;
     }
 
-    /* --- FILTROS --- */
     .filter-select,
     .filter-dropdown-btn {
         background-color: #fff;
@@ -58,7 +56,6 @@
         display: block;
     }
 
-    /* --- DROPDOWN DE CAMADAS --- */
     .layers-dropdown-menu {
         padding: 10px;
         min-width: 220px;
@@ -111,13 +108,11 @@
         font-size: 0.9rem;
     }
 
-    /* CORES DOS ÍCONES */
     .bg-success-soft { background-color: #d1e7dd; color: #198754; }
     .bg-warning-soft { background-color: #fff3cd; color: #ffc107; }
     .bg-primary-soft { background-color: #cfe2ff; color: #0d6efd; }
     .bg-danger-soft { background-color: #f8d7da; color: #dc3545; }
 
-    /* --- MAPA CONTAINER --- */
     .map-card-container {
         position: relative;
         border-radius: 16px;
@@ -134,7 +129,6 @@
         z-index: 1;
     }
 
-    /* --- PAINEL LATERAL --- */
     #details-panel {
         position: absolute;
         top: 20px;
@@ -169,7 +163,6 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; }
 
-    /* --- OUTROS CONTROLES --- */
     .map-coords-display {
         position: absolute;
         bottom: 20px;
@@ -185,13 +178,11 @@
         pointer-events: none;
     }
 
-    /* LEAFLET OVERRIDES */
     .leaflet-bar { border: none !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; }
     .leaflet-bar a { background-color: rgba(255, 255, 255, 0.9) !important; color: #1E5943 !important; backdrop-filter: blur(5px); }
     .leaflet-bar a:hover { background-color: #1E5943 !important; color: #fff !important; }
     .leaflet-pane.mask-pane { z-index: 350; }
 
-    /* LEAFLET DRAW TOOLBAR */
     .leaflet-draw-toolbar-actions, .leaflet-draw-toolbar-top { display: flex; gap: 8px; }
     
     .leaflet-draw-toolbar a {
@@ -243,7 +234,6 @@
     .leaflet-draw-draw-rectangle::after { content: "Adicionar Retângulo"; }
     .leaflet-draw-draw-marker::after { content: "Adicionar Árvore"; }
 
-    /* 🔥 SEGURANÇA VISUAL: Esconde toolbar se não for staff */
     {% if not user.is_staff %}
         .leaflet-draw-toolbar { display: none !important; }
     {% endif %}
@@ -515,7 +505,6 @@
 
 {% block scripts %}
 <script>
-    // Variáveis globais de controle
     const isUserStaff = "{{ user.is_staff|yesno:'true,false' }}" === "true";
     const currentUserId = {{ request.user.id|default:"null" }};
 </script>
